@@ -1,0 +1,41 @@
+<!--
+  ~ Copyright (c) 2018, Jeison Cardoso. All Rights Reserved
+  ~
+  ~ This program is free software; you can redistribute it and/or modify
+  ~ it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
+  ~ the Free Software Foundation; either version 3, or (at your option)
+  ~ any later version.
+  ~
+  -->
+
+<configuration>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+    </encoder>
+    </appender>
+    <!--<logger name= "slick.jdbc.JdbcBackend.statement" level= "DEBUG" />-->
+    <logger name="slick"                              level="INFO"/>
+    <logger name="slick.ast"                          level="INFO"/>
+    <logger name="slick.compiler"                     level="INFO"/>
+    <logger name="slick.jdbc.JdbcBackend.statement"   level="INFO"/>
+    <logger name="slick.jdbc.StatementInvoker.result" level="INFO"/>
+
+
+    <!--<appender name="FILE" class="ch.qos.logback.core.FileAppender">-->
+        <!--<file>./server.log</file>-->
+        <!--<append>/home/zero/the_hand_logger.log</append>-->
+        <!--<encoder>-->
+            <!--<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>-->
+        <!--</encoder>-->
+    <!--</appender>-->
+
+    <root level="info">
+    <appender-ref ref="STDOUT" />
+    </root>
+
+    <root level="debug">
+    <appender-ref ref="STDOUT" />
+    <!--<appender-ref ref="FILE" />-->
+    </root>
+</configuration>
