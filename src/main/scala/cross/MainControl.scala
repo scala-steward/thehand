@@ -36,10 +36,10 @@ object MainControl extends App {
   def loadSvnRepository(task: TaskConnector, confName: String, confPath: String) : Option[SvnRepositoryData] = {
     lazy val parser: TaskParser = TaskParserCharp(
       conf.getString(confName+".task_model.patternParser"),
-      conf.getString(confName+".task_model.patterSplit"),
+      conf.getString(confName+".task_model.patternSplit"),
       conf.getString(confName+".task_model.separator"))
 
-    lazy val suffix = conf.getString(confName+".database_sufix")
+    lazy val suffix = conf.getString(confName+".database_suffix")
     lazy val dao: RepositoryDao = new RepositoryDao(jdbcProfile, confPath, suffix)
 
     lazy val rep = new SvnConnectorFactory {}

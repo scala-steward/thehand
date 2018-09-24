@@ -1,18 +1,18 @@
 # The Hand
 
-## Requirements
+## Requisitos
 - Postgresql [download](https://www.postgresql.org/download/)
 - Java SDK 8 ou Superior [download](https://www.oracle.com/technetwork/java/javase/downloads/index.html)
 - Sbt [download](https://www.scala-sbt.org/download.html)
 
-### Setup DB
-Create a user and database
-[link for example](https://www.postgresql.org/docs/8.0/static/sql-createuser.html)
+### Como configurar o banco 
+Criar um usuário e database
+link para exemplo
 
-### Config
-You can find an example in /src/main/resources/application.conf
+### Configurar a aplicação
+Encontra-se um exemplo no /src/main/resources/application.conf
 
-#### Test config for running in memory
+#### Configuração de teste que roda em memória
 ```
 testConfig = {
   connectionPool      = disabled
@@ -22,7 +22,7 @@ testConfig = {
 }
 ```
 
-#### Setup DB
+#### Configuração do banco
 ```
 dbconfig = {
   connectionPool = disabled
@@ -38,17 +38,17 @@ dbconfig = {
 }
 ```
 
-#### Project Setup
-Each project has a distinct configuration with the repository connection data and connection to the database.
+#### Configuração de projeto
+Cada projeto, possui uma configuração distinta com os dados de conexão ao repositório e conexão ao banco de dados.
 
-It is important to switch to each project ```database_suffix =" demo_ "```, to keep each project separate using suffixes.
+É importante alternar para cada projeto ```database_sufix = "demo_"```, para manter separado cada projeto com o uso de sufixos. 
 
 ```
 projectDemo = {
   user = "YOUR USER"
   pass = "YOUR PASS"
   url = "YOUR SVN URL"
-  database_suffix = "demo_"
+  database_sufix = "demo_"
   mode = "auto"
   start_revision = 1  //use only if mode is no auto
   end_revision = 1000 //use only if mode is no auto
@@ -60,35 +60,34 @@ projectDemo = {
 }
 ```
 
-
-Defines how the information about the tasks is extracted
+Define qual a forma que é extraída a informação sobre as tarefas
 ```
 patternParser = "(#\\d)\\d+" //task or fix #NUMBER
 patternSplit = "#" //task or fix #NUMBER
 separator = ""
 ```
 
-##### Scan scm mode
-There are two operating modes for scm scanning
+##### Modo de scan scm
+Há dois modos de operação para scan sobre o scm
 
-###### Auto Mode
-Search in the records what the last version already saved, and in scm which the last version sent. Using this data to load the records.
+###### Modo Automático
+Pesquisa nos registros qual a última versão já salva, e no scm qual a última versão enviada. Utilizando esses dados para carregar os registros.
 ```
 mode = "auto"
 ```
 
-###### Manual Mode
-Use the user-defined revision number to set the log load.
-Currently does not update existing records. Not having an "insertOrUpdate" behavior.
+###### Modo Manual
+Utilizar o número de revisão definido pelo usuário para definir o carregamento dos registros.
+Atualmente não atualiza registros já existentes. Não possuindo um comportamento de “insertOrUpdate”.
 ```
 mode = "off"
-start_revision = 1
+start_revision = 1 
 end_revision = 1000
 ```
 
-##### Target Configuration
-For agile flow data aggregation using [TargetProcess] (targetprocess.com)
-Currently thehand does not have support for other means of authentication.
+##### Configuração do target
+Para agregação dos dados de fluxo ágil utilizando o [TargetProcess](targetprocess.com)
+Atualmente o thehand não possui suporte para outros meios de autenticação.
 ```
 target = {
   user = "YOUR USER"
@@ -97,12 +96,12 @@ target = {
 }
 ```
 
-### Run
+### Rodar
 ```
 > sbt run
 ```
 
-#### Test
+#### Testar
 ```
 > sbt test
 ```

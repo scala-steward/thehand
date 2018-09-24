@@ -13,7 +13,7 @@ package network
 
 import org.apache.commons.codec.binary.Base64
 
-object qHttpBasicAuth {
+object HttpBasicAuth {
   val BASIC = "Basic"
   val AUTHORIZATION = "Authorization"
 
