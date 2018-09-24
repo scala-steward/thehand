@@ -43,18 +43,18 @@ class ExtractorFixture() {
   def extractFiles: Seq[EntryFile] = files
 
   private lazy val commitFilesOne =
-    CommitEntryWriter(CommitEntryFile(Some('A'), None, Some(1), 0, 0), "/zip", null)::
-    CommitEntryWriter(CommitEntryFile(Some('A'), None, Some(1), 0, 0), "/zap", null)::
-    CommitEntryWriter(CommitEntryFile(Some('A'), None, Some(1), 0, 0), "/zop", null)::Nil
+    CommitEntryWriter(CommitEntryFile(Some('A'), None, Some(1), 0, 0), "/zip", "")::
+    CommitEntryWriter(CommitEntryFile(Some('A'), None, Some(1), 0, 0), "/zap", "")::
+    CommitEntryWriter(CommitEntryFile(Some('A'), None, Some(1), 0, 0), "/zop", "")::Nil
   private lazy val commitFilesTwo =
-    CommitEntryWriter(CommitEntryFile(Some('M'), None, Some(2), 0, 0), "/zip", null)::
-    CommitEntryWriter(CommitEntryFile(Some('M'), None, Some(2), 0, 0), "/zap", null)::Nil
+    CommitEntryWriter(CommitEntryFile(Some('M'), None, Some(2), 0, 0), "/zip", "")::
+    CommitEntryWriter(CommitEntryFile(Some('M'), None, Some(2), 0, 0), "/zap", "")::Nil
   private lazy val commitFilesThree =
-    CommitEntryWriter(CommitEntryFile(Some('M'), None, Some(3), 0, 0), "/zip", null)::Nil
+    CommitEntryWriter(CommitEntryFile(Some('M'), None, Some(3), 0, 0), "/zip", "")::Nil
   private lazy val commitFilesFour =
-    CommitEntryWriter(CommitEntryFile(Some('M'), None, Some(4), 0, 0), "/zip", null)::Nil
+    CommitEntryWriter(CommitEntryFile(Some('M'), None, Some(4), 0, 0), "/zip", "")::Nil
   private lazy val commitFilesFive =
-    CommitEntryWriter(CommitEntryFile(Some('D'), None, Some(5), 0, 0), "/zip", null)::Nil
+    CommitEntryWriter(CommitEntryFile(Some('D'), None, Some(5), 0, 0), "/zip", "")::Nil
 
   def extractCommitsFiles: Seq[(Seq[CommitEntryWriter], Long)] =
     (commitFilesOne, 1L)::
