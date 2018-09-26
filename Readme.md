@@ -1,6 +1,6 @@
 # The Hand
 
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/aadcc205dfca4972a53f2b6a7a925fdc)](https://www.codacy.com/app/0um/thehand?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=0um/thehand&amp;utm_campaign=Badge_Grade)
+[![Coverage Status](https://coveralls.io/repos/github/0um/thehand/badge.svg?branch=master)](https://coveralls.io/github/0um/thehand?branch=master)
 [![Build Status](https://travis-ci.org/0um/thehand.svg?branch=master)](https://travis-ci.org/0um/thehand)
 
 ## Requirements
