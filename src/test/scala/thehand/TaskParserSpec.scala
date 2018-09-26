@@ -37,18 +37,8 @@ class TaskParserSpec extends FlatSpec with Matchers {
     defaultParser.convert(Some("#TEST")) shouldEqual(Nil)
   }
 
-//
-//  "Table Commits Tasks" should "have three commits tasks" in {
-//    dao.countCommitTasks map { counter => assert(counter == 4) }
-//  }
-//
-//  "LastestCommit revision" should "be three" in {
-//    dao.actionLatestRevision map { counter => assert(counter.getOrElse(-1) == 3) }
-//  }
-//
-//  "Bug files counter" should "be two" in {
-//    dao.filesBugsCounter map {
-//      files => assert(files.size == 2)
-//    }
-//  }
+  "Convert no message" should "no return id" in {
+    defaultParser.convert(None) shouldEqual(Nil)
+  }
+
 }
