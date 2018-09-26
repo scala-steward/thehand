@@ -1,7 +1,7 @@
 # The Hand
 
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/533390e37ca04f7fac354b2acc71b681)](https://app.codacy.com/app/0um/thehand?utm_source=github.com&utm_medium=referral&utm_content=0um/thehand&utm_campaign=Badge_Grade_Dashboard)
-
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/aadcc205dfca4972a53f2b6a7a925fdc)](https://www.codacy.com/app/0um/thehand?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=0um/thehand&amp;utm_campaign=Badge_Grade)
+[![Build Status](https://travis-ci.org/0um/thehand.svg?branch=master)](https://travis-ci.org/0um/thehand)
 
 ## Requirements
 - Postgresql [download](https://www.postgresql.org/download/)
