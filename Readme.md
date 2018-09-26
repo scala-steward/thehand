@@ -1,5 +1,8 @@
 # The Hand
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/533390e37ca04f7fac354b2acc71b681)](https://app.codacy.com/app/0um/thehand?utm_source=github.com&utm_medium=referral&utm_content=0um/thehand&utm_campaign=Badge_Grade_Dashboard)
+
+
 ## Requirements
 - Postgresql [download](https://www.postgresql.org/download/)
 - Java SDK 8 ou Superior [download](https://www.oracle.com/technetwork/java/javase/downloads/index.html)
