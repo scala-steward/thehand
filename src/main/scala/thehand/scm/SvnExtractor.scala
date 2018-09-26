@@ -21,7 +21,7 @@ import scala.collection.JavaConverters._
 class SvnExtractor(val svnData: Seq[SVNLogEntry], parser: TaskParser) {
   def extractTasks: Seq[Long] = {
     svnData
-      .flatMap(s => parser.convertMessage(Some(s.getMessage)))
+      .flatMap(s => parser.convert(Some(s.getMessage)))
       .distinct
   }
 
@@ -51,7 +51,7 @@ class SvnExtractor(val svnData: Seq[SVNLogEntry], parser: TaskParser) {
 
   def extractCommitsTasks: Seq[CommitTasks] = {
     def extractCommitTasks(s: SVNLogEntry): Seq[CommitTasks] = {
-      parser.convertMessage(Some(s.getMessage)).map(CommitTasks(_, s.getRevision))
+      parser.convert(Some(s.getMessage)).map(CommitTasks(_, s.getRevision))
     }
     svnData.flatMap(extractCommitTasks)
   }

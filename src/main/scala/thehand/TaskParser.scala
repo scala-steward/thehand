@@ -12,31 +12,22 @@
 package thehand
 
 trait TaskParser {
-  def parse(s: String): Seq[String]
-  def parseConcat(s: String): String
-  def convert(s: String): Array[Long]
-  def convertMessage(s:  Option[String]): Seq[Long]
+  def convert(s: Option[String]): Seq[Long]
 }
 
-case class TaskParserCharp(patternParser: String, patterSplit: String, separator: String) extends TaskParser {
-  def parse(s: String): Seq[String] = {
+case class TaskParserCharp(patternParser: String, patternSplit: String, separator: String) extends TaskParser {
+  private def parse(s: String): Seq[String] = {
     (patternParser.r findAllIn s).toSeq
   }
 
-  def convert(s: String): Array[Long] = {
-    s.split(patterSplit)
+  private def slipt(s: String): Array[Long] = {
+    s.split(patternSplit)
       .filter(!_.isEmpty)
       .map(_.toLong)
   }
 
-  def parseConcat(s: String) : String = {
-    var v = ""
-    parse(s).foreach( v += _)
-    v
-  }
-
-  def convertMessage(s: Option[String]): Seq[Long] = s match {
-    case Some(v) => parse(v).flatMap(convert)
+  def convert(s: Option[String]): Seq[Long] = s match {
+    case Some(v) => parse(v).flatMap(slipt)
     case None => Nil
   }
 }
