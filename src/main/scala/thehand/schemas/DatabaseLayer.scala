@@ -20,6 +20,5 @@ trait Profile {
 class DatabaseLayer(val profile: JdbcProfile) extends Profile
   with SourceTables
   with TaskTables
-  with ProjectTables
 {
 }
