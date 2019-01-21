@@ -42,12 +42,12 @@ class RepositoryDao(databaseProfile: JdbcProfile, configPath: String, suffix: St
 
   def createSchemas(): Unit = {
     exec(
-      Query.tasks.schema.create andThen
-        Query.authors.schema.create andThen
-        Query.commits.schema.create andThen
-        Query.files.schema.create andThen
-        Query.commitsFiles.schema.create andThen
-        Query.commitTasks.schema.create) onComplete {
+        Query.tasks.schema.create.asTry andThen
+        Query.authors.schema.create.asTry andThen
+        Query.commits.schema.create.asTry andThen
+        Query.files.schema.create.asTry andThen
+        Query.commitsFiles.schema.create.asTry andThen
+        Query.commitTasks.schema.create.asTry) onComplete {
       case Success(_) => HandLogger.debug("correct create tables")
       case Failure(e) =>
         HandLogger.error("error in create tables " + e.getMessage)
@@ -92,6 +92,7 @@ class RepositoryDao(databaseProfile: JdbcProfile, configPath: String, suffix: St
   def writeCommitsFiles(entries: Seq[(Seq[CommitEntryWriter], Long)]) = {
     def fileQuery(fileEntries: (Seq[CommitEntryWriter], Long)) = {
       val (entryFiles, revisionNumber) = fileEntries
+      println(revisionNumber)
 
       def tryFindFileId(path: Option[String]): DBIO[Option[Long]] = path match {
         case Some(p) => if (p == null) DBIOAction.successful(Some(-1)) else Query.files.filter(_.path === p).map(_.id).result.headOption
@@ -124,6 +125,8 @@ class RepositoryDao(databaseProfile: JdbcProfile, configPath: String, suffix: St
     exec(DBIO.sequence(entries.map(tryInsert)).transactionally)
   }
 
+  // report
+
   def filesBugsCounter: Future[Seq[(String, Int)]] = {
     val bugs = for {
       co <- Query.commits
@@ -140,6 +143,8 @@ class RepositoryDao(databaseProfile: JdbcProfile, configPath: String, suffix: St
     }
     exec(countBugs.result.transactionally)
   }
+
+  // test
 
   def countCommitTasks: Future[Int] = exec(Query.commitTasks.size.result)
 
