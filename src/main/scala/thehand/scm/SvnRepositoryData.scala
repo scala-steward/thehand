@@ -43,12 +43,12 @@ class SvnRepositoryData(dao: RepositoryDao, taskConnector: TaskConnector, reposi
 
   def updateRange(startId: Long, endId: Long): Unit = {
     val extractor = new SvnExtractor(repository.log(startId, endId), parser)
+
     dao.writeTasks(extractor.extractTasks.flatMap(tp.process)) onComplete {
       case Success(_) => HandLogger.debug("correct write tasks")
       case Failure(e) => dao.close
         HandLogger.error("error in writing tasks " + e.getMessage)
     }
-
     dao.writeAuthors(extractor.extractAuthors) onComplete {
       case Success(_) => HandLogger.debug("correct write authors")
       case Failure(e) => dao.close

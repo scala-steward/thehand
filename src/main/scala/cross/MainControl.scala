@@ -15,7 +15,7 @@ import com.typesafe.config.{Config, ConfigFactory}
 import thehand.schemas.RepositoryDao
 import org.tmatesoft.svn.core.SVNLogEntry
 import slick.jdbc.JdbcProfile
-//import telemetrics.HandLogger
+import telemetrics.HandLogger
 import thehand.scm.{ScmConnector, SvnConnectorFactory, SvnRepositoryData}
 import thehand.{TaskParser, TaskParserCharp}
 import thehand.tasks.{TargetConnector, TaskConnector}
@@ -57,30 +57,30 @@ object MainControl extends App {
   val nutec = loadSvnRepository(target, "repositoryNU", "dbconfig")
   nutec.foreach{ rep =>
     rep.updateAuto()
-    //    rep.reportFilesBugCounter onComplete {
-    //      case scala.util.Success(value) => value.sortBy(_._2).map(println)
-    //      case scala.util.Failure(e) => HandLogger.error("error" + e.getMessage)
-    //    }
+    rep.reportFilesBugCounter onComplete {
+      case scala.util.Success(value) => value.sortBy(_._2).map(println)
+      case scala.util.Failure(e) => HandLogger.error("error" + e.getMessage)
+    }
     rep.close()
   }
 
-//  val qibuilder = loadSvnRepository(target, "repositoryQB", "dbconfig")
-//  qibuilder.foreach { rep =>
-//    rep.updateAuto()
-//    //    rep.reportFilesBugCounter onComplete {
-//    //      case scala.util.Success(value) => value.sortBy(_._2).map(println)
-//    //      case scala.util.Failure(e) => HandLogger.error("error" + e.getMessage)
-//    //    }
-//    rep.close()
-//  }
-//
-//  val eberick = loadSvnRepository(target, "repositoryEB", "dbconfig")
-//  eberick.foreach { rep =>
-//    rep.updateAuto()
-//    //    rep.reportFilesBugCounter onComplete {
-//    //      case scala.util.Success(value) => value.sortBy(_._2).map(println)
-//    //      case scala.util.Failure(e) => HandLogger.error("error" + e.getMessage)
-//    //    }
-//    rep.close()
-//  }
+  val qibuilder = loadSvnRepository(target, "repositoryQB", "dbconfig")
+  qibuilder.foreach { rep =>
+    rep.updateAuto()
+    rep.reportFilesBugCounter onComplete {
+      case scala.util.Success(value) => value.sortBy(_._2).map(println)
+      case scala.util.Failure(e) => HandLogger.error("error" + e.getMessage)
+    }
+    rep.close()
+  }
+
+  val eberick = loadSvnRepository(target, "repositoryEB", "dbconfig")
+  eberick.foreach { rep =>
+    rep.updateAuto()
+    rep.reportFilesBugCounter onComplete {
+      case scala.util.Success(value) => value.sortBy(_._2).map(println)
+      case scala.util.Failure(e) => HandLogger.error("error" + e.getMessage)
+    }
+    rep.close()
+  }
 }
