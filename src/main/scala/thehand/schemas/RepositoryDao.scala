@@ -39,7 +39,6 @@ class RepositoryDao(databaseProfile: JdbcProfile, configPath: String, suffix: St
     lazy val authors = TableQuery[AuthorsTable]((tag: Tag) => AuthorsTable(tag, suffix))
     lazy val commits = TableQuery[CommitTable]((tag: Tag) => CommitTable(tag, suffix))
     lazy val commitsFiles = TableQuery[CommitEntryFileTable]((tag: Tag) => CommitEntryFileTable(tag, suffix))
-    lazy val commitsUnify = TableQuery[CommitFilesUnifyTable]((tag: Tag) => CommitFilesUnifyTable(tag, suffix))
   }
 
   def createSchemas(): Unit = {
@@ -49,8 +48,7 @@ class RepositoryDao(databaseProfile: JdbcProfile, configPath: String, suffix: St
         Query.commits.schema.create.asTry andThen
         Query.files.schema.create.asTry andThen
         Query.commitsFiles.schema.create.asTry andThen
-        Query.commitTasks.schema.create.asTry andThen
-        Query.commitsUnify.schema.create.asTry) onComplete {
+        Query.commitTasks.schema.create.asTry) onComplete {
       case Success(_) => HandLogger.debug("correct create tables")
       case Failure(e) =>
         HandLogger.error("error in create tables " + e.getMessage)
@@ -192,42 +190,6 @@ class RepositoryDao(databaseProfile: JdbcProfile, configPath: String, suffix: St
     } yield u
 
     exec(DBIO.sequence(entries.map(tryInsert)).transactionally)
-  }
-
-  // transpose
-
-  def commitModifiedFilesUnify(revisionId: Long) : Unit = {
-    filterMovedFiles(revisionId: Long) onComplete {
-        case Success(value) => value.map(commitFileUnify(revisionId, _))
-        case Failure(e) => HandLogger.error("error on update modified files table " + e.getMessage)
-    }
-  }
-
-  def filterMovedFiles(revisionId: Long): Future[Seq[CommitEntryFile]] = {
-    val files = for {
-      cf <- Query.commitsFiles if cf.revisionId === revisionId
-    } yield cf
-    val filesMoved = files
-      .filterNot(_.copyPathId === -1L)
-    exec(filesMoved.result.transactionally)
-  }
-
-  private def commitFileUnify(revisionId: Long, commitEntryFile: CommitEntryFile) = {
-    HandLogger.info("unify revision " + revisionId + " " + CommitEntryFile.toString())
-    def upsert(id: Option[Long], file: Long) = {
-      if (id.isEmpty) {
-        Query.commitsUnify += CommitFileUnify(file, revisionId)
-      }
-      else {
-        Query.commitsUnify += CommitFileUnify(file, revisionId, id.head)
-      }
-    }
-
-    def unified = for {
-      id <- Query.commitsUnify.filter(_.pathId === commitEntryFile.copyPath).filter(_.revisionId === revisionId).map(_.id).result.headOption
-      u <- upsert(id, commitEntryFile.pathId).asTry
-    } yield u
-    exec(unified.transactionally)
   }
 
   // test

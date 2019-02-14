@@ -87,13 +87,5 @@ class SvnRepositoryData(dao: RepositoryDao, taskConnector: TaskConnector, reposi
       case Failure(e) => dao.close
         HandLogger.error("error in writing commits files " + e.getMessage)
     }
-
-    // transpose phase
-    updateMergeFiles(startId, endId)
-  }
-
-  private def updateMergeFiles(start: Long, end: Long): Unit = {
-    val revs: Seq[Long] = start to end
-    val _ = revs.map(rev => dao.commitModifiedFilesUnify(rev))
   }
 }

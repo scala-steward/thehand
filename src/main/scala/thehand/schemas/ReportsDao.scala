@@ -92,6 +92,13 @@ class ReportsDao(databaseProfile: JdbcProfile, configPath: String, suffix: Strin
     exec(countCommits.result.transactionally)
   }
 
+  def filterMovedFiles(revisionId: Long): Future[Seq[CommitEntryFile]] = {
+    val files = for {
+      cf <- Query.commitsFiles if cf.revisionId === revisionId && cf.copyPathId >= 1L
+    } yield cf
+    exec(files.result.transactionally)
+  }
+
   def authorsNames = {
     exec(Query.authors.map(_.author).result)
   }
