@@ -20,7 +20,9 @@ import thehand.scm.{ReportExchange, ScmConnector, SvnConnectorFactory, SvnReposi
 import thehand.{TaskParser, TaskParserCharp}
 import thehand.tasks.{TargetConnector, TaskConnector}
 
-import scala.concurrent.ExecutionContextExecutor
+import scala.concurrent.{Await, ExecutionContextExecutor}
+import scala.concurrent.duration.Duration
+import scala.util.{Failure, Success}
 
 object MainControl extends App {
   implicit val conf: Config = ConfigFactory.load()
@@ -75,21 +77,49 @@ object MainControl extends App {
   update(repositories)
 
   // generate reports
-  def loadReportExchange(confName: String, confPath: String) = {
+  def loadReportExchange(confName: String, confPath: String): ReportExchange = {
     lazy val suffix = conf.getString(confName+".database_suffix")
     lazy val dao: ReportsDao = new ReportsDao(jdbcProfile, confPath, suffix)
-    new ReportExchange(dao)
+    ReportExchange(dao)
   }
 
-  val reports = loadReportExchange("repository_qi4d", "dbconfig")
-  reports.reportFilesBugCounter onComplete {
-      case scala.util.Success(value) => value.sortBy(_._2).map(println)
-      case scala.util.Failure(e) => HandLogger.error("error" + e.getMessage)
-  }
-  reports.reportAuthorCommitsCounter("Jeison") onComplete {
-    case scala.util.Success(value) => value.sortBy(_._2).map(println)
-    case scala.util.Failure(e) => HandLogger.error("error" + e.getMessage)
-  }
-  reports.close()
+  def generateRepositoryReport(repository: String)= {
+    lazy val reports = loadReportExchange(repository, "dbconfig")
 
+    def reportFilesBugsCounter() = {
+      reports.reportFilesBugCounter onComplete {
+        case scala.util.Success(value) => reports.writeReport("./reports/" + repository + "report_files_bugs_counter", value.sortBy(_._2))
+        case scala.util.Failure(e) => HandLogger.error("error" + e.getMessage)
+      }
+    }
+
+    def autorReport(authorName: String) = {
+      HandLogger.info("generating author report " + authorName)
+      reports.reportAuthorCommitsCounter(authorName) onComplete {
+        case scala.util.Success(value) => //value.sortBy(_._2).map(println)
+          reports.writeReport("./reports/"+repository+"_"+authorName+"_author_commits_counter", value.sortBy(_._2))
+        case scala.util.Failure(e) => HandLogger.error("error" + e.getMessage)
+      }
+    }
+
+    def authorsReports()= {
+      val f = reports.authors
+      val result = Await.ready(f, Duration.Inf).value.get
+      val resultEither = result match {
+        case Success(t) => Right(t)
+        case Failure(e) => Left(e)
+      }
+      resultEither match {
+        case Right(values) => values.map(autorReport)
+        case Left(e) => HandLogger.error("error" + e.getMessage)
+      }
+    }
+
+    reportFilesBugsCounter
+    authorsReports
+
+    reports.close()
+  }
+
+  repositories.map(generateRepositoryReport)
 }

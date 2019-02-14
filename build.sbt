@@ -26,7 +26,8 @@ lazy val root = (project in file(".")).
       "com.github.tototoshi" %% "slick-joda-mapper" % "2.3.0",
       "com.typesafe" % "config" % "1.3.2",
       "joda-time" % "joda-time" % "2.10",
-      "org.joda" % "joda-convert" % "2.1.1"
+      "org.joda" % "joda-convert" % "2.1.1",
+      "com.github.tototoshi" %% "scala-csv" % "1.3.5"
     )
   )
 

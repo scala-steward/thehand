@@ -81,10 +81,10 @@ class RepositoryDaoSpec extends AsyncFlatSpec with Matchers {
     dao.actionLatestRevision map { counter => assert(counter.getOrElse(-1) == 3) }
   }
 
-  "Bug files counter" should "be two" in {
-    dao.filesBugsCounter map {
-      files => assert(files.size == 2)
-    }
-  }
+//  "Bug files counter" should "be two" in {
+//    dao.filesBugsCounter map {
+//      files => assert(files.size == 2)
+//    }
+//  }
 
 }

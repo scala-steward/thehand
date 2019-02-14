@@ -9,14 +9,21 @@
 
 package thehand.scm
 
+import java.io.File
+
 import thehand.schemas.ReportsDao
+import com.github.tototoshi.csv._
 
 import scala.concurrent.{ExecutionContextExecutor, Future}
+
+object ReportExchange {
+  def apply(dao: ReportsDao): ReportExchange = new ReportExchange(dao)
+}
 
 class ReportExchange (dao: ReportsDao) {
   implicit val context: ExecutionContextExecutor = scala.concurrent.ExecutionContext.fromExecutor(null)
 
-  def authors: Future[Seq[(String)]] = {
+  def authors: Future[Seq[String]] = {
     dao.authorsNames
   }
 
@@ -24,9 +31,16 @@ class ReportExchange (dao: ReportsDao) {
     dao.filesBugsCounter
   }
 
-  def reportAuthorCommitsCounter(autorName: String): Future[Seq[(String, Int)]] = {
-    dao.fileAuthorCommitsCounter(autorName)
+  def reportAuthorCommitsCounter(authorName: String): Future[Seq[(String, Int)]] = {
+    dao.fileAuthorCommitsCounter(authorName)
   }
 
   def close() = dao.close
+
+  def writeReport(filename: String, lines: Seq[(String, Int)]) = {
+    val f = new File(filename + ".csv")
+    val writer = CSVWriter.open(f)
+    lines.reverse.map(t => List(t._2, t._1)).map(writer.writeRow(_))
+    writer.close()
+  }
 }

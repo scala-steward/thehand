@@ -58,9 +58,9 @@ class ReportsDao(databaseProfile: JdbcProfile, configPath: String, suffix: Strin
     exec(countBugs.result.transactionally)
   }
 
-  def fileAuthorCommitsCounter(authorName: String): Future[Seq[(String, Int)]] = {
+  def fileAuthorCommitsCounter(author: String): Future[Seq[(String, Int)]] = {
     val commits = for {
-      ai <- Query.authors if ai.author === authorName
+      ai <- Query.authors if ai.author === author
       co <- Query.commits if co.authorId === ai.id
       cf <- Query.commitsFiles if cf.revisionId === co.id
       fi <- Query.files if fi.id === cf.pathId
