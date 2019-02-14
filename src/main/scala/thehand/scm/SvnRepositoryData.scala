@@ -24,6 +24,8 @@ class SvnRepositoryData(dao: RepositoryDao, taskConnector: TaskConnector, reposi
   implicit val context: ExecutionContextExecutor = scala.concurrent.ExecutionContext.fromExecutor(null)
   lazy val tp = ProcessTargetConnector(taskConnector)
 
+  def close() = dao.close
+
   def updateInStep(begin: Long, end: Long, step: Long): Unit = {
     if (((end - begin) / step) <= 0) updateRange(begin, end)
     else {
@@ -86,13 +88,12 @@ class SvnRepositoryData(dao: RepositoryDao, taskConnector: TaskConnector, reposi
         HandLogger.error("error in writing commits files " + e.getMessage)
     }
 
+    // transpose phase
     updateMergeFiles(startId, endId)
   }
 
-  def updateMergeFiles(start: Long, end: Long): Unit = {
+  private def updateMergeFiles(start: Long, end: Long): Unit = {
     val revs: Seq[Long] = start to end
     val _ = revs.map(rev => dao.commitModifiedFilesUnify(rev))
   }
-
-  def close() = dao.close
 }

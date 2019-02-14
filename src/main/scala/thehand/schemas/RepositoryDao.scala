@@ -72,6 +72,8 @@ class RepositoryDao(databaseProfile: JdbcProfile, configPath: String, suffix: St
     case None => 1L
   }
 
+  // update
+
   def writeTasks(tasks: Seq[Task]): Future[Seq[Try[Int]]] = {
     def upsert(task: Task, taskId: Option[Long]) =  {
       if (taskId.isEmpty) (Query.tasks += task) else Query.tasks.insertOrUpdate(task.copy(id = taskId.head))
@@ -192,7 +194,7 @@ class RepositoryDao(databaseProfile: JdbcProfile, configPath: String, suffix: St
     exec(DBIO.sequence(entries.map(tryInsert)).transactionally)
   }
 
-  // begin modified tables experiment
+  // transpose
 
   def commitModifiedFilesUnify(revisionId: Long) : Unit = {
     filterMovedFiles(revisionId: Long) onComplete {
@@ -227,8 +229,6 @@ class RepositoryDao(databaseProfile: JdbcProfile, configPath: String, suffix: St
     } yield u
     exec(unified.transactionally)
   }
-
-  // end modified tables experiment
 
   // test
 
