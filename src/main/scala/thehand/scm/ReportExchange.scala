@@ -13,14 +13,17 @@ import java.io.File
 
 import thehand.schemas.ReportsDao
 import com.github.tototoshi.csv._
+import telemetrics.HandLogger
 
-import scala.concurrent.{ExecutionContextExecutor, Future}
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, ExecutionContextExecutor, Future}
+import scala.util.{Failure, Success}
 
 object ReportExchange {
-  def apply(dao: ReportsDao): ReportExchange = new ReportExchange(dao)
+  def apply(dao: ReportsDao, name: String): ReportExchange = new ReportExchange(dao, name)
 }
 
-class ReportExchange (dao: ReportsDao) {
+class ReportExchange (dao: ReportsDao, repositoryName: String) {
   implicit val context: ExecutionContextExecutor = scala.concurrent.ExecutionContext.fromExecutor(null)
 
   def authors: Future[Seq[String]] = {
@@ -37,10 +40,39 @@ class ReportExchange (dao: ReportsDao) {
 
   def close() = dao.close
 
-  def writeReport(filename: String, lines: Seq[(String, Int)]) = {
+  private def writeCvsReport(filename: String, lines: Seq[(String, Int)]) = {
     val f = new File(filename + ".csv")
     val writer = CSVWriter.open(f)
     lines.reverse.map(t => List(t._2, t._1)).map(writer.writeRow(_))
     writer.close()
+  }
+
+  def reportFilesBugsCounterCvs() = {
+    reportFilesBugCounter onComplete {
+      case scala.util.Success(value) => writeCvsReport("./reports/" + repositoryName + "report_files_bugs_counter", value.sortBy(_._2))
+      case scala.util.Failure(e) => HandLogger.error("error" + e.getMessage)
+    }
+  }
+
+  private def autorReport(authorName: String) = {
+    HandLogger.info("generating author report " + authorName)
+    reportAuthorCommitsCounter(authorName) onComplete {
+      case scala.util.Success(value) =>
+        writeCvsReport("./reports/"+repositoryName+"_"+authorName+"_author_commits_counter", value.sortBy(_._2))
+      case scala.util.Failure(e) => HandLogger.error("error" + e.getMessage)
+    }
+  }
+
+  def authorsReports()= {
+    val f = authors
+    val result = Await.ready(f, Duration.Inf).value.get
+    val resultEither = result match {
+      case Success(t) => Right(t)
+      case Failure(e) => Left(e)
+    }
+    resultEither match {
+      case Right(values) => values.map(autorReport)
+      case Left(e) => HandLogger.error("error" + e.getMessage)
+    }
   }
 }
