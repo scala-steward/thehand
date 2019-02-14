@@ -17,7 +17,7 @@ import telemetrics.HandLogger
 import thehand.TaskParser
 import thehand.tasks.{ProcessTargetConnector, TaskConnector}
 
-import scala.concurrent.{ExecutionContextExecutor, Future}
+import scala.concurrent.ExecutionContextExecutor
 import scala.util.{Failure, Success}
 
 class SvnRepositoryData(dao: RepositoryDao, taskConnector: TaskConnector, repository: ScmConnector[SVNLogEntry], parser: TaskParser) {
@@ -37,7 +37,7 @@ class SvnRepositoryData(dao: RepositoryDao, taskConnector: TaskConnector, reposi
     val lastIdSvn = if (repository.latestId < 1) 1 else repository.latestId
     if (lastIdDB != lastIdSvn) {
       HandLogger.info("Start at revision #" + lastIdDB + " until #" + lastIdSvn)
-      updateInStep(lastIdDB, lastIdSvn, 1000)
+      updateInStep(lastIdDB, lastIdSvn, 5000)
     }
   }
 
@@ -49,6 +49,7 @@ class SvnRepositoryData(dao: RepositoryDao, taskConnector: TaskConnector, reposi
       case Failure(e) => dao.close
         HandLogger.error("error in writing tasks " + e.getMessage)
     }
+
     dao.writeAuthors(extractor.extractAuthors) onComplete {
       case Success(_) => HandLogger.debug("correct write authors")
       case Failure(e) => dao.close
@@ -78,10 +79,6 @@ class SvnRepositoryData(dao: RepositoryDao, taskConnector: TaskConnector, reposi
       case Failure(e) => dao.close
         HandLogger.error("error in writing commits files " + e.getMessage)
     }
-  }
-
-  def reportFilesBugCounter: Future[Seq[(String, Int)]] = {
-    dao.filesBugsCounter
   }
 
   def close() = dao.close

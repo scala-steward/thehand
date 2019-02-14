@@ -179,25 +179,6 @@ class RepositoryDao(databaseProfile: JdbcProfile, configPath: String, suffix: St
     exec(DBIO.sequence(entries.map(tryInsert)).transactionally)
   }
 
-  // report
-
-  def filesBugsCounter: Future[Seq[(String, Int)]] = {
-    val bugs = for {
-      co <- Query.commits
-      cf <- Query.commitsFiles if cf.revisionId === co.id
-      fi <- Query.files if fi.id === cf.pathId
-      ct <- Query.commitTasks if ct.commitId === co.id
-      tk <- Query.tasks if tk.taskId === ct.taskId && tk.typeTaskId === 8L
-    } yield fi
-    val countBugs = bugs
-      .groupBy(_.path)
-      .map {
-      case (path, group) =>
-        (path, group.length)
-    }
-    exec(countBugs.result.transactionally)
-  }
-
   // test
 
   def countCommitTasks: Future[Int] = exec(Query.commitTasks.size.result)
