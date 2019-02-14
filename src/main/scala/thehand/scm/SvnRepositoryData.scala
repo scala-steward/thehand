@@ -17,7 +17,7 @@ import telemetrics.HandLogger
 import thehand.TaskParser
 import thehand.tasks.{ProcessTargetConnector, TaskConnector}
 
-import scala.concurrent.ExecutionContextExecutor
+import scala.concurrent.{ExecutionContextExecutor, Future}
 import scala.util.{Failure, Success}
 
 class SvnRepositoryData(dao: RepositoryDao, taskConnector: TaskConnector, repository: ScmConnector[SVNLogEntry], parser: TaskParser) {
@@ -39,6 +39,12 @@ class SvnRepositoryData(dao: RepositoryDao, taskConnector: TaskConnector, reposi
       HandLogger.info("Start at revision #" + lastIdDB + " until #" + lastIdSvn)
       updateInStep(lastIdDB, lastIdSvn, 5000)
     }
+  }
+
+  def runRaise[T](f: Future[T]) = f onComplete {
+    case Success(_) => HandLogger.debug("correct write tasks")
+    case Failure(e) => dao.close
+    HandLogger.error("error in writing tasks " + e.getMessage)
   }
 
   def updateRange(startId: Long, endId: Long): Unit = {
@@ -79,6 +85,13 @@ class SvnRepositoryData(dao: RepositoryDao, taskConnector: TaskConnector, reposi
       case Failure(e) => dao.close
         HandLogger.error("error in writing commits files " + e.getMessage)
     }
+
+    updateMergeFiles(startId, endId)
+  }
+
+  def updateMergeFiles(start: Long, end: Long): Unit = {
+    val revs: Seq[Long] = start to end
+    val _ = revs.map(rev => dao.commitModifiedFilesUnify(rev))
   }
 
   def close() = dao.close

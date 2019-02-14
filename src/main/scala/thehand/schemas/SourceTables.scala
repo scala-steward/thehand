@@ -74,6 +74,20 @@ trait SourceTables {
     def path = foreignKey("path_fk", pathId, TableQuery[EntryFilesTable]((tag:Tag) => EntryFilesTable(tag, suffix)))(_.id, onDelete = ForeignKeyAction.Cascade)
   }
 
+  object CommitFilesUnifyTable {
+    def apply(tag: Tag, suffix: String): CommitFilesUnifyTable = new CommitFilesUnifyTable(tag, suffix)
+  }
+
+  final class CommitFilesUnifyTable(tag: Tag, suffix: String) extends Table[CommitFileUnify](tag, suffix + "commitmergefiles") {
+    def pathId = column[Long]("path_id")
+    def revisionId = column[Long]("revision")
+    def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
+
+    def * = (pathId, revisionId, id).mapTo[CommitFileUnify]
+    def revision = foreignKey("revision_fk", revisionId, TableQuery[CommitTable]((tag:Tag) => CommitTable(tag, suffix)))(_.id, onDelete = ForeignKeyAction.Cascade)
+    def path = foreignKey("path_fk", pathId, TableQuery[EntryFilesTable]((tag:Tag) => EntryFilesTable(tag, suffix)))(_.id, onDelete = ForeignKeyAction.Cascade)
+  }
+
   object EntryFilesTable {
     def apply(tag: Tag, suffix: String): EntryFilesTable = new EntryFilesTable(tag, suffix)
   }

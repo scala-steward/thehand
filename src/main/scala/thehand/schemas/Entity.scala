@@ -30,6 +30,10 @@ final case class CommitEntryFile(typeModification: Option[Char],
                                  revisionId: Long,
                                  id: Long = 0L)
 
+final case class CommitFileUnify(pathId: Long,
+                                 revisionId: Long,
+                                 id: Long = 0L)
+
 final case class CommitTasks(taskId: Long,
                              commitId: Long,
                              id: Long = 0L)
