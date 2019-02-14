@@ -74,6 +74,24 @@ class ReportsDao(databaseProfile: JdbcProfile, configPath: String, suffix: Strin
     exec(countCommits.result.transactionally)
   }
 
+  def fileAuthorCommitsBugsCounter(author: String): Future[Seq[(String, Int)]] = {
+    val commits = for {
+      ai <- Query.authors if ai.author === author
+      co <- Query.commits if co.authorId === ai.id
+      cf <- Query.commitsFiles if cf.revisionId === co.id
+      fi <- Query.files if fi.id === cf.pathId
+      ct <- Query.commitTasks if ct.commitId === co.id
+      tk <- Query.tasks if tk.taskId === ct.taskId && tk.typeTaskId === 8L //8L == BUG for target process
+    } yield fi
+    val countCommits = commits
+      .groupBy(_.path)
+      .map {
+        case (path, group) =>
+          (path, group.length)
+      }
+    exec(countCommits.result.transactionally)
+  }
+
   def authorsNames = {
     exec(Query.authors.map(_.author).result)
   }

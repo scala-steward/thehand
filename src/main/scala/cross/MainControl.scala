@@ -16,9 +16,10 @@ import thehand.schemas.{ReportsDao, RepositoryDao}
 import org.tmatesoft.svn.core.SVNLogEntry
 import slick.jdbc.JdbcProfile
 import telemetrics.HandLogger
-import thehand.scm.{ReportExchange, ScmConnector, SvnConnectorFactory, SvnRepositoryData}
+import thehand.scm.{ScmConnector, SvnConnectorFactory, SvnRepositoryData}
 import thehand.{TaskParser, TaskParserCharp}
 import thehand.tasks.{TargetConnector, TaskConnector}
+import thehand.report.{CvsIO, ReportExchange}
 
 import scala.concurrent.ExecutionContextExecutor
 
@@ -78,10 +79,12 @@ object MainControl extends App {
   def generateRepositoryReport(repository: String)= {
     lazy val suffix = conf.getString(repository+".database_suffix")
     lazy val dao: ReportsDao = new ReportsDao(jdbcProfile, "dbconfig", suffix)
-    val reports = ReportExchange(dao, repository)
-    reports.reportFilesBugsCounterCvs
-    reports.authorsReports
-    reports.close
+    implicit val writer = CvsIO
+    val reportsCsv = new ReportExchange(dao, repository)
+    reportsCsv.reportFilesBugsCounter
+    reportsCsv.authorsReports
+    reportsCsv.authorsBugsReports
+    reportsCsv.close
   }
 
   repositories.map(generateRepositoryReport)
