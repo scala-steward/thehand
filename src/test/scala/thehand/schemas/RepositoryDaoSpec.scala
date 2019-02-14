@@ -70,7 +70,7 @@ class RepositoryDaoSpec extends AsyncFlatSpec with Matchers {
   }
 
   "Table Commits Files" should "have eight commits files" in {
-    dao.countCommitsFiles map { counter => assert(counter == 8) }
+    dao.countCommitsFiles map { counter => assert(counter == 6) }
   }
 
   "Table Commits Tasks" should "have three commits tasks" in {
@@ -80,11 +80,4 @@ class RepositoryDaoSpec extends AsyncFlatSpec with Matchers {
   "LastestCommit revision" should "be three" in {
     dao.actionLatestRevision map { counter => assert(counter.getOrElse(-1) == 3) }
   }
-
-//  "Bug files counter" should "be two" in {
-//    dao.filesBugsCounter map {
-//      files => assert(files.size == 2)
-//    }
-//  }
-
 }
