@@ -1,12 +1,13 @@
 import Dependencies._
 
 enablePlugins(PackPlugin)
+enablePlugins(PlayScala)
 
 lazy val root = (project in file(".")).
   settings(
     inThisBuild(List(
       organization := "io.github.0um",
-      scalaVersion := "2.12.6",
+      scalaVersion := "2.12.8",
       version      := "0.1.1-SNAPSHOT"
     )),
     name := "thehand",
@@ -14,6 +15,7 @@ lazy val root = (project in file(".")).
     packMain := Map("thehand" -> "cross.MainControl"),
     libraryDependencies += scalaTest % Test,
     libraryDependencies ++= Seq(
+      guice,
       "org.tmatesoft.svnkit" % "svnkit" % "1.9.3",
       "commons-codec" % "commons-codec" % "1.9",
       "com.typesafe.play" % "play-json_2.12" % "2.7.0-M1",
@@ -27,7 +29,9 @@ lazy val root = (project in file(".")).
       "com.typesafe" % "config" % "1.3.2",
       "joda-time" % "joda-time" % "2.10",
       "org.joda" % "joda-convert" % "2.1.1",
-      "com.github.tototoshi" %% "scala-csv" % "1.3.5"
+      "com.github.tototoshi" %% "scala-csv" % "1.3.5",
+      "com.typesafe.play" %% "play-slick" % "4.0.0",
+      "com.typesafe.play" %% "play-json-joda" % "2.7.1"
     )
   )
 
@@ -47,7 +51,7 @@ scalacOptions ++= Seq(                 // for scala 2.12
   "-language:implicitConversions",     // Allow definition of implicit functions called views
   "-unchecked",                        // Enable additional warnings where generated code depends on assumptions.
   "-Xcheckinit",                       // Wrap field accessors to throw an exception on uninitialized access.
-  "-Xfatal-warnings",                  // Fail the compilation if there are any warnings.
+  //"-Xfatal-warnings",                  // Fail the compilation if there are any warnings.
   "-Xfuture",                          // Turn on future language features.
   "-Xlint:adapted-args",               // Warn if an argument list is modified to match the receiver.
   "-Xlint:by-name-right-associative",  // By-name parameter of right associative operator.
@@ -75,11 +79,11 @@ scalacOptions ++= Seq(                 // for scala 2.12
   "-Ywarn-nullary-override",           // Warn when non-nullary `def f()' overrides nullary `def f'.
   "-Ywarn-nullary-unit",               // Warn when nullary methods return Unit.
   "-Ywarn-numeric-widen",              // Warn when numerics are widened.
-  "-Ywarn-unused:implicits",           // Warn if an implicit parameter is unused.
-  "-Ywarn-unused:imports",             // Warn if an import selector is not referenced.
-  "-Ywarn-unused:locals",              // Warn if a local definition is unused.
-  "-Ywarn-unused:params",              // Warn if a value parameter is unused.
-  "-Ywarn-unused:patvars",             // Warn if a variable bound in a pattern is unused.
-  "-Ywarn-unused:privates",            // Warn if a private member is unused.
+//  "-Ywarn-unused:implicits",           // Warn if an implicit parameter is unused.
+//  "-Ywarn-unused:imports",             // Warn if an import selector is not referenced.
+//  "-Ywarn-unused:locals",              // Warn if a local definition is unused.
+//  "-Ywarn-unused:params",              // Warn if a value parameter is unused.
+//  "-Ywarn-unused:patvars",             // Warn if a variable bound in a pattern is unused.
+//  "-Ywarn-unused:privates",            // Warn if a private member is unused.
   "-Ywarn-value-discard"               // Warn when non-Unit expression results are unused.
 )

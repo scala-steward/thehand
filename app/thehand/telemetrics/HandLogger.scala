@@ -9,7 +9,7 @@
  *
  */
 
-package telemetrics
+package thehand.telemetrics
 
 import com.typesafe.scalalogging.LazyLogging
 

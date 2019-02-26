@@ -14,7 +14,7 @@ package thehand.schemas
 import org.scalatest.{AsyncFlatSpec, Matchers}
 
 import scala.concurrent.ExecutionContext
-import telemetrics.HandLogger
+import thehand.telemetrics.HandLogger
 
 import scala.util.{Failure, Success}
 

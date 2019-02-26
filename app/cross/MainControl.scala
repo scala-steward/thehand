@@ -15,7 +15,7 @@ import com.typesafe.config.{Config, ConfigFactory}
 import thehand.schemas.{ReportsDao, RepositoryDao}
 import org.tmatesoft.svn.core.SVNLogEntry
 import slick.jdbc.JdbcProfile
-import telemetrics.HandLogger
+import thehand.telemetrics.HandLogger
 import thehand.scm.{ScmConnector, SvnConnectorFactory, SvnRepositoryData}
 import thehand.{TaskParser, TaskParserCharp}
 import thehand.tasks.{TargetConnector, TaskConnector}

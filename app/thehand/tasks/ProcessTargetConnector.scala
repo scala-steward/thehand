@@ -13,7 +13,7 @@ package thehand.tasks
 
 import thehand.schemas.Task
 import play.api.libs.json.{JsValue, Json}
-import telemetrics.HandLogger
+import thehand.telemetrics.HandLogger
 
 import scala.util.{Failure, Success, Try}
 

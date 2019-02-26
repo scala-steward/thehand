@@ -115,9 +115,11 @@ project/plugins/project/
 .cache
 .lib/
 
+
 ### Scala ###
 
 
 # End of https://www.gitignore.io/api/sbt,java,scala,intellij+all
 
 *.conf
+*.csv

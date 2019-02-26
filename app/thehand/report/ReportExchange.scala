@@ -9,7 +9,7 @@
 
 package thehand.report
 
-import telemetrics.HandLogger
+import thehand.telemetrics.HandLogger
 import thehand.schemas.ReportsDao
 
 import scala.concurrent.duration.Duration

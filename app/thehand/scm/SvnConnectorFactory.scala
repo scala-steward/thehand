@@ -14,7 +14,7 @@ package thehand.scm
 import org.tmatesoft.svn.core.SVNURL
 import org.tmatesoft.svn.core.io.{SVNRepository, SVNRepositoryFactory}
 import org.tmatesoft.svn.core.wc.SVNWCUtil
-import telemetrics.HandLogger
+import thehand.telemetrics.HandLogger
 
 import scala.util.{Failure, Success, Try}
 

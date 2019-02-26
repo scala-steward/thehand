@@ -15,7 +15,7 @@ import java.net.URL
 
 import network.HttpBasicAuth
 import play.api.libs.json._
-import telemetrics.HandLogger
+import thehand.telemetrics.HandLogger
 
 import scala.io.Source
 import scala.io.Source.fromURL

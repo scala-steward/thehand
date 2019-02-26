@@ -13,7 +13,7 @@ package thehand.schemas
 
 import slick.dbio.DBIOAction
 import slick.jdbc.JdbcProfile
-import telemetrics.HandLogger
+import thehand.telemetrics.HandLogger
 
 import scala.concurrent.{Await, ExecutionContextExecutor, Future}
 import scala.concurrent.duration._

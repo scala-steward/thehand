@@ -13,7 +13,7 @@ package thehand.scm
 
 import thehand.schemas._
 import org.tmatesoft.svn.core.SVNLogEntry
-import telemetrics.HandLogger
+import thehand.telemetrics.HandLogger
 import thehand.TaskParser
 import thehand.tasks.{ProcessTargetConnector, TaskConnector}
 
