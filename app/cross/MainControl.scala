@@ -63,7 +63,7 @@ class MainControl @Inject() (protected val dbConfigProvider: DatabaseConfigProvi
     repositories.foreach(updateRepository)
   }
 
-  lazy val repositories = Seq(
+  lazy val repositories: Seq[String] = Seq(
     "repository_eberick",
     "repository_qibulder",
     "repository_qi4d"

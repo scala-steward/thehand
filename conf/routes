@@ -7,13 +7,10 @@ GET     /                            controllers.PersonController.index
 #POST    /person                     controllers.PersonController.addPerson
 GET     /persons                     controllers.PersonController.getPersons
 GET     /updateAll                   controllers.UpdateController.updateAll
-#GET     /tasks                      controllers.TaskController.getTasks
-#GET     /authors                    controllers.SourceController.getAuthors
-#GET     /commits                    controllers.SourceController.getCommits
-#GET     /commitsTasks               controllers.SourceController.getCommitsTasks
-#GET     /entryFiles                 controllers.SourceController.getEntryFiles
-#GET     /update                     controllers.HandController.getUpdate
-GET     /authors                     controllers.ReportController.getAuthors
+
+GET     /authors                     controllers.ReportController.getAuthors(suffix)
+GET     /getfilesbugs                controllers.ReportController.getFilesBugs(suffix)
+GET     /getauthorbugs               controllers.ReportController.getAuthorBugs(author,suffix)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)

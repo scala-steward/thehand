@@ -17,7 +17,7 @@ trait CommitComponent extends AuthorComponent { self: HasDatabaseConfigProvider[
   object PortableJodaSupport extends com.github.tototoshi.slick.GenericJodaSupport(dbConfig.profile)
   import PortableJodaSupport._
 
-  class CommitTable(tag: Tag, suffix: Suffix) extends Table[CommitEntry](tag, suffix + "commits") {
+  class CommitTable(tag: Tag, suffix: Suffix) extends Table[CommitEntry](tag, suffix.suffix + "commits") {
     def message: Rep[Option[String]] = column[Option[String]]("message")
     def date: Rep[Option[DateTime]] = column[Option[DateTime]]("date")
     def revision: Rep[Long] = column[Long]("revision", O.Unique)

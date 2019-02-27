@@ -19,16 +19,13 @@ class ReportDao @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
 
   import profile.api._
 
-  implicit val suffix = Suffix("eb_")
+  def filesBugsCounter(suffix: Suffix): Future[Seq[(String, Int)]] = db.run {
+    val commitTasks = TableQuery[CommitTasksTable]((tag: Tag) => new CommitTasksTable(tag, suffix))
+    val tasks = TableQuery[TaskTable]((tag: Tag) => new TaskTable(tag, suffix))
+    val files = TableQuery[EntryFilesTable]((tag: Tag) => new EntryFilesTable(tag, suffix))
+    val commits = TableQuery[CommitTable]((tag: Tag) => new CommitTable(tag, suffix))
+    val commitsFiles = TableQuery[CommitEntryFileTable]((tag: Tag) => new CommitEntryFileTable(tag, suffix))
 
-  private val commitTasks = TableQuery[CommitTasksTable]((tag: Tag) => new CommitTasksTable(tag, suffix))
-  private val tasks = TableQuery[TaskTable]((tag: Tag) => new TaskTable(tag, suffix))
-  private val files = TableQuery[EntryFilesTable]((tag: Tag) => new EntryFilesTable(tag, suffix))
-  private val authors = TableQuery[AuthorsTable]((tag: Tag) => new AuthorsTable(tag, suffix))
-  private val commits = TableQuery[CommitTable]((tag: Tag) => new CommitTable(tag, suffix))
-  private val commitsFiles = TableQuery[CommitEntryFileTable]((tag: Tag) => new CommitEntryFileTable(tag, suffix))
-
-  def filesBugsCounter: Future[Seq[(String, Int)]] = db.run {
     val bugs = for {
       co <- commits
       cf <- commitsFiles if cf.revisionId === co.id
@@ -45,7 +42,12 @@ class ReportDao @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
     countBugs.result.transactionally
   }
 
-  def fileAuthorCommitsCounter(author: String): Future[Seq[(String, Int)]] = db.run {
+  def fileAuthorCommitsCounter(author: String, suffix: Suffix): Future[Seq[(String, Int)]] = db.run {
+    val files = TableQuery[EntryFilesTable]((tag: Tag) => new EntryFilesTable(tag, suffix))
+    val authors = TableQuery[AuthorsTable]((tag: Tag) => new AuthorsTable(tag, suffix))
+    val commits = TableQuery[CommitTable]((tag: Tag) => new CommitTable(tag, suffix))
+    val commitsFiles = TableQuery[CommitEntryFileTable]((tag: Tag) => new CommitEntryFileTable(tag, suffix))
+
     val cmts = for {
       ai <- authors if ai.author === author
       co <- commits if co.authorId === ai.id
@@ -61,7 +63,14 @@ class ReportDao @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
     countCommits.result.transactionally
   }
 
-  def fileAuthorCommitsBugsCounter(author: String): Future[Seq[(String, Int)]] = db.run {
+  def fileAuthorCommitsBugsCounter(author: String, suffix: Suffix): Future[Seq[(String, Int)]] = db.run {
+    val commitTasks = TableQuery[CommitTasksTable]((tag: Tag) => new CommitTasksTable(tag, suffix))
+    val tasks = TableQuery[TaskTable]((tag: Tag) => new TaskTable(tag, suffix))
+    val files = TableQuery[EntryFilesTable]((tag: Tag) => new EntryFilesTable(tag, suffix))
+    val authors = TableQuery[AuthorsTable]((tag: Tag) => new AuthorsTable(tag, suffix))
+    val commits = TableQuery[CommitTable]((tag: Tag) => new CommitTable(tag, suffix))
+    val commitsFiles = TableQuery[CommitEntryFileTable]((tag: Tag) => new CommitEntryFileTable(tag, suffix))
+
     val cmts = for {
       ai <- authors if ai.author === author
       co <- commits if co.authorId === ai.id
@@ -79,14 +88,16 @@ class ReportDao @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
     countCommits.result.transactionally
   }
 
-  def filterMovedFiles(revisionId: Long): Future[Seq[CommitEntryFile]] = db.run {
+  def filterMovedFiles(revisionId: Long, suffix: Suffix): Future[Seq[CommitEntryFile]] = db.run {
+    val commitsFiles = TableQuery[CommitEntryFileTable]((tag: Tag) => new CommitEntryFileTable(tag, suffix))
     val files = for {
       cf <- commitsFiles if cf.revisionId === revisionId && cf.copyPathId >= 1L
     } yield cf
     files.result.transactionally
   }
 
-  def authorsNames: Future[Seq[String]] = db.run {
+  def authorsNames(suffix: Suffix): Future[Seq[String]] = db.run {
+    val authors = TableQuery[AuthorsTable]((tag: Tag) => new AuthorsTable(tag, suffix))
     authors.map(_.author).result
   }
 }

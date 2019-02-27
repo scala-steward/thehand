@@ -22,7 +22,7 @@ class UpdateController @Inject()(dao: UpdateDao,
                                 )
   extends MessagesAbstractController(cc) {
 
-  implicit val suffix = Suffix("eb_")
+  //implicit val suffix: Suffix = Suffix("eb_")
 
   def updateAll() = Action {
     dao.updateAll()

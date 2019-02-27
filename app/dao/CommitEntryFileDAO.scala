@@ -13,7 +13,7 @@ import scala.concurrent.{ExecutionContext, Future}
 trait CommitEntryFileComponent extends CommitComponent with EntryFileComponent { self: HasDatabaseConfigProvider[JdbcProfile] =>
   import profile.api._
 
-  class CommitEntryFileTable(tag: Tag, suffix: Suffix) extends Table[CommitEntryFile](tag, suffix + "commitfiles") {
+  class CommitEntryFileTable(tag: Tag, suffix: Suffix) extends Table[CommitEntryFile](tag, suffix.suffix + "commitfiles") {
     def typeModification: Rep[Option[Char]] = column[Option[Char]]("typeModification")
     def copyPathId: Rep[Option[Long]] = column[Option[Long]]("copyPath_id")
     def copyRevisionId: Rep[Option[Long]] = column[Option[Long]]("copyRevision")
@@ -28,17 +28,16 @@ trait CommitEntryFileComponent extends CommitComponent with EntryFileComponent {
 }
 
 @Singleton()
-class CommitEntryFileDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(implicit executionContext: ExecutionContext, suffix: Suffix)
+class CommitEntryFileDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(implicit executionContext: ExecutionContext)
   extends CommitEntryFileComponent
     with HasDatabaseConfigProvider[JdbcProfile] {
 
   import profile.api._
 
-  private val files = TableQuery[EntryFilesTable]((tag: Tag) => new EntryFilesTable(tag, suffix))
-  private val commitsFiles = TableQuery[CommitEntryFileTable]((tag: Tag) => new CommitEntryFileTable(tag, suffix))
-  private val commits = TableQuery[CommitTable]((tag: Tag) => new CommitTable(tag, suffix))
-
-  def insert(es: Seq[(Seq[CommitEntryWriter], Long)]): Future[Seq[Option[Long]]] = db.run {
+  def insert(es: Seq[(Seq[CommitEntryWriter], Long)], suffix: Suffix): Future[Seq[Option[Long]]] = db.run {
+    val files = TableQuery[EntryFilesTable]((tag: Tag) => new EntryFilesTable(tag, suffix))
+    val commitsFiles = TableQuery[CommitEntryFileTable]((tag: Tag) => new CommitEntryFileTable(tag, suffix))
+    val commits = TableQuery[CommitTable]((tag: Tag) => new CommitTable(tag, suffix))
     def fileQuery(fileEntries: (Seq[CommitEntryWriter], Long)) = {
       val (entryFiles, revisionNumber) = fileEntries
 
@@ -77,5 +76,8 @@ class CommitEntryFileDAO @Inject() (protected val dbConfigProvider: DatabaseConf
     commits.result
   }
 
-  def countCommitsFiles: Future[Int] = db.run(commitsFiles.size.result)
+  def countCommitsFiles(suffix: Suffix): Future[Int] = {
+    val commitsFiles = TableQuery[CommitEntryFileTable]((tag: Tag) => new CommitEntryFileTable(tag, suffix))
+    db.run(commitsFiles.size.result)
+  }
 }

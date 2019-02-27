@@ -63,8 +63,8 @@ class UpdateDao @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
   def updateAll(): Unit = {
     lazy val repositories = Seq(
       "repository_eberick",
-//      "repository_qibulder",
-  //    "repository_qi4d"
+      "repository_qibulder",
+      "repository_qi4d"
     )
     update(repositories)
   }

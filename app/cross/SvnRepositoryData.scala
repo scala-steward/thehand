@@ -58,13 +58,13 @@ class SvnRepositoryData @Inject() (protected val dbConfigProvider: DatabaseConfi
     val extractor = new SvnExtractor(repository.log(startId, endId), parser)
 
     val daoT = new TaskDAO(dbConfigProvider)
-    daoT.insert(extractor.extractTasks.flatMap(tp.process)) onComplete {
+    daoT.insert(extractor.extractTasks.flatMap(tp.process), suffix) onComplete {
       case Success(_) => HandLogger.debug("correct write tasks")
       case Failure(e) => HandLogger.error("error in writing tasks " + e.getMessage)
     }
 
     val daoA = new AuthorDAO(dbConfigProvider)
-    daoA.insert(extractor.extractAuthors) onComplete {
+    daoA.insert(extractor.extractAuthors, suffix) onComplete {
       case Success(_) => HandLogger.debug("correct write authors")
       case Failure(e) => HandLogger.error("error in writing authors " + e.getMessage)
     }
@@ -76,19 +76,19 @@ class SvnRepositoryData @Inject() (protected val dbConfigProvider: DatabaseConfi
     }
 
     val daoF = new EntryFileDAO(dbConfigProvider)
-    daoF.insert(extractor.extractFiles) onComplete {
+    daoF.insert(extractor.extractFiles, suffix) onComplete {
       case Success(_) => HandLogger.debug("correct create files")
       case Failure(e) => HandLogger.error("error in writing files " + e.getMessage)
     }
 
     val daoCt = new CommitTaskDAO(dbConfigProvider)
-    daoCt.insert(extractor.extractCommitsTasks) onComplete {
+    daoCt.insert(extractor.extractCommitsTasks, suffix) onComplete {
       case Success(_) => HandLogger.debug("correct create commits tasks")
       case Failure(e) => HandLogger.error("error in writing commits tasks " + e.getMessage)
     }
 
     val daoCf = new CommitEntryFileDAO(dbConfigProvider)
-    daoCf.insert(extractor.extractCommitsFiles) onComplete {
+    daoCf.insert(extractor.extractCommitsFiles, suffix) onComplete {
       case Success(_) => HandLogger.debug("correct create commits files")
       case Failure(e) => HandLogger.error("error in writing commits files " + e.getMessage)
     }

@@ -38,7 +38,7 @@ class PersonController @Inject()(repo: PersonRepository,
   /**
    * The index action.
    */
-  def index = Action { implicit request =>
+  def index: Action[AnyContent] = Action { implicit request =>
     Ok(views.html.index(personForm))
   }
 

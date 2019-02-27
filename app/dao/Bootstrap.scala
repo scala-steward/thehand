@@ -13,7 +13,7 @@ import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
 @Singleton()
-class Bootstrap @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(implicit executionContext: ExecutionContext, suffix: Suffix)
+class Bootstrap @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(implicit executionContext: ExecutionContext)
   extends AuthorComponent
     with CommitComponent
     with CommitEntryFileComponent
@@ -23,14 +23,14 @@ class Bootstrap @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
 
   import profile.api._
 
-  private val commitTasks = TableQuery[CommitTasksTable]((tag: Tag) => new CommitTasksTable(tag, suffix))
-  private val tasks = TableQuery[TaskTable]((tag: Tag) => new TaskTable(tag, suffix))
-  private val files = TableQuery[EntryFilesTable]((tag: Tag) => new EntryFilesTable(tag, suffix))
-  private val authors = TableQuery[AuthorsTable]((tag: Tag) => new AuthorsTable(tag, suffix))
-  private val commits = TableQuery[CommitTable]((tag: Tag) => new CommitTable(tag, suffix))
-  private val commitsFiles = TableQuery[CommitEntryFileTable]((tag: Tag) => new CommitEntryFileTable(tag, suffix))
+  def createSchemas(suffix: Suffix): Unit = {
+    val commitTasks = TableQuery[CommitTasksTable]((tag: Tag) => new CommitTasksTable(tag, suffix))
+    val tasks = TableQuery[TaskTable]((tag: Tag) => new TaskTable(tag, suffix))
+    val files = TableQuery[EntryFilesTable]((tag: Tag) => new EntryFilesTable(tag, suffix))
+    val authors = TableQuery[AuthorsTable]((tag: Tag) => new AuthorsTable(tag, suffix))
+    val commits = TableQuery[CommitTable]((tag: Tag) => new CommitTable(tag, suffix))
+    val commitsFiles = TableQuery[CommitEntryFileTable]((tag: Tag) => new CommitEntryFileTable(tag, suffix))
 
-  def createSchemas(): Unit = {
     exec(
       tasks.schema.create.asTry andThen
       authors.schema.create.asTry andThen

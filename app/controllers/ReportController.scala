@@ -11,6 +11,7 @@ package controllers
 
 import javax.inject._
 import dao._
+import models.Suffix
 import play.api.libs.json.Json
 import play.api.mvc._
 import thehand.report.CvsIO
@@ -28,26 +29,20 @@ class ReportController @Inject()(dao: ReportDao,
   private val repositoryName = "AHHAHAHA"
   implicit val writer: CvsIO.type = CvsIO
 
-  def authors: Future[Seq[String]] = {
-    dao.authorsNames
+  def authors(suffix: Suffix): Future[Seq[String]] = {
+    dao.authorsNames(suffix)
   }
 
-  def getAuthors: Action[AnyContent] = Action.async {
-    authors.map { a =>
-      Ok(Json.toJson(a))
-    }
+  def reportFilesBugCounter(suffix: Suffix): Future[Seq[(String, Int)]] = {
+    dao.filesBugsCounter(suffix)
   }
 
-  def reportFilesBugCounter: Future[Seq[(String, Int)]] = {
-    dao.filesBugsCounter
+  def reportAuthorCommitsCounter(authorName: String, suffix: Suffix): Future[Seq[(String, Int)]] = {
+    dao.fileAuthorCommitsCounter(authorName, suffix)
   }
 
-  def reportAuthorCommitsCounter(authorName: String): Future[Seq[(String, Int)]] = {
-    dao.fileAuthorCommitsCounter(authorName)
-  }
-
-  def reportAuthorBugsCommitsCounter(authorName: String): Future[Seq[(String, Int)]] = {
-    dao.fileAuthorCommitsBugsCounter(authorName)
+  def reportAuthorBugsCommitsCounter(authorName: String, suffix: Suffix): Future[Seq[(String, Int)]] = {
+    dao.fileAuthorCommitsBugsCounter(authorName, suffix)
   }
 
   private def exec[T](f: Future[T]) = {
@@ -59,9 +54,9 @@ class ReportController @Inject()(dao: ReportDao,
     resultEither
   }
 
-  def reportFilesBugsCounter(): Unit = {
+  def reportFilesBugsCounter(suffix: Suffix): Unit = {
     lazy val filename = s"./reports/report_bugs_${repositoryName.toLowerCase}_counter"
-    reportFilesBugCounter onComplete {
+    reportFilesBugCounter(suffix) onComplete {
       case scala.util.Success(value) =>
         writer.write(filename, value.sortBy(_._2))
         HandLogger.info("generate " + repositoryName + " files bugs report")
@@ -69,9 +64,9 @@ class ReportController @Inject()(dao: ReportDao,
     }
   }
 
-  private def authorReport(authorName: String): Unit = {
+  private def authorReport(authorName: String, suffix: Suffix): Unit = {
     lazy val filename = s"./reports/author_${authorName.toLowerCase()}_${repositoryName.toLowerCase}_commits_counter"
-    exec[Seq[(String, Int)]](reportAuthorCommitsCounter(authorName)) match {
+    exec[Seq[(String, Int)]](reportAuthorCommitsCounter(authorName, suffix)) match {
       case Right(values) =>
         writer.write(filename, values.sortBy(_._2))
         HandLogger.info("generate author report " + authorName)
@@ -79,16 +74,16 @@ class ReportController @Inject()(dao: ReportDao,
     }
   }
 
-  def authorsReports(): Unit = {
-    exec[Seq[String]](authors) match {
-      case Right(values) => values.foreach(authorReport)
+  def authorsReports(suffix: Suffix): Unit = {
+    exec[Seq[String]](authors(suffix)) match {
+      case Right(values) => values.foreach(authorReport(_, suffix))
       case Left(e) => HandLogger.error("error" + e.getMessage)
     }
   }
 
-  private def authorBugsReport(authorName: String): Unit = {
+  private def authorBugsReport(authorName: String, suffix: Suffix): Unit = {
     lazy val filename = s"./reports/author_${authorName.toLowerCase()}_${repositoryName.toLowerCase}_commits_bugs_counter"
-    exec[Seq[(String, Int)]](reportAuthorBugsCommitsCounter(authorName)) match {
+    exec[Seq[(String, Int)]](reportAuthorBugsCommitsCounter(authorName, suffix)) match {
       case Right(values) =>
         writer.write(filename, values.sortBy(_._2))
         HandLogger.info("generate author bugs report " + authorName)
@@ -96,10 +91,43 @@ class ReportController @Inject()(dao: ReportDao,
     }
   }
 
-  def authorsBugsReports()= {
-    exec[Seq[String]](authors) match {
-      case Right(values) => values.map(authorBugsReport)
+  def authorsBugsReports(suffix: Suffix): Unit = {
+    exec[Seq[String]](authors(suffix)) match {
+      case Right(values) => values.foreach(authorBugsReport(_,suffix))
       case Left(e) => HandLogger.error("error" + e.getMessage)
+    }
+  }
+
+  // ActionsFunciton ###################################################################
+
+  private def reportFilesBugsCounterToAction(suffix: Suffix) = {
+    reportFilesBugCounter(suffix)
+  }
+
+  private def authorBugsReportToAction(authorName: String, suffix: Suffix) = {
+    reportAuthorBugsCommitsCounter(authorName, suffix)
+  }
+
+  // Actions ###########################################################################
+
+  def getAuthors(suffix: String): Action[AnyContent] = Action.async {
+    val s = Suffix(suffix)
+    authors(s).map { a =>
+      Ok(Json.toJson(a))
+    }
+  }
+
+  def getFilesBugs(suffix: String): Action[AnyContent] = Action.async {
+    val s = Suffix(suffix)
+    reportFilesBugsCounterToAction(s).map { a =>
+      Ok(Json.toJson(a))
+    }
+  }
+
+  def getAuthorBugs(author: String, suffix: String): Action[AnyContent] = Action.async {
+    val s = Suffix(suffix)
+    authorBugsReportToAction(author, s).map { a =>
+      Ok(Json.toJson(a))
     }
   }
 }

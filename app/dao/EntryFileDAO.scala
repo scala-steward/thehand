@@ -11,7 +11,7 @@ import scala.concurrent.{ ExecutionContext, Future }
 trait EntryFileComponent { self: HasDatabaseConfigProvider[JdbcProfile] =>
   import profile.api._
 
-  class EntryFilesTable(tag: Tag, suffix: Suffix) extends Table[EntryFile](tag, suffix + "files") {
+  class EntryFilesTable(tag: Tag, suffix: Suffix) extends Table[EntryFile](tag, suffix.suffix + "files") {
     def path: Rep[String] = column[String]("path", O.Unique)
     def id: Rep[Long] = column[Long]("id", O.PrimaryKey, O.AutoInc)
 
@@ -20,15 +20,14 @@ trait EntryFileComponent { self: HasDatabaseConfigProvider[JdbcProfile] =>
 }
 
 @Singleton()
-class EntryFileDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(implicit executionContext: ExecutionContext, suffix: Suffix)
+class EntryFileDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(implicit executionContext: ExecutionContext)
   extends EntryFileComponent
     with HasDatabaseConfigProvider[JdbcProfile] {
 
   import profile.api._
 
-  private val files = TableQuery[EntryFilesTable]((tag: Tag) => new EntryFilesTable(tag, suffix))
-
-  def insert(fs: Seq[EntryFile]): Future[Seq[Int]] = db.run {
+  def insert(fs: Seq[EntryFile], suffix: Suffix): Future[Seq[Int]] = db.run {
+    val files = TableQuery[EntryFilesTable]((tag: Tag) => new EntryFilesTable(tag, suffix))
     def upsert(file: EntryFile, id: Option[Long]) = {
       if (id.isEmpty) files += file else files.insertOrUpdate(file.copy(id = id.head))
     }
@@ -48,5 +47,8 @@ class EntryFileDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProv
     files.result
   }
 
-  def countFiles: Future[Int] = db.run(files.size.result)
+  def countFiles(suffix: Suffix): Future[Int] = db.run {
+    val files = TableQuery[EntryFilesTable]((tag: Tag) => new EntryFilesTable(tag, suffix))
+    files.size.result
+  }
 }

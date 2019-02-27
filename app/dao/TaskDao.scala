@@ -24,15 +24,14 @@ trait TaskComponent { self: HasDatabaseConfigProvider[JdbcProfile] =>
 }
 
 @Singleton()
-class TaskDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(implicit executionContext: ExecutionContext, suffix: Suffix)
+class TaskDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(implicit executionContext: ExecutionContext)
   extends TaskComponent
     with HasDatabaseConfigProvider[JdbcProfile] {
 
   import profile.api._
 
-  private val tasks = TableQuery[TaskTable]((tag: Tag) => new TaskTable(tag, suffix))
-
-  def insert(ts: Seq[Task]): Future[Seq[Int]] = db.run {
+  def insert(ts: Seq[Task], suffix: Suffix): Future[Seq[Int]] = db.run {
+    val tasks = TableQuery[TaskTable]((tag: Tag) => new TaskTable(tag, suffix))
     def upsert(task: Task, taskId: Option[Long]) =  {
       if (taskId.isEmpty) tasks += task else tasks.insertOrUpdate(task.copy(id = taskId.head))
     }
@@ -47,5 +46,8 @@ class TaskDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)
     DBIO.sequence(ts.map(taskQuery)).transactionally
   }
 
-  def countTasks: Future[Int] = db.run(tasks.size.result)
+  def countTasks(suffix: Suffix): Future[Int] = db.run {
+    val tasks = TableQuery[TaskTable]((tag: Tag) => new TaskTable(tag, suffix))
+    tasks.size.result
+  }
 }

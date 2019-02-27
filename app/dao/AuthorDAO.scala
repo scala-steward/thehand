@@ -12,7 +12,7 @@ import scala.concurrent.{ ExecutionContext, Future }
 trait AuthorComponent { self: HasDatabaseConfigProvider[JdbcProfile] =>
   import profile.api._
 
-  class AuthorsTable(tag: Tag, suffix: Suffix) extends Table[Author](tag, suffix +"authors") {
+  class AuthorsTable(tag: Tag, suffix: Suffix) extends Table[Author](tag, suffix.suffix +"authors") {
     def author: Rep[String] = column[String]("author", O.Unique)
     def id: Rep[Long] = column[Long]("id", O.PrimaryKey, O.AutoInc)
 
@@ -21,19 +21,20 @@ trait AuthorComponent { self: HasDatabaseConfigProvider[JdbcProfile] =>
 }
 
 @Singleton()
-class AuthorDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(implicit executionContext: ExecutionContext, suffix: Suffix)
+class AuthorDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(implicit executionContext: ExecutionContext)
   extends AuthorComponent
   with HasDatabaseConfigProvider[JdbcProfile] {
 
   import profile.api._
 
-  private val authors = TableQuery[AuthorsTable]((tag: Tag) => new AuthorsTable(tag, suffix))
 
-  def list: Future[Seq[Author]] = db.run {
+  def list(suffix: Suffix): Future[Seq[Author]] = db.run {
+    val authors = TableQuery[AuthorsTable]((tag: Tag) => new AuthorsTable(tag, suffix))
     authors.result
   }
 
-  def insert(as: Seq[Author]): Future[Seq[Int]] = db.run {
+  def insert(as: Seq[Author], suffix: Suffix): Future[Seq[Int]] = db.run {
+    val authors = TableQuery[AuthorsTable]((tag: Tag) => new AuthorsTable(tag, suffix))
     def upsert(author: Author, authorIds: Option[Long]) = {
       if (authorIds.isEmpty) authors += author else authors.insertOrUpdate(author.copy(author.author, authorIds.head))
     }
@@ -48,7 +49,10 @@ class AuthorDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
     DBIO.sequence(as.map(authorQuery)).transactionally
   }
 
-  def countAuthors: Future[Int] = db.run(authors.size.result)
+  def countAuthors(suffix: Suffix): Future[Int] = {
+    val authors = TableQuery[AuthorsTable]((tag: Tag) => new AuthorsTable(tag, suffix))
+    db.run(authors.size.result)
+  }
 }
 //  class Computers(tag: Tag) extends Table[Computer](tag, "COMPUTER") {
 //
