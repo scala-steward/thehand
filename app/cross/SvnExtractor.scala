@@ -9,12 +9,12 @@
  *
  */
 
-package thehand.scm
+package cross
 
-import thehand.schemas._
 import org.joda.time.DateTime
 import org.tmatesoft.svn.core.{SVNLogEntry, SVNLogEntryPath}
 import thehand.TaskParser
+import models._
 
 import scala.collection.JavaConverters._
 

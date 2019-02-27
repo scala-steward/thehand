@@ -9,7 +9,7 @@
 
 package models
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 final case class Parser(
                          name: String,
@@ -19,5 +19,5 @@ final case class Parser(
                          id: Long = 0L)
 
 object Parser {
-  implicit val parserFormat = Json.format[Parser]
+  implicit val parserFormat: OFormat[Parser] = Json.format[Parser]
 }

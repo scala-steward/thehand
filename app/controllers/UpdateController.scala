@@ -9,30 +9,23 @@
 
 package controllers
 
-
-
-import cross.MainControl.update
 import javax.inject._
-import models._
+import dao._
+import models.Suffix
 import play.api.libs.json.Json
 import play.api.mvc._
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
-class HandController @Inject()(repo: SourceRepository,
+class UpdateController @Inject()(dao: UpdateDao,
                                  cc: MessagesControllerComponents
-                                )(implicit ec: ExecutionContext)
+                                )
   extends MessagesAbstractController(cc) {
 
-  def getUpdate = Action.async { implicit request =>
-    lazy val repositories = Seq(
-      "repository_eberick",
-      "repository_qibulder",
-      "repository_qi4d"
-    )
-    Future { update(repositories) }.map {
-      case _ => Ok("Got update")
-      //case e => InternalServerError(e)
-    }
+  implicit val suffix = Suffix("eb_")
+
+  def updateAll() = Action {
+    dao.updateAll()
+    Ok("Updated")
   }
 }

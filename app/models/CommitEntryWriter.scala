@@ -9,15 +9,8 @@
 
 package models
 
-import play.api.libs.json.Json
-
-
-
 case class CommitEntryWriter(
                               commit: CommitEntryFile,
                               path: String,
                               pathCopy: String)
 
-//object CommitEntryWriter {
-//  implicit val commitEntryWriterFormat = Json.format[CommitEntryWriter]
-//}

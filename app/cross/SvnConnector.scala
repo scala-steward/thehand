@@ -9,7 +9,7 @@
  *
  */
 
-package thehand.scm
+package cross
 
 import org.tmatesoft.svn.core.SVNLogEntry
 import org.tmatesoft.svn.core.internal.io.dav.DAVRepositoryFactory

@@ -9,15 +9,9 @@
 
 package models
 
-import play.api.libs.json._
-
 case class CommitEntryFile(typeModification: Option[Char],
                                  copyPath: Option[Long],
                                  copyRevision: Option[Long],
                                  pathId: Long,
                                  revisionId: Long,
                                  id: Long = 0L)
-
-//object CommitEntryFile {
-//  implicit val commitEntryFileFormat = Json.format[CommitEntryFile]
-//}

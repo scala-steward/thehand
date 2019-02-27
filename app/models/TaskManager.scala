@@ -9,7 +9,7 @@
 
 package models
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 final case class TaskManager(
                               name: String,
@@ -19,5 +19,5 @@ final case class TaskManager(
                               id: Long = 0L)
 
 object TaskManager {
-  implicit val taskManagerFormat = Json.format[TaskManager]
+  implicit val taskManagerFormat: OFormat[TaskManager] = Json.format[TaskManager]
 }

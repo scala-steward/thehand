@@ -15,11 +15,10 @@ import models._
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.data.validation.Constraints._
-import play.api.i18n._
 import play.api.libs.json.Json
 import play.api.mvc._
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 class PersonController @Inject()(repo: PersonRepository,
                                   cc: MessagesControllerComponents
@@ -70,7 +69,7 @@ class PersonController @Inject()(repo: PersonRepository,
   /**
    * A REST endpoint that gets all the people as JSON.
    */
-  def getPersons = Action.async { implicit request =>
+  def getPersons: Action[AnyContent] = Action.async {
     repo.list().map { people =>
       Ok(Json.toJson(people))
     }

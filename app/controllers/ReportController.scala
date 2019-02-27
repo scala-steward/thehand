@@ -7,17 +7,25 @@
  * any later version.
  */
 
-package thehand.report
+package controllers
 
+import javax.inject._
+import dao._
+import play.api.mvc._
+import thehand.report.CvsIO
 import thehand.telemetrics.HandLogger
-import thehand.schemas.ReportsDao
 
 import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, ExecutionContextExecutor, Future}
+import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
-class ReportExchange (dao: ReportsDao, repositoryName: String)(implicit writer: ReportIO) {
-  implicit val context: ExecutionContextExecutor = scala.concurrent.ExecutionContext.fromExecutor(null)
+class ReportController @Inject()(dao: ReportDao,
+                                 cc: MessagesControllerComponents
+                                )(implicit ec: ExecutionContext)
+  extends MessagesAbstractController(cc) {
+
+  private val repositoryName = "AHHAHAHA"
+  implicit val writer: CvsIO.type = CvsIO
 
   def authors: Future[Seq[String]] = {
     dao.authorsNames
@@ -44,9 +52,7 @@ class ReportExchange (dao: ReportsDao, repositoryName: String)(implicit writer: 
     resultEither
   }
 
-  def close() = dao.close
-
-  def reportFilesBugsCounter() = {
+  def reportFilesBugsCounter(): Unit = {
     lazy val filename = s"./reports/report_bugs_${repositoryName.toLowerCase}_counter"
     reportFilesBugCounter onComplete {
       case scala.util.Success(value) =>
@@ -56,7 +62,7 @@ class ReportExchange (dao: ReportsDao, repositoryName: String)(implicit writer: 
     }
   }
 
-  private def authorReport(authorName: String) = {
+  private def authorReport(authorName: String): Unit = {
     lazy val filename = s"./reports/author_${authorName.toLowerCase()}_${repositoryName.toLowerCase}_commits_counter"
     exec[Seq[(String, Int)]](reportAuthorCommitsCounter(authorName)) match {
       case Right(values) =>
@@ -66,14 +72,14 @@ class ReportExchange (dao: ReportsDao, repositoryName: String)(implicit writer: 
     }
   }
 
-  def authorsReports()= {
+  def authorsReports(): Unit = {
     exec[Seq[String]](authors) match {
-      case Right(values) => values.map(authorReport)
+      case Right(values) => values.foreach(authorReport)
       case Left(e) => HandLogger.error("error" + e.getMessage)
     }
   }
 
-  private def authorBugsReport(authorName: String) = {
+  private def authorBugsReport(authorName: String): Unit = {
     lazy val filename = s"./reports/author_${authorName.toLowerCase()}_${repositoryName.toLowerCase}_commits_bugs_counter"
     exec[Seq[(String, Int)]](reportAuthorBugsCommitsCounter(authorName)) match {
       case Right(values) =>

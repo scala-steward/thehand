@@ -12,37 +12,33 @@
 package cross
 
 import com.typesafe.config.{Config, ConfigFactory}
-import thehand.schemas.{ReportsDao, RepositoryDao}
 import org.tmatesoft.svn.core.SVNLogEntry
 import slick.jdbc.JdbcProfile
 import thehand.telemetrics.HandLogger
-import thehand.scm.{ScmConnector, SvnConnectorFactory, SvnRepositoryData}
 import thehand.{TaskParser, TaskParserCharp}
 import thehand.tasks.{TargetConnector, TaskConnector}
-import thehand.report.{CvsIO, ReportExchange}
 
 import scala.concurrent.ExecutionContextExecutor
+import javax.inject.Inject
+import play.api.db.slick.DatabaseConfigProvider
 
-object MainControl extends App {
+class MainControl @Inject() (protected val dbConfigProvider: DatabaseConfigProvider) {
   implicit val conf: Config = ConfigFactory.load()
   implicit val context: ExecutionContextExecutor = scala.concurrent.ExecutionContext.fromExecutor(null)
   lazy val jdbcProfile: JdbcProfile = slick.jdbc.PostgresProfile
 
   // update projects
-  def update(repositories: Seq[String]) = {
+  def update(repositories: Seq[String]): Unit = {
     lazy val target: TaskConnector = TargetConnector(
       conf.getString("target.url"),
       conf.getString("target.user"),
       conf.getString("target.pass"))
 
-    def loadSvnRepository(task: TaskConnector, confName: String, confPath: String): Option[SvnRepositoryData] = {
-      lazy val parser: TaskParser = TaskParserCharp(
+    def loadSvnRepository(task: TaskConnector, confName: String): Option[SvnRepositoryData] = {
+      val parser: TaskParser = TaskParserCharp(
         conf.getString(confName + ".task_model.patternParser"),
         conf.getString(confName + ".task_model.patternSplit"),
         conf.getString(confName + ".task_model.separator"))
-
-      lazy val suffix = conf.getString(confName + ".database_suffix")
-      lazy val dao: RepositoryDao = new RepositoryDao(jdbcProfile, confPath, suffix)
 
       lazy val rep = new SvnConnectorFactory {}
       lazy val repository: Option[ScmConnector[SVNLogEntry]] = rep.connect(
@@ -51,21 +47,20 @@ object MainControl extends App {
         conf.getString(confName + ".pass"))
 
       repository match {
-        case Some(r) => Some(new SvnRepositoryData(dao, task, r, parser))
+        case Some(r) => Some(new SvnRepositoryData(dbConfigProvider, task, r, parser))
         case None => None
       }
     }
 
-    def updateRepository(confName: String) = {
+    def updateRepository(confName: String): Unit = {
       HandLogger.info("updating " + confName)
-      val repository = loadSvnRepository(target, confName, "dbconfig")
+      val repository = loadSvnRepository(target, confName)
       repository.foreach { rep =>
         rep.updateAuto()
-        rep.close()
       }
     }
 
-    repositories.map(updateRepository(_))
+    repositories.foreach(updateRepository)
   }
 
   lazy val repositories = Seq(
@@ -75,17 +70,4 @@ object MainControl extends App {
   )
   update(repositories)
 
-  // generate reports
-  def generateRepositoryReport(repository: String)= {
-    lazy val suffix = conf.getString(repository+".database_suffix")
-    lazy val dao: ReportsDao = new ReportsDao(jdbcProfile, "dbconfig", suffix)
-    implicit val writer = CvsIO
-    val reportsCsv = new ReportExchange(dao, repository)
-    reportsCsv.reportFilesBugsCounter
-    reportsCsv.authorsReports
-    reportsCsv.authorsBugsReports
-    reportsCsv.close
-  }
-
-  repositories.map(generateRepositoryReport)
 }

@@ -20,5 +20,5 @@ final case class Task (typeTask: Option[String],
 
 
 object Task {
-  implicit val taskFormat = Json.format[Task]
+  implicit val taskFormat: OFormat[Task] = Json.format[Task]
 }

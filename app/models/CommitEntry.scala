@@ -22,6 +22,6 @@ case class CommitEntry(message: Option[String],
 
 object CommitEntry {
   implicit val dateTimeWriter: Writes[DateTime] = JodaWrites.jodaDateWrites("yyyy-MM-dd HH:mm:ss.SSS")
-  implicit val dateTimeJsReader = JodaReads.jodaDateReads("yyyy-MM-dd HH:mm:ss.SSS")
-  implicit val commitEntryFormat = Json.format[CommitEntry]
+  implicit val dateTimeJsReader: Reads[DateTime] = JodaReads.jodaDateReads("yyyy-MM-dd HH:mm:ss.SSS")
+  implicit val commitEntryFormat: OFormat[CommitEntry] = Json.format[CommitEntry]
 }

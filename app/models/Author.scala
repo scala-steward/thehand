@@ -9,12 +9,12 @@
 
 package models
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 case class Author(
                    author: String,
                    id: Long = 0L)
 
 object Author {
-  implicit val authorFormat = Json.format[Author]
+  implicit val authorFormat: OFormat[Author] = Json.format[Author]
 }

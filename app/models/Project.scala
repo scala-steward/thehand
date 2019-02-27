@@ -9,8 +9,6 @@
 
 package models
 
-import play.api.libs.json.{JsString, Json, Reads, Writes, OFormat}
-
 case class Project(
                           name: String,
                           defaultMode: Option[Char],
@@ -18,6 +16,3 @@ case class Project(
                           taskManagerId: Long,
                           id: Long = 0L)
 
-//object Project {
-//  implicit val projectFormat = Json.format[Project]
-//}

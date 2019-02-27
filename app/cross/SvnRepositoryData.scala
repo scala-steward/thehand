@@ -9,22 +9,25 @@
  *
  */
 
-package thehand.scm
+package cross
 
-import thehand.schemas._
+import dao._
+import javax.inject.Inject
+import models.Suffix
 import org.tmatesoft.svn.core.SVNLogEntry
-import thehand.telemetrics.HandLogger
 import thehand.TaskParser
 import thehand.tasks.{ProcessTargetConnector, TaskConnector}
+import thehand.telemetrics.HandLogger
 
 import scala.concurrent.{ExecutionContextExecutor, Future}
 import scala.util.{Failure, Success}
+import play.api.db.slick.DatabaseConfigProvider
 
-class SvnRepositoryData(dao: RepositoryDao, taskConnector: TaskConnector, repository: ScmConnector[SVNLogEntry], parser: TaskParser) {
+class SvnRepositoryData @Inject() (protected val dbConfigProvider: DatabaseConfigProvider, taskConnector: TaskConnector, repository: ScmConnector[SVNLogEntry], parser: TaskParser) {
   implicit val context: ExecutionContextExecutor = scala.concurrent.ExecutionContext.fromExecutor(null)
   lazy val tp = ProcessTargetConnector(taskConnector)
 
-  def close() = dao.close
+  implicit val suffix: Suffix = Suffix("eb_")
 
   def updateInStep(begin: Long, end: Long, step: Long): Unit = {
     if (((end - begin) / step) <= 0) updateRange(begin, end)
@@ -34,7 +37,10 @@ class SvnRepositoryData(dao: RepositoryDao, taskConnector: TaskConnector, reposi
     }
   }
 
+
+
   def updateAuto(): Unit = {
+    val dao = new CommitDAO(dbConfigProvider)
     val lastIdDB = if (dao.latestId < 1) 1 else dao.latestId
     val lastIdSvn = if (repository.latestId < 1) 1 else repository.latestId
     if (lastIdDB != lastIdSvn) {
@@ -43,49 +49,48 @@ class SvnRepositoryData(dao: RepositoryDao, taskConnector: TaskConnector, reposi
     }
   }
 
-  def runRaise[T](f: Future[T]) = f onComplete {
+  def runRaise[T](f: Future[T]): Unit = f onComplete {
     case Success(_) => HandLogger.debug("correct write tasks")
-    case Failure(e) => dao.close
-    HandLogger.error("error in writing tasks " + e.getMessage)
+    case Failure(e) => HandLogger.error("error in writing tasks " + e.getMessage)
   }
 
   def updateRange(startId: Long, endId: Long): Unit = {
     val extractor = new SvnExtractor(repository.log(startId, endId), parser)
 
-    dao.writeTasks(extractor.extractTasks.flatMap(tp.process)) onComplete {
+    val daoT = new TaskDAO(dbConfigProvider)
+    daoT.insert(extractor.extractTasks.flatMap(tp.process)) onComplete {
       case Success(_) => HandLogger.debug("correct write tasks")
-      case Failure(e) => dao.close
-        HandLogger.error("error in writing tasks " + e.getMessage)
+      case Failure(e) => HandLogger.error("error in writing tasks " + e.getMessage)
     }
 
-    dao.writeAuthors(extractor.extractAuthors) onComplete {
+    val daoA = new AuthorDAO(dbConfigProvider)
+    daoA.insert(extractor.extractAuthors) onComplete {
       case Success(_) => HandLogger.debug("correct write authors")
-      case Failure(e) => dao.close
-        HandLogger.error("error in writing authors " + e.getMessage)
+      case Failure(e) => HandLogger.error("error in writing authors " + e.getMessage)
     }
 
-    dao.writeCommits(extractor.extractCommits) onComplete {
+    val daoC = new CommitDAO(dbConfigProvider)
+    daoC.insert(extractor.extractCommits) onComplete {
       case Success(_) => HandLogger.debug("correct create commits")
-      case Failure(e) => dao.close
-        HandLogger.error("error in writing commits " + e.getMessage)
+      case Failure(e) => HandLogger.error("error in writing commits " + e.getMessage)
     }
 
-    dao.writeFiles(extractor.extractFiles) onComplete {
+    val daoF = new EntryFileDAO(dbConfigProvider)
+    daoF.insert(extractor.extractFiles) onComplete {
       case Success(_) => HandLogger.debug("correct create files")
-      case Failure(e) => dao.close
-        HandLogger.error("error in writing files " + e.getMessage)
+      case Failure(e) => HandLogger.error("error in writing files " + e.getMessage)
     }
 
-    dao.writeCommitsTasks(extractor.extractCommitsTasks) onComplete {
+    val daoCt = new CommitTaskDAO(dbConfigProvider)
+    daoCt.insert(extractor.extractCommitsTasks) onComplete {
       case Success(_) => HandLogger.debug("correct create commits tasks")
-      case Failure(e) => dao.close
-        HandLogger.error("error in writing commits tasks " + e.getMessage)
+      case Failure(e) => HandLogger.error("error in writing commits tasks " + e.getMessage)
     }
 
-    dao.writeCommitsFiles(extractor.extractCommitsFiles) onComplete {
+    val daoCf = new CommitEntryFileDAO(dbConfigProvider)
+    daoCf.insert(extractor.extractCommitsFiles) onComplete {
       case Success(_) => HandLogger.debug("correct create commits files")
-      case Failure(e) => dao.close
-        HandLogger.error("error in writing commits files " + e.getMessage)
+      case Failure(e) => HandLogger.error("error in writing commits files " + e.getMessage)
     }
   }
 }

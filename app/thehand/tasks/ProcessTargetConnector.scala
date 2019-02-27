@@ -11,7 +11,7 @@
 
 package thehand.tasks
 
-import thehand.schemas.Task
+import models.Task
 import play.api.libs.json.{JsValue, Json}
 import thehand.telemetrics.HandLogger
 
