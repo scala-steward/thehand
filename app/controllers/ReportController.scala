@@ -11,6 +11,7 @@ package controllers
 
 import javax.inject._
 import dao._
+import play.api.libs.json.Json
 import play.api.mvc._
 import thehand.report.CvsIO
 import thehand.telemetrics.HandLogger
@@ -29,6 +30,12 @@ class ReportController @Inject()(dao: ReportDao,
 
   def authors: Future[Seq[String]] = {
     dao.authorsNames
+  }
+
+  def getAuthors: Action[AnyContent] = Action.async {
+    authors.map { a =>
+      Ok(Json.toJson(a))
+    }
   }
 
   def reportFilesBugCounter: Future[Seq[(String, Int)]] = {

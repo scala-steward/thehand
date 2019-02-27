@@ -9,7 +9,7 @@ import slick.jdbc.JdbcProfile
 import scala.concurrent.{ ExecutionContext, Future }
 
 @Singleton()
-class ReportDao @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(implicit suffix: Suffix)
+class ReportDao @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)
   extends AuthorComponent
     with CommitComponent
     with CommitEntryFileComponent
@@ -18,6 +18,8 @@ class ReportDao @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
     with HasDatabaseConfigProvider[JdbcProfile] {
 
   import profile.api._
+
+  implicit val suffix = Suffix("eb_")
 
   private val commitTasks = TableQuery[CommitTasksTable]((tag: Tag) => new CommitTasksTable(tag, suffix))
   private val tasks = TableQuery[TaskTable]((tag: Tag) => new TaskTable(tag, suffix))
