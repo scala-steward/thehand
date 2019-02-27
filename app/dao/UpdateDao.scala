@@ -1,13 +1,7 @@
 package dao
 
-
-//import java.util.Date
-import javax.inject.{Inject, Singleton}
 import models._
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
-import slick.jdbc.JdbcProfile
-
-import scala.concurrent.{ExecutionContext, Future}
 import cross.{ScmConnector, SvnConnectorFactory, SvnRepositoryData}
 import org.tmatesoft.svn.core.SVNLogEntry
 import slick.jdbc.JdbcProfile
@@ -15,16 +9,12 @@ import thehand.telemetrics.HandLogger
 import thehand.{TaskParser, TaskParserCharp}
 import thehand.tasks.{TargetConnector, TaskConnector}
 
-import scala.concurrent.ExecutionContextExecutor
 import javax.inject.Inject
-import play.api.Configuration
 import play.api.db.slick.DatabaseConfigProvider
 
 class UpdateDao @Inject() (protected val dbConfigProvider: DatabaseConfigProvider, conf: play.api.Configuration) extends HasDatabaseConfigProvider[JdbcProfile] {
   import profile.api._
 
-  //val conf: Configuration = play.api.Configuration.empty
-  // update projects
   def update(repositories: Seq[String]): Unit = {
     lazy val target: TaskConnector = TargetConnector(
       conf.getString("target.url").get,
@@ -43,8 +33,10 @@ class UpdateDao @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
         conf.getString(confName + ".user").get,
         conf.getString(confName + ".pass").get)
 
+      lazy val suffix = Suffix(conf.getString(confName + ".database_suffix").getOrElse("_"))
+
       repository match {
-        case Some(r) => Some(new SvnRepositoryData(dbConfigProvider, task, r, parser))
+        case Some(r) => Some(new SvnRepositoryData(dbConfigProvider, task, r, parser, suffix))
         case None => None
       }
     }

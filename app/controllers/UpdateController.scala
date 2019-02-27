@@ -24,7 +24,7 @@ class UpdateController @Inject()(dao: UpdateDao,
 
   //implicit val suffix: Suffix = Suffix("eb_")
 
-  def updateAll() = Action {
+  def updateAll(): Action[AnyContent] = Action {
     dao.updateAll()
     Ok("Updated")
   }

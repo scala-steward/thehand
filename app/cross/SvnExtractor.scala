@@ -44,7 +44,7 @@ class SvnExtractor(val svnData: Seq[SVNLogEntry], parser: TaskParser) {
 
   def extractCommitsFiles: Seq[(Seq[CommitEntryWriter], Long)] = {
     def extractCommitEntryFile(s: SVNLogEntryPath): CommitEntryWriter = {
-      CommitEntryWriter(CommitEntryFile(Some(s.getType), None, Some(s.getCopyRevision), 0, 0), s.getPath, s.getCopyPath)
+      CommitEntryWriter(CommitEntryFile(Some(s.getType.toInt), None, Some(s.getCopyRevision), 0, 0), s.getPath, s.getCopyPath)
     }
     svnData.map(c => (c.getChangedPaths.asScala.values.toSeq.map(extractCommitEntryFile), c.getRevision))
   }

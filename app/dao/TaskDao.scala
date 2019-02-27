@@ -50,4 +50,9 @@ class TaskDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)
     val tasks = TableQuery[TaskTable]((tag: Tag) => new TaskTable(tag, suffix))
     tasks.size.result
   }
+
+  def list(suffix: Suffix): Future[Seq[Task]] = db.run {
+    val tasks = TableQuery[TaskTable]((tag: Tag) => new TaskTable(tag, suffix))
+    tasks.result
+  }
 }

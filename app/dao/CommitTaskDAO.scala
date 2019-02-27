@@ -61,4 +61,9 @@ class CommitTaskDAO @Inject() (protected val dbConfigProvider: DatabaseConfigPro
     val commitTasks = TableQuery[CommitTasksTable]((tag: Tag) => new CommitTasksTable(tag, suffix))
     commitTasks.size.result
   }
+
+  def list(suffix: Suffix): Future[Seq[CommitTasks]] = db run {
+    val commitTasks = TableQuery[CommitTasksTable]((tag: Tag) => new CommitTasksTable(tag, suffix))
+    commitTasks.result
+  }
 }

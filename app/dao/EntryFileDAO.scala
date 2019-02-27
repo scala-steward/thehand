@@ -42,7 +42,7 @@ class EntryFileDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProv
     DBIO.sequence(fs.map(fileQuery)).transactionally
   }
 
-  def listEntryFiles_s(suffix : Suffix): Future[Seq[EntryFile]] = db.run {
+  def list(suffix : Suffix): Future[Seq[EntryFile]] = db.run {
     lazy val files = TableQuery[EntryFilesTable]((tag: Tag) => new EntryFilesTable(tag, suffix))
     files.result
   }

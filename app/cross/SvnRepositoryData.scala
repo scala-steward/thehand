@@ -23,11 +23,9 @@ import scala.concurrent.{ExecutionContextExecutor, Future}
 import scala.util.{Failure, Success}
 import play.api.db.slick.DatabaseConfigProvider
 
-class SvnRepositoryData @Inject() (protected val dbConfigProvider: DatabaseConfigProvider, taskConnector: TaskConnector, repository: ScmConnector[SVNLogEntry], parser: TaskParser) {
+class SvnRepositoryData @Inject() (protected val dbConfigProvider: DatabaseConfigProvider, taskConnector: TaskConnector, repository: ScmConnector[SVNLogEntry], parser: TaskParser, suffix: Suffix) {
   implicit val context: ExecutionContextExecutor = scala.concurrent.ExecutionContext.fromExecutor(null)
   lazy val tp = ProcessTargetConnector(taskConnector)
-
-  implicit val suffix: Suffix = Suffix("eb_")
 
   def updateInStep(begin: Long, end: Long, step: Long): Unit = {
     if (((end - begin) / step) <= 0) updateRange(begin, end)
@@ -37,11 +35,9 @@ class SvnRepositoryData @Inject() (protected val dbConfigProvider: DatabaseConfi
     }
   }
 
-
-
   def updateAuto(): Unit = {
     val dao = new CommitDAO(dbConfigProvider)
-    val lastIdDB = if (dao.latestId < 1) 1 else dao.latestId
+    val lastIdDB = if (dao.latestId(suffix) < 1) 1 else dao.latestId(suffix)
     val lastIdSvn = if (repository.latestId < 1) 1 else repository.latestId
     if (lastIdDB != lastIdSvn) {
       HandLogger.info("Start at revision #" + lastIdDB + " until #" + lastIdSvn)
@@ -70,7 +66,7 @@ class SvnRepositoryData @Inject() (protected val dbConfigProvider: DatabaseConfi
     }
 
     val daoC = new CommitDAO(dbConfigProvider)
-    daoC.insert(extractor.extractCommits) onComplete {
+    daoC.insert(extractor.extractCommits, suffix) onComplete {
       case Success(_) => HandLogger.debug("correct create commits")
       case Failure(e) => HandLogger.error("error in writing commits " + e.getMessage)
     }

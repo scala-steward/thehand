@@ -9,10 +9,15 @@
 
 package models
 
+import play.api.libs.json.{Json, OFormat}
+
 case class Project(
                           name: String,
-                          defaultMode: Option[Char],
+                          defaultMode: Option[Int],
                           scmId: Long,
                           taskManagerId: Long,
                           id: Long = 0L)
 
+object Project {
+  implicit val personFormat: OFormat[Project] = Json.format[Project]
+}

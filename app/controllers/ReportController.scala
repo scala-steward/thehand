@@ -29,19 +29,19 @@ class ReportController @Inject()(dao: ReportDao,
   private val repositoryName = "AHHAHAHA"
   implicit val writer: CvsIO.type = CvsIO
 
-  def authors(suffix: Suffix): Future[Seq[String]] = {
+  private def authors(suffix: Suffix): Future[Seq[String]] = {
     dao.authorsNames(suffix)
   }
 
-  def reportFilesBugCounter(suffix: Suffix): Future[Seq[(String, Int)]] = {
+  private def reportFilesBugCounter(suffix: Suffix): Future[Seq[(String, Int)]] = {
     dao.filesBugsCounter(suffix)
   }
 
-  def reportAuthorCommitsCounter(authorName: String, suffix: Suffix): Future[Seq[(String, Int)]] = {
+  private def reportAuthorCommitsCounter(authorName: String, suffix: Suffix): Future[Seq[(String, Int)]] = {
     dao.fileAuthorCommitsCounter(authorName, suffix)
   }
 
-  def reportAuthorBugsCommitsCounter(authorName: String, suffix: Suffix): Future[Seq[(String, Int)]] = {
+  private def reportAuthorBugsCommitsCounter(authorName: String, suffix: Suffix): Future[Seq[(String, Int)]] = {
     dao.fileAuthorCommitsBugsCounter(authorName, suffix)
   }
 

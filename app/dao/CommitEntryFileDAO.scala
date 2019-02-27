@@ -14,7 +14,7 @@ trait CommitEntryFileComponent extends CommitComponent with EntryFileComponent {
   import profile.api._
 
   class CommitEntryFileTable(tag: Tag, suffix: Suffix) extends Table[CommitEntryFile](tag, suffix.suffix + "commitfiles") {
-    def typeModification: Rep[Option[Char]] = column[Option[Char]]("typeModification")
+    def typeModification: Rep[Option[Int]] = column[Option[Int]]("typeModification")
     def copyPathId: Rep[Option[Long]] = column[Option[Long]]("copyPath_id")
     def copyRevisionId: Rep[Option[Long]] = column[Option[Long]]("copyRevision")
     def pathId: Rep[Long] = column[Long]("path_id")
@@ -71,7 +71,7 @@ class CommitEntryFileDAO @Inject() (protected val dbConfigProvider: DatabaseConf
     DBIO.sequence(es.map(fileQuery)).transactionally
   }
 
-  def listCommitEntryFile_s(suffix : Suffix): Future[Seq[CommitEntryFile]] = db.run {
+  def list(suffix : Suffix): Future[Seq[CommitEntryFile]] = db.run {
     lazy val commits = TableQuery[CommitEntryFileTable]((tag: Tag) => new CommitEntryFileTable(tag, suffix))
     commits.result
   }
