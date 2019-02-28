@@ -44,7 +44,7 @@ class CommitDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
   def list(suffix: Suffix, revision: Option[Long]): Future[Seq[CommitEntry]] = db.run {
     val commits = TableQuery[CommitTable]((tag: Tag) => new CommitTable(tag, suffix))
     revision match {
-      case Some(revision) => commits.filter(_.revision === revision).result
+      case Some(r) => commits.filter(_.revision === r).result
       case None => commits.result
     }
   }

@@ -20,57 +20,61 @@ import thehand.tasks.{ProcessTargetConnector, TaskConnector}
 import thehand.telemetrics.HandLogger
 
 import scala.concurrent.{ExecutionContextExecutor, Future}
+import scala.util.{Failure, Success}
 import play.api.db.slick.DatabaseConfigProvider
 
-class SvnRepositoryData @Inject() (protected val dbConfigProvider: DatabaseConfigProvider, taskConnector: TaskConnector, repository: ScmConnector[SVNLogEntry], parser: TaskParser, suffix: Suffix) {
+class SvnRepositoryData @Inject()
+  (protected val dbConfigProvider: DatabaseConfigProvider, repository: ScmConnector[SVNLogEntry], suffix: Suffix)
+  (implicit taskConnector: TaskConnector, parser: TaskParser) {
+
   implicit val context: ExecutionContextExecutor = scala.concurrent.ExecutionContext.fromExecutor(null)
   lazy val tp = ProcessTargetConnector(taskConnector)
 
-  def updateInStep(from: Long, to: Long, step: Long): Unit = {
-    val lessThenStep = ((to - from) / step) <= 0
-    if (lessThenStep) updateRange(from, to)
-    else {
-      updateRange(from, from + step)
-      updateInStep(from + step, to, step)
-    }
-  }
+  lazy val daoTasks = new TaskDAO(dbConfigProvider)
+  lazy val daoCommits = new CommitDAO(dbConfigProvider)
+  lazy val daoAuthors = new AuthorDAO(dbConfigProvider)
+  lazy val daoFiles = new EntryFileDAO(dbConfigProvider)
+  lazy val daoCommitFiles = new CommitEntryFileDAO(dbConfigProvider)
+  lazy val daoCommitTasks = new CommitTaskDAO(dbConfigProvider)
 
-  private def updatePrimitive(o : Option[Long]) = {
-    val lastId: Long = o.getOrElse(1)
+  private def calculateRangeLimit(lastId: Long) : (Long, Long) = {
     val lastIdDB: Long = if (lastId < 1) 1 else lastId
     val lastIdSvn: Long = if (repository.latestId < 1) 1 else repository.latestId
-    if (lastIdDB != lastIdSvn) {
-      HandLogger.info("Start at revision #" + lastIdDB + " until #" + lastIdSvn)
-      updateInStep(lastIdDB, lastIdSvn, 1000)
+    if (lastIdDB != lastIdSvn) (lastIdDB, lastIdSvn) else (1,1)
+  }
+
+  def updateRange(range: (Long, Long), steps: Long = 1000): Future[Seq[Int]] = {
+    doStep(range._1, range._2, steps)
+  }
+
+  def doStep(from: Long, to: Long, step: Long) : Future[Seq[Int]] = {
+    if (((to - from) / step) <= 0) {
+      updateInRange(from, to)
+    }
+    else {
+      updateInRange(from, from + step)
+      doStep(from + step, to, step)
     }
   }
 
-  def updateAuto() = {
-    val dao = new CommitDAO(dbConfigProvider)
-    dao.actionLatestRevision(suffix).foreach(updatePrimitive)
+  def updateAuto(): Future[Seq[Int]] = {
+    daoCommits
+      .actionLatestRevision(suffix)
+      .flatMap(lastId => updateRange(calculateRangeLimit(lastId.getOrElse(1))))
   }
 
-  def updateRange(startId: Long, endId: Long): Future[Seq[Int]] = {
-    HandLogger.info("updating" + startId + " to " + endId)
-    val extractor = new SvnExtractor(repository.log(startId, endId), parser)
-
-    lazy val daoT = new TaskDAO(dbConfigProvider)
-    lazy val daoA = new AuthorDAO(dbConfigProvider)
-    lazy val daoC = new CommitDAO(dbConfigProvider)
-    lazy val daoF = new EntryFileDAO(dbConfigProvider)
-    lazy val daoCt = new CommitTaskDAO(dbConfigProvider)
-    lazy val daoCf = new CommitEntryFileDAO(dbConfigProvider)
-
-    lazy val run: Seq[Future[Seq[Int]]] =
-      Seq(daoT.insert(extractor.extractTasks.flatMap(tp.process), suffix),
-      daoA.insert(extractor.extractAuthors, suffix),
-      daoC.insert(extractor.extractCommits, suffix),
-      daoC.insert(extractor.extractCommits, suffix),
-      daoF.insert(extractor.extractFiles, suffix),
-      daoCt.insert(extractor.extractCommitsTasks, suffix),
-      daoCf.insert(extractor.extractCommitsFiles, suffix)
-    )
-
-    Future.sequence(run).map(_.flatten)
+  def updateInRange(startId: Long, endId: Long): Future[Seq[Int]] = {
+    lazy val extractor = new SvnExtractor(repository.log(startId, endId), parser)
+    val insertAll: Future[Seq[Int]] =
+      for {
+        _ <- daoTasks.insert(extractor.extractTasks.flatMap(tp.process), suffix)
+        _ <- daoAuthors.insert(extractor.extractAuthors, suffix)
+        _ <- daoCommits.insert(extractor.extractCommits, suffix)
+        _ <- daoFiles.insert(extractor.extractFiles, suffix)
+        _ <- daoCommitTasks.insert(extractor.extractCommitsTasks, suffix)
+        c <- daoCommitFiles.insert(extractor.extractCommitsFiles, suffix)
+      } yield c
+    insertAll
   }
+
 }

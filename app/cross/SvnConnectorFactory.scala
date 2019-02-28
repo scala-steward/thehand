@@ -1,10 +1,11 @@
 package cross
 
-import org.tmatesoft.svn.core.SVNURL
+import org.tmatesoft.svn.core.{SVNException, SVNURL}
 import org.tmatesoft.svn.core.io.{SVNRepository, SVNRepositoryFactory}
 import org.tmatesoft.svn.core.wc.SVNWCUtil
 import thehand.telemetrics.HandLogger
 
+import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
 trait SvnConnectorFactory {
@@ -18,10 +19,10 @@ trait SvnConnectorFactory {
     SVNRepositoryFactory.create(SVNURL.parseURIEncoded(url))
   }
 
-  def connect(url: String, name: String, password: String): Option[SvnConnector] = init(url) match {
-    case Success(r) => Some(new SvnConnector(auth(r, name, password)))
+  def connect(url: String, name: String, password: String): Future[SvnConnector] = init(url) match {
+    case Success(r) => Future.successful(new SvnConnector(auth(r, name, password)))
     case Failure(e) =>
       HandLogger.error("error while creating an SVNRepository for the location '" + url + "': " + e.getMessage)
-      None
+      Future.failed(new Exception)
   }
 }
