@@ -34,7 +34,7 @@ class CommitEntryFileDAO @Inject() (protected val dbConfigProvider: DatabaseConf
 
   import profile.api._
 
-  def insert(es: Seq[(Seq[CommitEntryWriter], Long)], suffix: Suffix): Future[Seq[Option[Long]]] = db.run {
+  def insert(es: Seq[(Seq[CommitEntryWriter], Long)], suffix: Suffix) = db.run {
     val files = TableQuery[EntryFilesTable]((tag: Tag) => new EntryFilesTable(tag, suffix))
     val commitsFiles = TableQuery[CommitEntryFileTable]((tag: Tag) => new CommitEntryFileTable(tag, suffix))
     val commits = TableQuery[CommitTable]((tag: Tag) => new CommitTable(tag, suffix))
@@ -63,7 +63,7 @@ class CommitEntryFileDAO @Inject() (protected val dbConfigProvider: DatabaseConf
       def insert(files: Seq[CommitEntryWriter]) = for {
         commitId <- commits.filter(_.revision === revisionNumber).map(_.id).result.headOption
         _ <- DBIO.sequence(files.map(insertFilePath(_, commitId.getOrElse(-1))))//.asTry
-      } yield commitId
+      } yield files.size
 
       insert(entryFiles)
     }

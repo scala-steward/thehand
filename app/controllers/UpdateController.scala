@@ -12,20 +12,21 @@ package controllers
 import javax.inject._
 import dao._
 import models.Suffix
-import play.api.libs.json.Json
 import play.api.mvc._
-
-import scala.concurrent.ExecutionContext
 
 class UpdateController @Inject()(dao: UpdateDao,
                                  cc: MessagesControllerComponents
                                 )
   extends MessagesAbstractController(cc) {
 
-  //implicit val suffix: Suffix = Suffix("eb_")
-
   def updateAll(): Action[AnyContent] = Action {
     dao.updateAll()
+    Ok("Updated All")
+  }
+
+  def update(suffix: String, from: Option[Long], to: Option[Long]): Action[AnyContent] = Action {
+    val s = Suffix(suffix)
+    dao.update(s, from, to)
     Ok("Updated")
   }
 }

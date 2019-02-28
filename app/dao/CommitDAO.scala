@@ -80,10 +80,4 @@ class CommitDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
     val commits = TableQuery[CommitTable]((tag: Tag) => new CommitTable(tag, suffix))
     db.run(commits.map(_.revision).max.result)
   }
-
-  def latestId(suffix: Suffix): Long = Await.result(actionLatestRevision(suffix), 10 seconds) match {
-    case Some(s) => s
-    case None => 1L
-  }
-
 }

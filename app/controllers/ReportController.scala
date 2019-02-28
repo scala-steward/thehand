@@ -98,7 +98,7 @@ class ReportController @Inject()(dao: ReportDao,
     }
   }
 
-  // ActionsFunciton ###################################################################
+  // ActionsFunctions ##################################################################
 
   private def reportFilesBugsCounterToAction(suffix: Suffix) = {
     reportFilesBugCounter(suffix)

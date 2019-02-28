@@ -3,20 +3,21 @@
 # ~~~~
 
 # Home page
-#GET     /                               controllers.PersonController.index
-#POST    /person                         controllers.PersonController.addPerson
-#GET     /persons                        controllers.PersonController.getPersons
-#GET     /updateAll                      controllers.UpdateController.updateAll
+#GET     /                           controllers.PersonController.index
+#POST    /person                     controllers.PersonController.addPerson
+#GET     /persons                    controllers.PersonController.getPersons
+GET     /update                      controllers.UpdateController.update(suffix: String, from: Option[Long], to: Option[Long])
+GET     /updateall                   controllers.UpdateController.updateAll
 
-GET     /api/v1/authors                     controllers.AuthorController.getAuthors(suffix: String)
-GET     /api/v1/commits                     controllers.CommitController.getCommits(suffix: String, revision: Option[Long])
-GET     /api/v1/commitstasks                controllers.CommitTaskController.getCommitsTasks(suffix)
-GET     /api/v1/commitsentryfiles           controllers.CommitEntryFileController.getCommitEntryFiles(suffix: String)
-GET     /api/v1/entyfiles                   controllers.EntryFileController.getEntryFiles(suffix: String)
-GET     /api/v1/tasks                       controllers.TaskController.getTask(suffix: String)
-GET     /api/v1/authorsReport               controllers.ReportController.getAuthors(suffix: String)
-GET     /api/v1/filesbugs                controllers.ReportController.getFilesBugs(suffix: String)
-GET     /api/v1/authorbugs               controllers.ReportController.getAuthorBugs(author: String,suffix: String)
+GET     /api/v1/authors              controllers.AuthorController.getAuthors(suffix: String)
+GET     /api/v1/commits              controllers.CommitController.getCommits(suffix: String, revision: Option[Long])
+GET     /api/v1/commitstasks         controllers.CommitTaskController.getCommitsTasks(suffix)
+GET     /api/v1/commitsentryfiles    controllers.CommitEntryFileController.getCommitEntryFiles(suffix: String)
+GET     /api/v1/entyfiles            controllers.EntryFileController.getEntryFiles(suffix: String)
+GET     /api/v1/tasks                controllers.TaskController.getTask(suffix: String)
+GET     /api/v1/authorsReport        controllers.ReportController.getAuthors(suffix: String)
+GET     /api/v1/filesbugs            controllers.ReportController.getFilesBugs(suffix: String)
+GET     /api/v1/authorbugs           controllers.ReportController.getAuthorBugs(author: String,suffix: String)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
