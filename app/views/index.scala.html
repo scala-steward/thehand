@@ -6,15 +6,14 @@
    @request.messages(key)
 }
 
-@main("Welcome to Play") {
-  @*********************
-   * @form(routes.PersonController.addPerson()) {
-	*	@inputText(person("name"))
-	*	@inputText(person("age"))
-	*	@CSRF.formField
-*
-*		<div class="buttons">
-*			<input type="submit" value="Add Person"/>
-*		</div>
-*@
-}
+@*main("Welcome to Play") {
+      @form(routes.PersonController.addPerson()) {
+		@inputText(person("name"))
+		@inputText(person("age"))
+		@CSRF.formField
+
+		<div class="buttons">
+			<input type="submit" value="Add Person"/>
+		</div>
+    }
+}*@

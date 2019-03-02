@@ -42,6 +42,10 @@ class PersonController @Inject()(repo: PersonRepository,
     Ok(views.html.index(personForm))
   }
 
+  def test: Action[AnyContent] = Action {
+    Ok(views.html.test())
+  }
+
   /**
    * The add person action.
    *

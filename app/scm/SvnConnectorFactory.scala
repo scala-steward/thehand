@@ -1,9 +1,9 @@
-package cross
+package scm
 
-import org.tmatesoft.svn.core.{SVNException, SVNURL}
+import org.tmatesoft.svn.core.SVNURL
 import org.tmatesoft.svn.core.io.{SVNRepository, SVNRepositoryFactory}
 import org.tmatesoft.svn.core.wc.SVNWCUtil
-import thehand.telemetrics.HandLogger
+import telemetrics.HandLogger
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}

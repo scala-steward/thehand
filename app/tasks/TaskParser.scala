@@ -9,7 +9,7 @@
  *
  */
 
-package thehand
+package tasks
 
 trait TaskParser {
   def convert(s: Option[String]): Seq[Long]

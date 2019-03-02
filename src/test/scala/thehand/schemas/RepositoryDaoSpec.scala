@@ -12,10 +12,9 @@
 package thehand.schemas
 
 import org.scalatest.{AsyncFlatSpec, Matchers}
+import telemetrics.HandLogger
 
 import scala.concurrent.ExecutionContext
-import thehand.telemetrics.HandLogger
-
 import scala.util.{Failure, Success}
 
 class RepositoryDaoSpec extends AsyncFlatSpec with Matchers {

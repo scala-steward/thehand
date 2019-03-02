@@ -1,6 +1,5 @@
 package dao
 
-//import java.util.Date
 import javax.inject.{ Inject, Singleton }
 
 import models._

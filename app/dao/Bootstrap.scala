@@ -2,12 +2,11 @@ package dao
 
 import scala.concurrent.duration._
 import scala.language.postfixOps
-
 import javax.inject.{Inject, Singleton}
 import models._
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.jdbc.JdbcProfile
-import thehand.telemetrics.HandLogger
+import telemetrics.HandLogger
 
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.util.{Failure, Success}

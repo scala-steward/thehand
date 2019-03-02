@@ -9,11 +9,11 @@
  *
  */
 
-package thehand.tasks
+package tasks
 
 import models.Task
 import play.api.libs.json.{JsValue, Json}
-import thehand.telemetrics.HandLogger
+import telemetrics.HandLogger
 
 import scala.util.{Failure, Success, Try}
 

@@ -9,14 +9,14 @@
  *
  */
 
-package cross
+package scm
 
 import org.tmatesoft.svn.core.SVNLogEntry
 import org.tmatesoft.svn.core.internal.io.dav.DAVRepositoryFactory
 import org.tmatesoft.svn.core.internal.io.fs.FSRepositoryFactory
 import org.tmatesoft.svn.core.internal.io.svn.SVNRepositoryFactoryImpl
 import org.tmatesoft.svn.core.io.SVNRepository
-import thehand.telemetrics.HandLogger
+import telemetrics.HandLogger
 
 import scala.collection.JavaConverters._
 import scala.util.{Failure, Success, Try}
@@ -44,7 +44,7 @@ class SvnConnector(repository: SVNRepository) extends ScmConnector[SVNLogEntry] 
         Nil
     }
 
-  def log(startRev: Long, endRev: Long): Seq[SVNLogEntry] = {
+  override def log(startRev: Long, endRev: Long): Seq[SVNLogEntry] = {
     logMap(startRev, endRev)
   }
 
@@ -57,7 +57,7 @@ class SvnConnector(repository: SVNRepository) extends ScmConnector[SVNLogEntry] 
     repository.getLatestRevision
   }
 
-  def latestId: Long = getLatestRevision match {
+  override def latestId: Long = getLatestRevision match {
     case Success(rev) => rev
     case Failure(e) =>
       HandLogger.error("error while fetching the latest repository revision: " + e.getMessage)

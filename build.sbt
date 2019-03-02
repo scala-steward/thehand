@@ -31,7 +31,8 @@ lazy val root = (project in file(".")).
       "org.joda" % "joda-convert" % "2.1.1",
       "com.github.tototoshi" %% "scala-csv" % "1.3.5",
       "com.typesafe.play" %% "play-slick" % "4.0.0",
-      "com.typesafe.play" %% "play-json-joda" % "2.7.1"
+      "com.typesafe.play" %% "play-json-joda" % "2.7.1",
+      "org.eclipse.jgit" % "org.eclipse.jgit" % "5.2.1.201812262042-r"
     )
   )
 
@@ -80,10 +81,10 @@ scalacOptions ++= Seq(                 // for scala 2.12
   "-Ywarn-nullary-unit",               // Warn when nullary methods return Unit.
   "-Ywarn-numeric-widen",              // Warn when numerics are widened
   "-Ywarn-unused:implicits",           // Warn if an implicit parameter is unused.
-  //"-Ywarn-unused:imports",             // Warn if an import selector is not referenced.
+//  "-Ywarn-unused:imports",             // Warn if an import selector is not referenced.
   "-Ywarn-unused:locals",              // Warn if a local definition is unused.
-  "-Ywarn-unused:params",              // Warn if a value parameter is unused.
-  "-Ywarn-unused:patvars",             // Warn if a variable bound in a pattern is unused.
+//  "-Ywarn-unused:params",              // Warn if a value parameter is unused.
+//  "-Ywarn-unused:patvars",             // Warn if a variable bound in a pattern is unused.
   "-Ywarn-unused:privates",            // Warn if a private member is unused.
   "-Ywarn-value-discard"               // Warn when non-Unit expression results are unused.
 )

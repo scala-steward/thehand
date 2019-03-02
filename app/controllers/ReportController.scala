@@ -14,8 +14,8 @@ import dao._
 import models.Suffix
 import play.api.libs.json.Json
 import play.api.mvc._
-import thehand.report.CvsIO
-import thehand.telemetrics.HandLogger
+import reportio.CvsIO
+import telemetrics.HandLogger
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, ExecutionContext, Future}

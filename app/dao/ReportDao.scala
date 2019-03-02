@@ -6,7 +6,7 @@ import models._
 import play.api.db.slick.{ DatabaseConfigProvider, HasDatabaseConfigProvider }
 import slick.jdbc.JdbcProfile
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.Future
 
 @Singleton()
 class ReportDao @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)
@@ -29,9 +29,9 @@ class ReportDao @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
     val bugs = for {
       co <- commits
       cf <- commitsFiles if cf.revisionId === co.id
-      fi <- files if fi.id === cf.pathId
       ct <- commitTasks if ct.commitId === co.id
       tk <- tasks if tk.taskId === ct.taskId && tk.typeTaskId === 8L //8L == BUG for target process
+      fi <- files if fi.id === cf.pathId
     } yield fi
     val countBugs = bugs
       .groupBy(_.path)
@@ -75,9 +75,9 @@ class ReportDao @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
       ai <- authors if ai.author === author
       co <- commits if co.authorId === ai.id
       cf <- commitsFiles if cf.revisionId === co.id
-      fi <- files if fi.id === cf.pathId
       ct <- commitTasks if ct.commitId === co.id
       tk <- tasks if tk.taskId === ct.taskId && tk.typeTaskId === 8L //8L == BUG for target process
+      fi <- files if fi.id === cf.pathId
     } yield fi
     val countCommits = cmts
       .groupBy(_.path)

@@ -1,39 +1,36 @@
 package dao
 
 import models._
-import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
-import cross.{ScmConnector, SvnConnector, SvnConnectorFactory, SvnRepositoryData}
-import org.tmatesoft.svn.core.{SVNException, SVNLogEntry}
+import play.api.db.slick.HasDatabaseConfigProvider
+import scm.{SvnConnector, SvnConnectorFactory, SvnRepositoryData}
 import slick.jdbc.JdbcProfile
-import thehand.telemetrics.HandLogger
-import thehand.{TaskParser, TaskParserCharp}
-import thehand.tasks.{TargetConnector, TaskConnector}
+import tasks.{TaskParser, TaskParserCharp}
 import javax.inject.{Inject, Singleton}
 import play.api.db.slick.DatabaseConfigProvider
+import tasks.{TargetConnector, TaskConnector}
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
 
 @Singleton()
 class UpdateDao @Inject() (protected val dbConfigProvider: DatabaseConfigProvider, conf: play.api.Configuration)(implicit executionContext: ExecutionContext) extends HasDatabaseConfigProvider[JdbcProfile] {
   private implicit val target: TaskConnector = TargetConnector(
-    conf.getString("target.url").get,
-    conf.getString("target.user").get,
-    conf.getString("target.pass").get)
+    conf.get[String]("target.url"),
+    conf.get[String]("target.user"),
+    conf.get[String]("target.pass"))
 
-  private def loadSvnRepository(task: TaskConnector, confName: String) = {
-    lazy val suffix = Suffix(conf.getString(confName + ".database_suffix").getOrElse("_"))
+  private def loadSvnRepository(confName: String) = {
+    lazy val suffix = Suffix(conf.get[String](confName + ".database_suffix"))
 
     implicit val parser: TaskParser = TaskParserCharp(
-      conf.getString(confName + ".task_model.patternParser").get,
-      conf.getString(confName + ".task_model.patternSplit").get,
-      conf.getString(confName + ".task_model.separator").get)
+      conf.get[String](confName + ".task_model.patternParser"),
+      conf.get[String](confName + ".task_model.patternSplit"),
+      conf.get[String](confName + ".task_model.separator"))
 
     lazy val rep = new SvnConnectorFactory {}
     lazy val repository: Future[SvnConnector] = rep.connect(
-      conf.getString(confName + ".url").get,
-      conf.getString(confName + ".user").get,
-      conf.getString(confName + ".pass").get)
+      conf.get[String](confName + ".url"),
+      conf.get[String](confName + ".user"),
+      conf.get[String](confName + ".pass"))
 
     // hiro wrong place
     val b = new Bootstrap(dbConfigProvider)
@@ -43,12 +40,12 @@ class UpdateDao @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
   }
 
   private def updateRepositoryAuto(confName: String) = {
-    val repository = loadSvnRepository(target, confName)
+    val repository = loadSvnRepository(confName)
     repository.flatMap(rep => rep.updateAuto())
   }
 
   private def updateRepositoryRange(confName: String, from: Long, to: Long) = {
-    val repository = loadSvnRepository(target, confName)
+    val repository = loadSvnRepository(confName)
     repository.flatMap(rep => rep.updateRange((from, to)))
   }
 

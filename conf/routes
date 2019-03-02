@@ -5,6 +5,7 @@
 # Home page
 #GET     /                           controllers.PersonController.index
 #POST    /person                     controllers.PersonController.addPerson
+GET      /test                       controllers.PersonController.test
 #GET     /persons                    controllers.PersonController.getPersons
 GET     /update                      controllers.UpdateController.update(suffix: String, from: Option[Long], to: Option[Long])
 GET     /updateall                   controllers.UpdateController.updateAll

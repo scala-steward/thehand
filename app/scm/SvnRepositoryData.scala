@@ -9,19 +9,17 @@
  *
  */
 
-package cross
+package scm
 
 import dao._
 import javax.inject.Inject
 import models.Suffix
 import org.tmatesoft.svn.core.SVNLogEntry
-import thehand.TaskParser
-import thehand.tasks.{ProcessTargetConnector, TaskConnector}
-import thehand.telemetrics.HandLogger
+import tasks.TaskParser
 
 import scala.concurrent.{ExecutionContextExecutor, Future}
-import scala.util.{Failure, Success}
 import play.api.db.slick.DatabaseConfigProvider
+import tasks.{ProcessTargetConnector, TaskConnector}
 
 class SvnRepositoryData @Inject()
   (protected val dbConfigProvider: DatabaseConfigProvider, repository: ScmConnector[SVNLogEntry], suffix: Suffix)
