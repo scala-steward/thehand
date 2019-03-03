@@ -11,8 +11,7 @@ package models
 
 import play.api.libs.json.{Json, OFormat}
 
-case class CommitEntryWriter(
-                              commit: CommitEntryFile,
+case class CommitEntryWriter(commit: CommitEntryFile,
                               path: String,
                               pathCopy: String)
 

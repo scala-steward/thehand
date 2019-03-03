@@ -33,7 +33,7 @@ class UpdateDao @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
       conf.get[String](confName + ".pass"))
 
     // hiro wrong place
-    val b = new Bootstrap(dbConfigProvider)
+    val b = new BootstrapDAO(dbConfigProvider)
     b.createSchemas(suffix)
 
     repository.flatMap(r => Future.successful(new SvnRepositoryData(dbConfigProvider, r, suffix)))

@@ -6,8 +6,9 @@
    @request.messages(key)
 }
 
-@*main("Welcome to Play") {
+@main("Welcome to Play") {
       @form(routes.PersonController.addPerson()) {
+		@inputText(person("username"))
 		@inputText(person("name"))
 		@inputText(person("age"))
 		@CSRF.formField
@@ -16,4 +17,4 @@
 			<input type="submit" value="Add Person"/>
 		</div>
     }
-}*@
+}

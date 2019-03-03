@@ -11,8 +11,7 @@ package models
 
 import play.api.libs.json.{Json, OFormat}
 
-final case class Scm(
-                      name: String,
+final case class Scm(name: String,
                       user: String,
                       pass: String,
                       usr: String,

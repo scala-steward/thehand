@@ -3,12 +3,13 @@
 # ~~~~
 
 # Home page
-#GET     /                           controllers.PersonController.index
-#POST    /person                     controllers.PersonController.addPerson
-GET      /test                       controllers.PersonController.test
-#GET     /persons                    controllers.PersonController.getPersons
+GET     /                            controllers.PersonController.index
+POST    /person                      controllers.PersonController.addPerson
+GET     /persons                     controllers.PersonController.getPersons
+GET     /test                        controllers.PersonController.test
 GET     /update                      controllers.UpdateController.update(suffix: String, from: Option[Long], to: Option[Long])
 GET     /updateall                   controllers.UpdateController.updateAll
+GET     /bootstrap                   controllers.BootstrapController.createDefaultTables
 
 GET     /api/v1/authors              controllers.AuthorController.getAuthors(suffix: String)
 GET     /api/v1/commits              controllers.CommitController.getCommits(suffix: String, revision: Option[Long])

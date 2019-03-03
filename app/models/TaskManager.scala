@@ -11,8 +11,7 @@ package models
 
 import play.api.libs.json.{Json, OFormat}
 
-final case class TaskManager(
-                              name: String,
+final case class TaskManager(name: String,
                               user: String,
                               pass: String,
                               usr: String,

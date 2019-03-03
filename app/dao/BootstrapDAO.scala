@@ -12,15 +12,25 @@ import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
 @Singleton()
-class Bootstrap @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(implicit executionContext: ExecutionContext)
+class BootstrapDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)(implicit executionContext: ExecutionContext)
   extends AuthorComponent
     with CommitComponent
     with CommitEntryFileComponent
     with CommitTaskComponent
     with TaskComponent
+    with PersonComponent
     with HasDatabaseConfigProvider[JdbcProfile] {
 
   import profile.api._
+
+  def createSchemas(): Unit= {
+    val person = TableQuery[PeopleTable]((tag: Tag) => new PeopleTable(tag))
+    exec(person.schema.create.asTry)onComplete {
+      case Success(_) => HandLogger.debug("correct create tables")
+      case Failure(e) =>
+        HandLogger.error("error in create tables " + e.getMessage)
+    }
+  }
 
   def createSchemas(suffix: Suffix): Unit = {
     val commitTasks = TableQuery[CommitTasksTable]((tag: Tag) => new CommitTasksTable(tag, suffix))

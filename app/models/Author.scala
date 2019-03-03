@@ -11,8 +11,7 @@ package models
 
 import play.api.libs.json.{Json, OFormat}
 
-case class Author(
-                   author: String,
+case class Author(author: String,
                    id: Long = 0L)
 
 object Author {
