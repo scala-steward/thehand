@@ -2,14 +2,14 @@ package dao
 
 import models._
 import play.api.db.slick.HasDatabaseConfigProvider
-import scm.{SvnConnector, SvnConnectorFactory, SvnRepositoryData}
+import scm.{ SvnConnector, SvnConnectorFactory, SvnRepositoryData }
 import slick.jdbc.JdbcProfile
-import tasks.{TaskParser, TaskParserCharp}
-import javax.inject.{Inject, Singleton}
+import tasks.{ TaskParser, TaskParserCharp }
+import javax.inject.{ Inject, Singleton }
 import play.api.db.slick.DatabaseConfigProvider
-import tasks.{TargetConnector, TaskConnector}
+import tasks.{ TargetConnector, TaskConnector }
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 
 @Singleton()
 class UpdateDao @Inject() (protected val dbConfigProvider: DatabaseConfigProvider, conf: play.api.Configuration)(implicit executionContext: ExecutionContext) extends HasDatabaseConfigProvider[JdbcProfile] {
@@ -57,8 +57,7 @@ class UpdateDao @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
     def repositories = Seq(
       updateRepositoryAuto("eb_"),
       updateRepositoryAuto("qb_"),
-      updateRepositoryAuto("nu_")
-    )
+      updateRepositoryAuto("nu_"))
     Future.sequence(repositories).map(_.flatten)
   }
 

@@ -22,7 +22,7 @@ trait EntryFileComponent { self: HasDatabaseConfigProvider[JdbcProfile] =>
 @Singleton()
 class EntryFileDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(implicit executionContext: ExecutionContext)
   extends EntryFileComponent
-    with HasDatabaseConfigProvider[JdbcProfile] {
+  with HasDatabaseConfigProvider[JdbcProfile] {
 
   import profile.api._
 
@@ -35,14 +35,14 @@ class EntryFileDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProv
     def fileQuery(file: EntryFile) = {
       for {
         fileId <- files.filter(_.path === file.path).map(_.id).result.headOption
-        u <- upsert(file, fileId)//.asTry
+        u <- upsert(file, fileId) //.asTry
       } yield u
     }
 
     DBIO.sequence(fs.map(fileQuery)).transactionally
   }
 
-  def list(suffix : Suffix): Future[Seq[EntryFile]] = db.run {
+  def list(suffix: Suffix): Future[Seq[EntryFile]] = db.run {
     lazy val files = TableQuery[EntryFilesTable]((tag: Tag) => new EntryFilesTable(tag, suffix))
     files.result
   }

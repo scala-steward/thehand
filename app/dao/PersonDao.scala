@@ -1,11 +1,11 @@
 package dao
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.{ Inject, Singleton }
 import models.Person
 import play.api.db.slick.{ DatabaseConfigProvider, HasDatabaseConfigProvider }
 import slick.jdbc.JdbcProfile
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 
 trait PersonComponent { self: HasDatabaseConfigProvider[JdbcProfile] =>
   import profile.api._
@@ -28,19 +28,19 @@ class PersonDao @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
 
   private val people = TableQuery[PeopleTable]
 
-//  def create_(username: String, name: String, age: Int) = db.run {
-//    val person = Person(username, name, age)
-//    (people returning people.map(_.id)
-//      into ((person, newId) => person.copy(id = newId))
-//      ) += person
-//  }
-  
+  //  def create_(username: String, name: String, age: Int) = db.run {
+  //    val person = Person(username, name, age)
+  //    (people returning people.map(_.id)
+  //      into ((person, newId) => person.copy(id = newId))
+  //      ) += person
+  //  }
+
   def create(username: String, name: String, age: Int) = db.run {
-    people  += Person(username, name, age)
+    people += Person(username, name, age)
   }
 
   def update(id: Int, username: String, name: String, age: Int) = db.run {
-    def upsert(personId: Option[Long])= {
+    def upsert(personId: Option[Long]) = {
       if (personId.isEmpty) people += Person(username, name, age, 0)
       else people.insertOrUpdate(Person(username, name, age, personId.head))
     }

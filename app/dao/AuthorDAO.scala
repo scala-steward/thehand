@@ -11,7 +11,7 @@ import scala.concurrent.{ ExecutionContext, Future }
 trait AuthorComponent { self: HasDatabaseConfigProvider[JdbcProfile] =>
   import profile.api._
 
-  class AuthorsTable(tag: Tag, suffix: Suffix) extends Table[Author](tag, suffix.suffix +"authors") {
+  class AuthorsTable(tag: Tag, suffix: Suffix) extends Table[Author](tag, suffix.suffix + "authors") {
     def author: Rep[String] = column[String]("author", O.Unique)
     def id: Rep[Long] = column[Long]("id", O.PrimaryKey, O.AutoInc)
 
@@ -25,7 +25,6 @@ class AuthorDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
   with HasDatabaseConfigProvider[JdbcProfile] {
 
   import profile.api._
-
 
   def list(suffix: Suffix): Future[Seq[Author]] = db.run {
     val authors = TableQuery[AuthorsTable]((tag: Tag) => new AuthorsTable(tag, suffix))

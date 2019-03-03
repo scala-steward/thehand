@@ -2,10 +2,50 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
+# TEST PAGE
+GET			/test								controllers.Application.test
+
+# AUTHENTICATION
+POST		/signin							controllers.Auth.signIn
+POST		/signout						controllers.Auth.signOut
+POST		/signup							controllers.Auth.signUp
+
+# USERNAMES
+GET			/usernames					controllers.Users.usernames
+
+# ACCOUNT
+GET			/account						controllers.Account.info
+PUT			/account						controllers.Account.update
+PUT			/account/password		controllers.Account.updatePassword
+DELETE	/account						controllers.Account.delete
+
+# FOLDERS
+GET			/folders						controllers.Folders.list(sort: Option[String], page: Int ?= 1, size: Int ?= 10)
+POST		/folders						controllers.Folders.insert
+GET			/folders/:id				controllers.Folders.info(id: Long)
+PUT			/folders/:id				controllers.Folders.update(id: Long)
+PUT			/folders/:id/order/:newOrder	controllers.Folders.updateOrder(id: Long, newOrder: Int)
+DELETE	/folders/:id				controllers.Folders.delete(id: Long)
+
+# TASKS
+GET			/folders/:id/tasks	controllers.Tasks.list(id: Long, q: Option[String], done: Option[Boolean], sort: Option[String], page: Int ?= 1, size: Int ?= 10)
+POST		/folders/:id/tasks	controllers.Tasks.insert(id: Long)
+GET			/tasks/:id					controllers.Tasks.info(id: Long)
+PUT			/tasks/:id					controllers.Tasks.update(id: Long)
+PUT			/tasks/:id/order/:newOrder	controllers.Tasks.updateOrder(id: Long, newOrder: Int)
+PUT			/tasks/:id/folder/:folder		controllers.Tasks.updateFolder(id: Long, folder: Long)
+PUT			/tasks/:id/done			controllers.Tasks.updateDone(id: Long, done: Boolean = true)
+DELETE	/tasks/:id/done			controllers.Tasks.updateDone(id: Long, done: Boolean = false)
+DELETE	/tasks/:id					controllers.Tasks.delete(id: Long)
+
+# SHOW FAKE DB DATA
+# Auxiliar to check the FakeDB information. It's only for testing purpose. You should remove it.
+GET			/fakeDB							controllers.Application.fakeDB
+
 # Home page
-GET     /                            controllers.PersonController.index
+GET     /person                          controllers.PersonController.index
 POST    /person                      controllers.PersonController.addPerson
-GET     /persons                     controllers.PersonController.getPersons
+#GET     /persons                     controllers.PersonController.getPersons
 GET     /test                        controllers.PersonController.test
 GET     /update                      controllers.UpdateController.update(suffix: String, from: Option[Long], to: Option[Long])
 GET     /updateall                   controllers.UpdateController.updateAll

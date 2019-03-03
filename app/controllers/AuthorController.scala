@@ -17,9 +17,9 @@ import play.api.mvc._
 
 import scala.concurrent.ExecutionContext
 
-class AuthorController @Inject()(dao: AuthorDAO,
-                                 cc: MessagesControllerComponents
-                                )(implicit ec: ExecutionContext)
+class AuthorController @Inject() (
+  dao: AuthorDAO,
+  cc: MessagesControllerComponents)(implicit ec: ExecutionContext)
   extends MessagesAbstractController(cc) {
 
   def getAuthors(suffix: String): Action[AnyContent] = Action.async {

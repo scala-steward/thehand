@@ -11,11 +11,11 @@
 
 package thehand.schemas
 
-import org.scalatest.{AsyncFlatSpec, Matchers}
+import org.scalatest.{ AsyncFlatSpec, Matchers }
 import telemetrics.HandLogger
 
 import scala.concurrent.ExecutionContext
-import scala.util.{Failure, Success}
+import scala.util.{ Failure, Success }
 
 class RepositoryDaoSpec extends AsyncFlatSpec with Matchers {
   implicit val context = ExecutionContext.Implicits.global

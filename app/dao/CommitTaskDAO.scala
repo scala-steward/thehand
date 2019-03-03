@@ -18,14 +18,14 @@ trait CommitTaskComponent extends CommitComponent { self: HasDatabaseConfigProvi
     def id: Rep[Long] = column[Long]("id", O.PrimaryKey, O.AutoInc)
 
     def * = (taskId, commitId, id) <> ((CommitTasks.apply _).tupled, CommitTasks.unapply)
-    def commit = foreignKey("commit_fk", commitId, TableQuery[CommitTable]((tag:Tag) => new CommitTable(tag, suffix)))(_.id, onDelete = ForeignKeyAction.Cascade)
+    def commit = foreignKey("commit_fk", commitId, TableQuery[CommitTable]((tag: Tag) => new CommitTable(tag, suffix)))(_.id, onDelete = ForeignKeyAction.Cascade)
   }
 }
 
 @Singleton()
 class CommitTaskDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(implicit executionContext: ExecutionContext)
   extends CommitTaskComponent
-    with HasDatabaseConfigProvider[JdbcProfile] {
+  with HasDatabaseConfigProvider[JdbcProfile] {
 
   import profile.api._
 
@@ -51,7 +51,7 @@ class CommitTaskDAO @Inject() (protected val dbConfigProvider: DatabaseConfigPro
     def tryInsert(commitTask: CommitTasks) = for {
       commitId <- swapRevisionByTableId(commitTask.commitId)
       id <- commitTasks.filter(_.id === commitTask.id).map(_.id).result.headOption
-      u <- upsert(commitTask, id ,commitId)//.asTry
+      u <- upsert(commitTask, id, commitId) //.asTry
     } yield u
 
     DBIO.sequence(entries.map(tryInsert)).transactionally

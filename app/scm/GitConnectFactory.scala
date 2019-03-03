@@ -4,12 +4,12 @@ import java.io.File
 
 import org.eclipse.jgit.api.Git
 import org.tmatesoft.svn.core.SVNURL
-import org.tmatesoft.svn.core.io.{SVNRepository, SVNRepositoryFactory}
+import org.tmatesoft.svn.core.io.{ SVNRepository, SVNRepositoryFactory }
 import org.tmatesoft.svn.core.wc.SVNWCUtil
 import telemetrics.HandLogger
 
 import scala.concurrent.Future
-import scala.util.{Failure, Success, Try}
+import scala.util.{ Failure, Success, Try }
 
 trait GitConnectFactory {
   def auth(repository: SVNRepository, name: String, password: String): Git = ???
@@ -31,7 +31,5 @@ trait GitConnectFactory {
       .call()
     result
   }
-
-
 
 }

@@ -17,11 +17,11 @@ import play.api.data.validation.Constraints._
 import play.api.libs.json.Json
 import play.api.mvc._
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 
-class PersonController @Inject()(repo: PersonDao,
-                                  cc: MessagesControllerComponents
-                                )(implicit ec: ExecutionContext)
+class PersonController @Inject() (
+  repo: PersonDao,
+  cc: MessagesControllerComponents)(implicit ec: ExecutionContext)
   extends MessagesAbstractController(cc) {
 
   /**
@@ -31,14 +31,13 @@ class PersonController @Inject()(repo: PersonDao,
     mapping(
       "username" -> nonEmptyText,
       "name" -> nonEmptyText,
-      "age" -> number.verifying(min(0), max(140))
-    )(CreatePersonForm.apply)(CreatePersonForm.unapply)
+      "age" -> number.verifying(min(0), max(140)))(CreatePersonForm.apply)(CreatePersonForm.unapply)
   }
 
   /**
    * The index action.
    */
-  def index : Action[AnyContent] = Action { implicit request =>
+  def index: Action[AnyContent] = Action { implicit request =>
     Ok(views.html.index(personForm))
   }
 
@@ -62,12 +61,11 @@ class PersonController @Inject()(repo: PersonDao,
       },
       // There were no errors in the from, so create the person.
       person => {
-        repo.create(person.username ,person.name, person.age).map { _ =>
+        repo.create(person.username, person.name, person.age).map { _ =>
           // If successful, we simply redirect to the index page.
           Redirect(routes.PersonController.index).flashing("success" -> "user.created")
         }
-      }
-    )
+      })
   }
 
   /**

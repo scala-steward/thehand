@@ -1,12 +1,12 @@
 package dao
 
 import org.joda.time.DateTime
-import javax.inject.{Inject, Singleton}
+import javax.inject.{ Inject, Singleton }
 import models._
-import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
+import play.api.db.slick.{ DatabaseConfigProvider, HasDatabaseConfigProvider }
 import slick.jdbc.JdbcProfile
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 
 trait CommitComponent extends AuthorComponent { self: HasDatabaseConfigProvider[JdbcProfile] =>
   import profile.api._
@@ -22,14 +22,14 @@ trait CommitComponent extends AuthorComponent { self: HasDatabaseConfigProvider[
     def id: Rep[Long] = column[Long]("id", O.PrimaryKey, O.AutoInc)
 
     def * = (message, date, revision, authorId, id) <> ((CommitEntry.apply _).tupled, CommitEntry.unapply)
-    def author = foreignKey("author_fk", authorId, TableQuery[AuthorsTable]((tag:Tag) => new AuthorsTable(tag, suffix)))(_.id, onDelete = ForeignKeyAction.SetNull)
+    def author = foreignKey("author_fk", authorId, TableQuery[AuthorsTable]((tag: Tag) => new AuthorsTable(tag, suffix)))(_.id, onDelete = ForeignKeyAction.SetNull)
   }
 }
 
 @Singleton()
 class CommitDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(implicit executionContext: ExecutionContext)
   extends CommitComponent
-    with HasDatabaseConfigProvider[JdbcProfile] {
+  with HasDatabaseConfigProvider[JdbcProfile] {
 
   import profile.api._
 
@@ -61,7 +61,7 @@ class CommitDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
       for {
         authorId <- authors.filter(_.author === authorName).map(_.id).result.headOption
         commitId <- commits.filter(_.revision === commit.revision).map(_.id).result.headOption
-        u <- upsert(commit, commitId, authorId)//.asTry
+        u <- upsert(commit, commitId, authorId) //.asTry
       } yield u
     }
 

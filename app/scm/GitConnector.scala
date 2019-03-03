@@ -1,13 +1,13 @@
 package scm
 
 import org.eclipse.jgit.api.Git
-import org.eclipse.jgit.lib.{Ref, Repository}
+import org.eclipse.jgit.lib.{ Ref, Repository }
 import org.eclipse.jgit.revwalk.RevCommit
 import telemetrics.HandLogger
 
 import scala.collection.JavaConverters._
 
-class GitConnector(repository :Repository) extends ScmConnector[RevCommit] {
+class GitConnector(repository: Repository) extends ScmConnector[RevCommit] {
   override def latestId: Long = {
     val git = new Git(repository)
     Seq(git.log.all).size.toLong

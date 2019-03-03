@@ -9,7 +9,7 @@
 
 package models
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.{ Json, OFormat }
 
 case class EntryFile(path: String, id: Long = 0L)
 

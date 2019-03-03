@@ -1,12 +1,12 @@
 package scm
 
 import org.tmatesoft.svn.core.SVNURL
-import org.tmatesoft.svn.core.io.{SVNRepository, SVNRepositoryFactory}
+import org.tmatesoft.svn.core.io.{ SVNRepository, SVNRepositoryFactory }
 import org.tmatesoft.svn.core.wc.SVNWCUtil
 import telemetrics.HandLogger
 
 import scala.concurrent.Future
-import scala.util.{Failure, Success, Try}
+import scala.util.{ Failure, Success, Try }
 
 trait SvnConnectorFactory {
   private def auth(repository: SVNRepository, name: String, password: String): SVNRepository = {

@@ -2,30 +2,30 @@ package dao
 
 import scala.concurrent.duration._
 import scala.language.postfixOps
-import javax.inject.{Inject, Singleton}
+import javax.inject.{ Inject, Singleton }
 import models._
-import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
+import play.api.db.slick.{ DatabaseConfigProvider, HasDatabaseConfigProvider }
 import slick.jdbc.JdbcProfile
 import telemetrics.HandLogger
 
-import scala.concurrent.{Await, ExecutionContext, Future}
-import scala.util.{Failure, Success}
+import scala.concurrent.{ Await, ExecutionContext, Future }
+import scala.util.{ Failure, Success }
 
 @Singleton()
-class BootstrapDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)(implicit executionContext: ExecutionContext)
+class BootstrapDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(implicit executionContext: ExecutionContext)
   extends AuthorComponent
-    with CommitComponent
-    with CommitEntryFileComponent
-    with CommitTaskComponent
-    with TaskComponent
-    with PersonComponent
-    with HasDatabaseConfigProvider[JdbcProfile] {
+  with CommitComponent
+  with CommitEntryFileComponent
+  with CommitTaskComponent
+  with TaskComponent
+  with PersonComponent
+  with HasDatabaseConfigProvider[JdbcProfile] {
 
   import profile.api._
 
-  def createSchemas(): Unit= {
+  def createSchemas(): Unit = {
     val person = TableQuery[PeopleTable]((tag: Tag) => new PeopleTable(tag))
-    exec(person.schema.create.asTry)onComplete {
+    exec(person.schema.create.asTry) onComplete {
       case Success(_) => HandLogger.debug("correct create tables")
       case Failure(e) =>
         HandLogger.error("error in create tables " + e.getMessage)
@@ -42,15 +42,15 @@ class BootstrapDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
 
     exec(
       tasks.schema.create.asTry andThen
-      authors.schema.create.asTry andThen
-      commits.schema.create.asTry andThen
-      files.schema.create.asTry andThen
-      commitsFiles.schema.create.asTry andThen
-      commitTasks.schema.create.asTry) onComplete {
-      case Success(_) => HandLogger.debug("correct create tables")
-      case Failure(e) =>
-        HandLogger.error("error in create tables " + e.getMessage)
-    }
+        authors.schema.create.asTry andThen
+        commits.schema.create.asTry andThen
+        files.schema.create.asTry andThen
+        commitsFiles.schema.create.asTry andThen
+        commitTasks.schema.create.asTry) onComplete {
+        case Success(_) => HandLogger.debug("correct create tables")
+        case Failure(e) =>
+          HandLogger.error("error in create tables " + e.getMessage)
+      }
   }
 
   private def exec[T](program: DBIO[T]): Future[T] =

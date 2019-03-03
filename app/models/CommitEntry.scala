@@ -11,14 +11,14 @@ package models
 
 import org.joda.time.DateTime
 import play.api.libs.json._
-import play.api.libs.json.{JodaWrites, JodaReads}
+import play.api.libs.json.{ JodaWrites, JodaReads }
 
-
-case class CommitEntry(message: Option[String],
-                         date: Option[DateTime],
-                         revision: Long,
-                         authorId: Long,
-                         id: Long = 0L)
+case class CommitEntry(
+  message: Option[String],
+  date: Option[DateTime],
+  revision: Long,
+  authorId: Long,
+  id: Long = 0L)
 
 object CommitEntry {
   implicit val dateTimeWriter: Writes[DateTime] = JodaWrites.jodaDateWrites("yyyy-MM-dd HH:mm:ss.SSS")

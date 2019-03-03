@@ -11,11 +11,11 @@ import scala.concurrent.Future
 @Singleton()
 class ReportDao @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)
   extends AuthorComponent
-    with CommitComponent
-    with CommitEntryFileComponent
-    with CommitTaskComponent
-    with TaskComponent
-    with HasDatabaseConfigProvider[JdbcProfile] {
+  with CommitComponent
+  with CommitEntryFileComponent
+  with CommitTaskComponent
+  with TaskComponent
+  with HasDatabaseConfigProvider[JdbcProfile] {
 
   import profile.api._
 

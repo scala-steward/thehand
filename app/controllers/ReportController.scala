@@ -18,12 +18,12 @@ import reportio.CvsIO
 import telemetrics.HandLogger
 
 import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, ExecutionContext, Future}
-import scala.util.{Failure, Success}
+import scala.concurrent.{ Await, ExecutionContext, Future }
+import scala.util.{ Failure, Success }
 
-class ReportController @Inject()(dao: ReportDao,
-                                 cc: MessagesControllerComponents
-                                )(implicit ec: ExecutionContext)
+class ReportController @Inject() (
+  dao: ReportDao,
+  cc: MessagesControllerComponents)(implicit ec: ExecutionContext)
   extends MessagesAbstractController(cc) {
 
   private val repositoryName = "AHHAHAHA"
@@ -93,7 +93,7 @@ class ReportController @Inject()(dao: ReportDao,
 
   def authorsBugsReports(suffix: Suffix): Unit = {
     exec[Seq[String]](authors(suffix)) match {
-      case Right(values) => values.foreach(authorBugsReport(_,suffix))
+      case Right(values) => values.foreach(authorBugsReport(_, suffix))
       case Left(e) => HandLogger.error("error" + e.getMessage)
     }
   }

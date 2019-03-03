@@ -11,7 +11,7 @@
 
 package thehand
 
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.{ FlatSpec, Matchers }
 
 class TaskParserSpec extends FlatSpec with Matchers {
   //#NUMBER
@@ -22,23 +22,23 @@ class TaskParserSpec extends FlatSpec with Matchers {
   val defaultParser = TaskParserCharp(patternParser, patternSplit, separator)
 
   "Convert message #123 TEST" should "return id 123" in {
-    defaultParser.convert(Some("#123 TEST")) shouldEqual(Seq(123))
+    defaultParser.convert(Some("#123 TEST")) shouldEqual (Seq(123))
   }
 
   "Convert message #123 #145 TEST" should "return ids 123 145" in {
-    defaultParser.convert(Some("#123 #145 TEST")) shouldEqual(Seq(123, 145))
+    defaultParser.convert(Some("#123 #145 TEST")) shouldEqual (Seq(123, 145))
   }
 
   "Convert message #123#145#67 TEST" should "return ids 123, 145, 67" in {
-    defaultParser.convert(Some("#123#145#67 TEST")) shouldEqual(Seq(123, 145, 67))
+    defaultParser.convert(Some("#123#145#67 TEST")) shouldEqual (Seq(123, 145, 67))
   }
 
   "Convert message #TEST" should "no return id" in {
-    defaultParser.convert(Some("#TEST")) shouldEqual(Nil)
+    defaultParser.convert(Some("#TEST")) shouldEqual (Nil)
   }
 
   "Convert no message" should "no return id" in {
-    defaultParser.convert(None) shouldEqual(Nil)
+    defaultParser.convert(None) shouldEqual (Nil)
   }
 
 }

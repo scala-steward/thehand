@@ -14,9 +14,9 @@ import dao._
 import models.Suffix
 import play.api.mvc._
 
-class UpdateController @Inject()(dao: UpdateDao,
-                                 cc: MessagesControllerComponents
-                                )
+class UpdateController @Inject() (
+  dao: UpdateDao,
+  cc: MessagesControllerComponents)
   extends MessagesAbstractController(cc) {
 
   def updateAll(): Action[AnyContent] = Action {

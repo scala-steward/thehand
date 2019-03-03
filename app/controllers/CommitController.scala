@@ -17,9 +17,9 @@ import play.api.mvc._
 
 import scala.concurrent.ExecutionContext
 
-class CommitController @Inject()(dao: CommitDAO,
-                                 cc: MessagesControllerComponents
-                                )(implicit ec: ExecutionContext)
+class CommitController @Inject() (
+  dao: CommitDAO,
+  cc: MessagesControllerComponents)(implicit ec: ExecutionContext)
   extends MessagesAbstractController(cc) {
 
   def getCommits(suffix: String, revision: Option[Long]): Action[AnyContent] = Action.async {

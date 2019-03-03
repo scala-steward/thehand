@@ -12,7 +12,7 @@
 package scm
 
 import org.joda.time.DateTime
-import org.tmatesoft.svn.core.{SVNLogEntry, SVNLogEntryPath}
+import org.tmatesoft.svn.core.{ SVNLogEntry, SVNLogEntryPath }
 import tasks.TaskParser
 import models._
 

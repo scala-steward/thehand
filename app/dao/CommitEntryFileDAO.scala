@@ -1,14 +1,12 @@
 package dao
 
 import slick.dbio.DBIOAction
-import javax.inject.{Inject, Singleton}
+import javax.inject.{ Inject, Singleton }
 import models._
-import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
+import play.api.db.slick.{ DatabaseConfigProvider, HasDatabaseConfigProvider }
 import slick.jdbc.JdbcProfile
 
-
-import scala.concurrent.{ExecutionContext, Future}
-
+import scala.concurrent.{ ExecutionContext, Future }
 
 trait CommitEntryFileComponent extends CommitComponent with EntryFileComponent { self: HasDatabaseConfigProvider[JdbcProfile] =>
   import profile.api._
@@ -22,15 +20,15 @@ trait CommitEntryFileComponent extends CommitComponent with EntryFileComponent {
     def id: Rep[Long] = column[Long]("id", O.PrimaryKey, O.AutoInc)
 
     def * = (typeModification, copyPathId, copyRevisionId, pathId, revisionId, id) <> ((CommitEntryFile.apply _).tupled, CommitEntryFile.unapply)
-    def revision = foreignKey("revision_fk", revisionId, TableQuery[CommitTable]((tag:Tag) => new CommitTable(tag, suffix)))(_.id, onDelete = ForeignKeyAction.Cascade)
-    def path = foreignKey("path_fk", pathId, TableQuery[EntryFilesTable]((tag:Tag) => new EntryFilesTable(tag, suffix)))(_.id, onDelete = ForeignKeyAction.Cascade)
+    def revision = foreignKey("revision_fk", revisionId, TableQuery[CommitTable]((tag: Tag) => new CommitTable(tag, suffix)))(_.id, onDelete = ForeignKeyAction.Cascade)
+    def path = foreignKey("path_fk", pathId, TableQuery[EntryFilesTable]((tag: Tag) => new EntryFilesTable(tag, suffix)))(_.id, onDelete = ForeignKeyAction.Cascade)
   }
 }
 
 @Singleton()
 class CommitEntryFileDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(implicit executionContext: ExecutionContext)
   extends CommitEntryFileComponent
-    with HasDatabaseConfigProvider[JdbcProfile] {
+  with HasDatabaseConfigProvider[JdbcProfile] {
 
   import profile.api._
 
@@ -62,7 +60,7 @@ class CommitEntryFileDAO @Inject() (protected val dbConfigProvider: DatabaseConf
 
       def insert(files: Seq[CommitEntryWriter]) = for {
         commitId <- commits.filter(_.revision === revisionNumber).map(_.id).result.headOption
-        _ <- DBIO.sequence(files.map(insertFilePath(_, commitId.getOrElse(-1))))//.asTry
+        _ <- DBIO.sequence(files.map(insertFilePath(_, commitId.getOrElse(-1)))) //.asTry
       } yield files.size
 
       insert(entryFiles)
@@ -71,7 +69,7 @@ class CommitEntryFileDAO @Inject() (protected val dbConfigProvider: DatabaseConf
     DBIO.sequence(es.map(fileQuery)).transactionally
   }
 
-  def list(suffix : Suffix): Future[Seq[CommitEntryFile]] = db.run {
+  def list(suffix: Suffix): Future[Seq[CommitEntryFile]] = db.run {
     lazy val commits = TableQuery[CommitEntryFileTable]((tag: Tag) => new CommitEntryFileTable(tag, suffix))
     commits.result
   }

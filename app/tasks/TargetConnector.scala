@@ -19,7 +19,7 @@ import telemetrics.HandLogger
 
 import scala.io.Source
 import scala.io.Source.fromURL
-import scala.util.{Failure, Success, Try}
+import scala.util.{ Failure, Success, Try }
 
 object TargetConnector {
   def apply(url: String, user: String, password: String): TargetConnector = new TargetConnector(url, user, password)
@@ -42,19 +42,23 @@ class TargetConnector(url: String, user: String, password: String) extends TaskC
   private def auth(): Option[String] = {
     val response = authConnect()
     response match {
-      case Success(json) => HandLogger.debug("authenticate")
+      case Success(json) =>
+        HandLogger.debug("authenticate")
         parseToken(json)
-      case Failure(e) => HandLogger.error("error in authentication " + e.getMessage)
+      case Failure(e) =>
+        HandLogger.error("error in authentication " + e.getMessage)
         None
     }
   }
 
   def jsonData(url: String, options: String): String = {
-    val response = Try { fromURL(url +  "/?" + options + token + "&format=json").mkString }
+    val response = Try { fromURL(url + "/?" + options + token + "&format=json").mkString }
     response match {
-      case Success(json) => HandLogger.debug("get data from " + url)
+      case Success(json) =>
+        HandLogger.debug("get data from " + url)
         json
-      case Failure(e) => HandLogger.error("error " + e.getMessage)
+      case Failure(e) =>
+        HandLogger.error("error " + e.getMessage)
         ""
     }
   }
@@ -100,5 +104,4 @@ class TargetConnector(url: String, user: String, password: String) extends TaskC
     jsonData(url + "/Users/" + id.toString + "/Assignables", "&include=" + options + takeOption)
   }
 }
-
 

@@ -19,7 +19,7 @@ import org.tmatesoft.svn.core.io.SVNRepository
 import telemetrics.HandLogger
 
 import scala.collection.JavaConverters._
-import scala.util.{Failure, Success, Try}
+import scala.util.{ Failure, Success, Try }
 
 object SvnConnector {
   DAVRepositoryFactory.setup()

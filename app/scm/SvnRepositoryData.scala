@@ -17,13 +17,11 @@ import models.Suffix
 import org.tmatesoft.svn.core.SVNLogEntry
 import tasks.TaskParser
 
-import scala.concurrent.{ExecutionContextExecutor, Future}
+import scala.concurrent.{ ExecutionContextExecutor, Future }
 import play.api.db.slick.DatabaseConfigProvider
-import tasks.{ProcessTargetConnector, TaskConnector}
+import tasks.{ ProcessTargetConnector, TaskConnector }
 
-class SvnRepositoryData @Inject()
-  (protected val dbConfigProvider: DatabaseConfigProvider, repository: ScmConnector[SVNLogEntry], suffix: Suffix)
-  (implicit taskConnector: TaskConnector, parser: TaskParser) {
+class SvnRepositoryData @Inject() (protected val dbConfigProvider: DatabaseConfigProvider, repository: ScmConnector[SVNLogEntry], suffix: Suffix)(implicit taskConnector: TaskConnector, parser: TaskParser) {
 
   implicit val context: ExecutionContextExecutor = scala.concurrent.ExecutionContext.fromExecutor(null)
   lazy val tp = ProcessTargetConnector(taskConnector)
@@ -35,21 +33,20 @@ class SvnRepositoryData @Inject()
   lazy val daoCommitFiles = new CommitEntryFileDAO(dbConfigProvider)
   lazy val daoCommitTasks = new CommitTaskDAO(dbConfigProvider)
 
-  private def calculateRangeLimit(lastId: Long) : (Long, Long) = {
+  private def calculateRangeLimit(lastId: Long): (Long, Long) = {
     val lastIdDB: Long = if (lastId < 1) 1 else lastId
     val lastIdSvn: Long = if (repository.latestId < 1) 1 else repository.latestId
-    if (lastIdDB != lastIdSvn) (lastIdDB, lastIdSvn) else (1,1)
+    if (lastIdDB != lastIdSvn) (lastIdDB, lastIdSvn) else (1, 1)
   }
 
   def updateRange(range: (Long, Long), steps: Long = 1000): Future[Seq[Int]] = {
     doStep(range._1, range._2, steps)
   }
 
-  def doStep(from: Long, to: Long, step: Long) : Future[Seq[Int]] = {
+  def doStep(from: Long, to: Long, step: Long): Future[Seq[Int]] = {
     if (((to - from) / step) <= 0) {
       updateInRange(from, to)
-    }
-    else {
+    } else {
       updateInRange(from, from + step)
       doStep(from + step, to, step)
     }

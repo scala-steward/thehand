@@ -11,27 +11,27 @@
 
 package tasks
 
-import models.Task
-import play.api.libs.json.{JsValue, Json}
+import models.TaskItem
+import play.api.libs.json.{ JsValue, Json }
 import telemetrics.HandLogger
 
-import scala.util.{Failure, Success, Try}
+import scala.util.{ Failure, Success, Try }
 
 object ProcessTargetConnector {
   def apply(t: TaskConnector): ProcessTargetConnector = new ProcessTargetConnector(t)
 }
 
 class ProcessTargetConnector(t: TaskConnector) {
-  private def parseTask(json: JsValue): Try[Task] = Try {
+  private def parseTask(json: JsValue): Try[TaskItem] = Try {
     val typeTask = (json \ "EntityType" \ "Name").validateOpt[String].get
     val typeTaskId = (json \ "EntityType" \ "Id").validateOpt[Long].get
     val timeSpend = (json \ "TimeSpent").validateOpt[Double].get
     val parentId = (json \ "Project" \ "Id").validateOpt[Long].get
     val id = (json \ "Id").validate[Long].get
-    Task(typeTask, typeTaskId, timeSpend, parentId, id)
+    TaskItem(typeTask, typeTaskId, timeSpend, parentId, id)
   }
 
-  def parseJson(jsonValue: JsValue) : Option[Task] = {
+  def parseJson(jsonValue: JsValue): Option[TaskItem] = {
     parseTask(jsonValue) match {
       case Success(task) => Some(task)
       case Failure(e) =>
@@ -40,10 +40,11 @@ class ProcessTargetConnector(t: TaskConnector) {
     }
   }
 
-  def process(id: Long) : Option[Task]  = {
+  def process(id: Long): Option[TaskItem] = {
     Try { Json.parse(t.assignables(id)) } match {
       case Success(s) => parseJson(s)
-      case Failure(e) => HandLogger.error("error in parse the json task data " + e)
+      case Failure(e) =>
+        HandLogger.error("error in parse the json task data " + e)
         None
     }
   }

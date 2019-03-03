@@ -9,7 +9,7 @@
 
 package models
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.{ Json, OFormat }
 
 case class CommitTasks(taskId: Long, commitId: Long, id: Long = 0L)
 

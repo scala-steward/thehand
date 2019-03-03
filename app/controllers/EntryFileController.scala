@@ -17,9 +17,9 @@ import play.api.mvc._
 
 import scala.concurrent.ExecutionContext
 
-class EntryFileController @Inject()(dao: EntryFileDAO,
-                                 cc: MessagesControllerComponents
-                                )(implicit ec: ExecutionContext)
+class EntryFileController @Inject() (
+  dao: EntryFileDAO,
+  cc: MessagesControllerComponents)(implicit ec: ExecutionContext)
   extends MessagesAbstractController(cc) {
 
   def getEntryFiles(suffix: String): Action[AnyContent] = Action.async {
