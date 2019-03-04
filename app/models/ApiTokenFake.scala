@@ -2,24 +2,30 @@ package models
 
 import org.joda.time.DateTime
 import java.util.UUID
+
+import play.api.libs.json._
+
 import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
 
 /*
 * Stores the Auth Token information. Each token belongs to a Api Key and user
 */
-case class ApiToken(
+case class ApiTokenFake(
   token: String, // UUID 36 digits
   apiKey: String,
   expirationTime: DateTime,
   userId: Long) {
-  def isExpired = expirationTime.isBeforeNow
+  def isExpired: Boolean = expirationTime.isBeforeNow
 }
 
-object ApiToken {
+object ApiTokenFake {
+  implicit val dateTimeWriter: Writes[DateTime] = JodaWrites.jodaDateWrites("yyyy-MM-dd HH:mm:ss")
+  implicit val dateTimeJsReader: Reads[DateTime] = JodaReads.jodaDateReads("yyyy-MM-dd HH:mm:ss")
+  implicit val taskManagerFormat: OFormat[ApiTokenFake] = Json.format[ApiTokenFake]
+
   import FakeDB.tokens
 
-  def findByTokenAndApiKey(token: String, apiKey: String): Future[Option[ApiToken]] = Future.successful {
+  def findByTokenAndApiKey(token: String, apiKey: String): Future[Option[ApiTokenFake]] = Future.successful {
     tokens.find(t => t.token == token && t.apiKey == apiKey)
   }
 
@@ -30,7 +36,7 @@ object ApiToken {
       if (!tokens.exists(_.token == uuid)) uuid else newUUID
     }
     val token = newUUID
-    tokens.insert(_ => ApiToken(token, apiKey, expirationTime = (new DateTime()) plusMinutes 10, userId))
+    tokens.insert(_ => ApiTokenFake(token, apiKey, expirationTime = new DateTime() plusMinutes 10, userId))
     token
   }
 

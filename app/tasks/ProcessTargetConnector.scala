@@ -11,7 +11,7 @@
 
 package tasks
 
-import models.TaskItem
+import models.Task
 import play.api.libs.json.{ JsValue, Json }
 import telemetrics.HandLogger
 
@@ -22,16 +22,16 @@ object ProcessTargetConnector {
 }
 
 class ProcessTargetConnector(t: TaskConnector) {
-  private def parseTask(json: JsValue): Try[TaskItem] = Try {
+  private def parseTask(json: JsValue): Try[Task] = Try {
     val typeTask = (json \ "EntityType" \ "Name").validateOpt[String].get
     val typeTaskId = (json \ "EntityType" \ "Id").validateOpt[Long].get
     val timeSpend = (json \ "TimeSpent").validateOpt[Double].get
     val parentId = (json \ "Project" \ "Id").validateOpt[Long].get
     val id = (json \ "Id").validate[Long].get
-    TaskItem(typeTask, typeTaskId, timeSpend, parentId, id)
+    Task(typeTask, typeTaskId, timeSpend, parentId, id)
   }
 
-  def parseJson(jsonValue: JsValue): Option[TaskItem] = {
+  def parseJson(jsonValue: JsValue): Option[Task] = {
     parseTask(jsonValue) match {
       case Success(task) => Some(task)
       case Failure(e) =>
@@ -40,7 +40,7 @@ class ProcessTargetConnector(t: TaskConnector) {
     }
   }
 
-  def process(id: Long): Option[TaskItem] = {
+  def process(id: Long): Option[Task] = {
     Try { Json.parse(t.assignables(id)) } match {
       case Success(s) => parseJson(s)
       case Failure(e) =>

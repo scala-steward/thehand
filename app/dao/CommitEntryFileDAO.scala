@@ -1,7 +1,7 @@
 package dao
 
 import slick.dbio.DBIOAction
-import javax.inject.{ Inject, Singleton }
+import javax.inject.Inject
 import models._
 import play.api.db.slick.{ DatabaseConfigProvider, HasDatabaseConfigProvider }
 import slick.jdbc.JdbcProfile
@@ -25,7 +25,6 @@ trait CommitEntryFileComponent extends CommitComponent with EntryFileComponent {
   }
 }
 
-@Singleton()
 class CommitEntryFileDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(implicit executionContext: ExecutionContext)
   extends CommitEntryFileComponent
   with HasDatabaseConfigProvider[JdbcProfile] {
@@ -44,7 +43,7 @@ class CommitEntryFileDAO @Inject() (protected val dbConfigProvider: DatabaseConf
         case None => DBIOAction.successful(Some(-1))
       }
 
-      def upsert(c: CommitEntryWriter, id: Option[Long], commitId: Long, copyFileId: Option[Long], fileId: Option[Long]) = {
+      def updateInsert(c: CommitEntryWriter, id: Option[Long], commitId: Long, copyFileId: Option[Long], fileId: Option[Long]) = {
         if (id.isEmpty)
           commitsFiles += c.commit.copy(copyPath = copyFileId, pathId = fileId.get, revisionId = commitId)
         else
@@ -55,7 +54,7 @@ class CommitEntryFileDAO @Inject() (protected val dbConfigProvider: DatabaseConf
         fileId <- tryFindFileId(Some(c.path))
         copyFileId <- tryFindFileId(Some(c.pathCopy))
         id <- commitsFiles.filter(_.revisionId === commitId).filter(_.pathId === fileId).map(_.id).result.headOption
-        u <- upsert(c, id, commitId, copyFileId, fileId).asTry
+        u <- updateInsert(c, id, commitId, copyFileId, fileId).asTry
       } yield u
 
       def insert(files: Seq[CommitEntryWriter]) = for {

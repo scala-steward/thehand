@@ -1,6 +1,6 @@
 package dao
 
-import javax.inject.{ Inject, Singleton }
+import javax.inject.Inject
 
 import models._
 import play.api.db.slick.{ DatabaseConfigProvider, HasDatabaseConfigProvider }
@@ -19,7 +19,6 @@ trait AuthorComponent { self: HasDatabaseConfigProvider[JdbcProfile] =>
   }
 }
 
-@Singleton()
 class AuthorDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(implicit executionContext: ExecutionContext)
   extends AuthorComponent
   with HasDatabaseConfigProvider[JdbcProfile] {
@@ -33,14 +32,14 @@ class AuthorDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
 
   def insert(as: Seq[Author], suffix: Suffix): Future[Seq[Int]] = db.run {
     val authors = TableQuery[AuthorsTable]((tag: Tag) => new AuthorsTable(tag, suffix))
-    def upsert(author: Author, authorIds: Option[Long]) = {
+    def updateInsert(author: Author, authorIds: Option[Long]) = {
       if (authorIds.isEmpty) authors += author else authors.insertOrUpdate(author.copy(author.author, authorIds.head))
     }
 
     def authorQuery(author: Author) = {
       for {
         authorId <- authors.filter(_.author === author.author).map(_.id).result.headOption
-        u <- upsert(author, authorId) //.asTry
+        u <- updateInsert(author, authorId) //.asTry
       } yield u
     }
 

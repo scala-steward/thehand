@@ -35,19 +35,19 @@ class PersonDao @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
   //      ) += person
   //  }
 
-  def create(username: String, name: String, age: Int) = db.run {
+  def create(username: String, name: String, age: Int): Future[Int] = db.run {
     people += Person(username, name, age)
   }
 
-  def update(id: Int, username: String, name: String, age: Int) = db.run {
-    def upsert(personId: Option[Long]) = {
-      if (personId.isEmpty) people += Person(username, name, age, 0)
+  def update(id: Int, username: String, name: String, age: Int): Future[Int] = db.run {
+    def updateInsert(personId: Option[Long]) = {
+      if (personId.isEmpty) people += Person(username, name, age)
       else people.insertOrUpdate(Person(username, name, age, personId.head))
     }
 
     for {
       personId <- people.filter(_.username === username).map(_.id).result.headOption
-      u <- upsert(personId)
+      u <- updateInsert(personId)
     } yield u
   }
 

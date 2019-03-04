@@ -15,7 +15,7 @@ import models.Suffix
 import play.api.mvc._
 
 class UpdateController @Inject() (
-  dao: UpdateDao,
+  dao: UpdateDAO,
   cc: MessagesControllerComponents)
   extends MessagesAbstractController(cc) {
 

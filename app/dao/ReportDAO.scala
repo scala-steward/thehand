@@ -1,6 +1,6 @@
 package dao
 
-import javax.inject.{ Inject, Singleton }
+import javax.inject.Inject
 
 import models._
 import play.api.db.slick.{ DatabaseConfigProvider, HasDatabaseConfigProvider }
@@ -8,8 +8,7 @@ import slick.jdbc.JdbcProfile
 
 import scala.concurrent.Future
 
-@Singleton()
-class ReportDao @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)
+class ReportDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)
   extends AuthorComponent
   with CommitComponent
   with CommitEntryFileComponent

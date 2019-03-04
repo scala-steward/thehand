@@ -1,7 +1,7 @@
 package dao
 
 import org.joda.time.DateTime
-import javax.inject.{ Inject, Singleton }
+import javax.inject.Inject
 import models._
 import play.api.db.slick.{ DatabaseConfigProvider, HasDatabaseConfigProvider }
 import slick.jdbc.JdbcProfile
@@ -26,7 +26,6 @@ trait CommitComponent extends AuthorComponent { self: HasDatabaseConfigProvider[
   }
 }
 
-@Singleton()
 class CommitDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(implicit executionContext: ExecutionContext)
   extends CommitComponent
   with HasDatabaseConfigProvider[JdbcProfile] {
@@ -49,7 +48,7 @@ class CommitDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
   def insert(cs: Seq[(CommitEntry, String)], suffix: Suffix): Future[Seq[Int]] = db.run {
     val authors = TableQuery[AuthorsTable]((tag: Tag) => new AuthorsTable(tag, suffix))
     val commits = TableQuery[CommitTable]((tag: Tag) => new CommitTable(tag, suffix))
-    def upsert(commit: CommitEntry, commitId: Option[Long], authorId: Option[Long]) = {
+    def updateInsert(commit: CommitEntry, commitId: Option[Long], authorId: Option[Long]) = {
       if (commitId.isEmpty)
         commits += commit.copy(authorId = authorId.head)
       else
@@ -61,7 +60,7 @@ class CommitDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
       for {
         authorId <- authors.filter(_.author === authorName).map(_.id).result.headOption
         commitId <- commits.filter(_.revision === commit.revision).map(_.id).result.headOption
-        u <- upsert(commit, commitId, authorId) //.asTry
+        u <- updateInsert(commit, commitId, authorId) //.asTry
       } yield u
     }
 

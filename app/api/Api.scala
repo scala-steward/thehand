@@ -13,7 +13,6 @@ import play.api.mvc.{ Call, RequestHeader }
 */
 object Api {
 
-  //////////////////////////////////////////////////////////////////////
   // Headers
 
   final val HEADER_CONTENT_TYPE = "Content-Type"
@@ -36,7 +35,6 @@ object Api {
   def locationHeader(uri: String): (String, String) = HEADER_LOCATION -> uri
   def locationHeader(call: Call)(implicit request: RequestHeader): (String, String) = locationHeader(call.absoluteURL())
 
-  //////////////////////////////////////////////////////////////////////
   // Date and joda.DateTime utils
 
   private final val longDateTimeFormatter = DateTimeFormat.forPattern("E, dd MMM yyyy HH:mm:ss 'GMT'").withLocale(Locale.ENGLISH).withZoneUTC()
@@ -46,11 +44,11 @@ object Api {
   private final val dateTimeFormatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss")
   def parseDateTime(dateStr: String): Date = dateTimeFormatter.parse(dateStr)
   def printDateTime(date: Date): String = dateTimeFormatter.format(date)
+
   private final val dateFormatter = new SimpleDateFormat("dd-MM-yyyy")
   def parseDate(dateStr: String): Date = dateFormatter.parse(dateStr)
   def printDate(date: Date): String = dateFormatter.format(date)
 
-  //////////////////////////////////////////////////////////////////////
   // Sorting
 
   object Sorting {

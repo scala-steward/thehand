@@ -2,7 +2,7 @@ package dao
 
 import scala.concurrent.duration._
 import scala.language.postfixOps
-import javax.inject.{ Inject, Singleton }
+import javax.inject.Inject
 import models._
 import play.api.db.slick.{ DatabaseConfigProvider, HasDatabaseConfigProvider }
 import slick.jdbc.JdbcProfile
@@ -11,7 +11,6 @@ import telemetrics.HandLogger
 import scala.concurrent.{ Await, ExecutionContext, Future }
 import scala.util.{ Failure, Success }
 
-@Singleton()
 class BootstrapDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(implicit executionContext: ExecutionContext)
   extends AuthorComponent
   with CommitComponent

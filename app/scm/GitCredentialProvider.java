@@ -6,8 +6,9 @@ import org.eclipse.jgit.transport.CredentialsProvider;
 import org.eclipse.jgit.transport.URIish;
 
 public class GitCredentialProvider {
+    @SuppressWarnings("UnusedReturnValue")
     public CredentialsProvider Build() {
-        CredentialsProvider allowHosts = new CredentialsProvider() {
+        return new CredentialsProvider() {
 
             @Override
             public boolean supports(CredentialItem... items) {
@@ -35,7 +36,6 @@ public class GitCredentialProvider {
                 return false;
             }
         };
-        return allowHosts;
     }
 }
 

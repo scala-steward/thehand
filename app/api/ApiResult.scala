@@ -2,7 +2,7 @@ package api
 
 import ApiResponse._
 import ApiError._
-import models.ApiLog
+import models.ApiLogFake
 import play.api.mvc.Results._
 import play.api.mvc.{ Result, RequestHeader }
 import play.api.libs.json._
@@ -26,7 +26,7 @@ trait ApiResult {
   //  }
 
   def saveLog[R <: RequestHeader](request: ApiRequestHeader[R]): ApiResult = {
-    ApiLog.insert(request, status, json)
+    ApiLogFake.insert(request, status, json)
     this
   }
 
@@ -43,7 +43,7 @@ trait ApiResult {
 	* If needed, it envelopes the resulting JSON in case the API client couldn't access to the headers
 	*/
   def toResult[R <: RequestHeader](implicit request: R, lang: Lang): Result = {
-    val envelope = request.getQueryString("envelope") == Some("true")
+    val envelope = request.getQueryString("envelope").contains("true")
     toResult(envelope)
   }
   def toResult(envelope: Boolean = false)(implicit lang: Lang): Result = {
@@ -60,6 +60,6 @@ trait ApiResult {
       case STATUS_NOTFOUND => NotFound(js)
       case s if s > 400 && s < 500 => BadRequest(js)
       case _ => InternalServerError(js)
-    }).withHeaders((headers ++ Api.basicHeaders): _*)
+    }).withHeaders(headers ++ Api.basicHeaders: _*)
   }
 }

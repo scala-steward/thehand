@@ -1,7 +1,6 @@
 package api
 
 import play.api.libs.json._
-import play.api.data.validation.ValidationError
 import play.api.i18n.Messages
 
 /*
@@ -16,7 +15,6 @@ case class ApiError(code: Int, msg: String, info: Option[JsValue]) extends ApiRe
 
 object ApiError {
 
-  //////////////////////////////////////////////////////////////////////
   // Status Codes
 
   final val STATUS_BADREQUEST = 400
@@ -25,7 +23,6 @@ object ApiError {
   final val STATUS_NOTFOUND = 404
   final val STATUS_INTERNAL_SERVER = 500
 
-  //////////////////////////////////////////////////////////////////////
   // Error Codes
 
   final val ERROR_CUSTOM = 0
@@ -54,15 +51,14 @@ object ApiError {
   final val ERROR_UNAUTHORIZED = 401
   final val ERROR_FORBIDDEN = 403
   final val ERROR_NOTFOUND = 404
+
   final val ERROR_INTERNAL_SERVER = 500
 
-  //////////////////////////////////////////////////////////////////////
   // Factory methods
 
   def apply(code: Int, msg: String): ApiError = ApiError(code, msg, None)
   def apply(code: Int, msg: String, info: JsValue): ApiError = ApiError(code, msg, Some(info))
 
-  //////////////////////////////////////////////////////////////////////
   // More factory methods used as shortcuts for common errors
 
   def errorApiKeyNotFound(implicit m: Messages) = apply(ERROR_APIKEY_NOTFOUND, Messages("api.error.apikey.notfound"))
@@ -101,7 +97,6 @@ object ApiError {
   def errorNotFound(implicit m: Messages) = apply(ERROR_NOTFOUND, Messages("api.error.notfound"))
   def errorInternalServer(error: String)(implicit m: Messages) = apply(ERROR_INTERNAL_SERVER, error)
 
-  //////////////////////////////////////////////////////////////////////
   // Utility methods
 
   /*
@@ -117,7 +112,7 @@ object ApiError {
   /*
 	* Returns a Status Code from an Error Code
 	*/
-  def statusFromCode(code: Int) = code match {
+  def statusFromCode(code: Int): Int = code match {
     case ERROR_APIKEY_NOTFOUND => STATUS_BADREQUEST
     case ERROR_APIKEY_UNKNOWN => STATUS_UNAUTHORIZED
     case ERROR_APIKEY_DISABLED => STATUS_UNAUTHORIZED

@@ -1,6 +1,6 @@
 package dao
 
-import javax.inject.{ Inject, Singleton }
+import javax.inject.Inject
 
 import models._
 import play.api.db.slick.{ DatabaseConfigProvider, HasDatabaseConfigProvider }
@@ -19,7 +19,6 @@ trait EntryFileComponent { self: HasDatabaseConfigProvider[JdbcProfile] =>
   }
 }
 
-@Singleton()
 class EntryFileDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(implicit executionContext: ExecutionContext)
   extends EntryFileComponent
   with HasDatabaseConfigProvider[JdbcProfile] {
@@ -28,14 +27,14 @@ class EntryFileDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProv
 
   def insert(fs: Seq[EntryFile], suffix: Suffix): Future[Seq[Int]] = db.run {
     val files = TableQuery[EntryFilesTable]((tag: Tag) => new EntryFilesTable(tag, suffix))
-    def upsert(file: EntryFile, id: Option[Long]) = {
+    def updateInsert(file: EntryFile, id: Option[Long]) = {
       if (id.isEmpty) files += file else files.insertOrUpdate(file.copy(id = id.head))
     }
 
     def fileQuery(file: EntryFile) = {
       for {
         fileId <- files.filter(_.path === file.path).map(_.id).result.headOption
-        u <- upsert(file, fileId) //.asTry
+        u <- updateInsert(file, fileId) //.asTry
       } yield u
     }
 

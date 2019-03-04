@@ -2,75 +2,71 @@ package controllers
 
 import api.ApiError._
 import api.JsonCombinators._
-import models.{ ApiToken, User }
+import models.{ ApiTokenFake, UserFake }
 import play.api.mvc._
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
-import play.api.Play.current
 import akka.actor.ActorSystem
 import api.ApiController
 
 import scala.concurrent.duration._
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import javax.inject.Inject
-import play.api.i18n.MessagesApi
 
 import scala.language.postfixOps
-import play.api.i18n.{ Langs, MessagesApi }
+import play.api.i18n.Langs
 
-class Auth @Inject() (langs: Langs, mcc: MessagesControllerComponents, system: ActorSystem)
-  extends ApiController(langs, mcc) {
+class Auth @Inject() (l: Langs, mcc: MessagesControllerComponents, system: ActorSystem)
+  extends ApiController(l, mcc) {
 
-  implicit val loginInfoReads: Reads[Tuple2[String, String]] = (
+  implicit val loginInfoReads: Reads[(String, String)] =
     (__ \ "email").read[String](Reads.email) and
-      (__ \ "password").read[String] tupled)
+      (__ \ "password").read[String] tupled
 
-  def signIn = ApiActionWithBody { implicit request =>
-    readFromRequest[Tuple2[String, String]] {
+  def signIn: Action[JsValue] = ApiActionWithBody { implicit request =>
+    readFromRequest[(String, String)] {
       case (email, pwd) =>
-        User.findByEmail(email).flatMap {
+        UserFake.findByEmail(email).flatMap {
           case None => errorUserNotFound
-          case Some(user) => {
+          case Some(user) =>
             if (user.password != pwd) errorUserNotFound
             else if (!user.emailConfirmed) errorUserEmailUnconfirmed
             else if (!user.active) errorUserInactive
-            else ApiToken.create(request.apiKeyOpt.get, user.id).flatMap { token =>
+            else ApiTokenFake.create(request.apiKeyOpt.get, user.id).flatMap { token =>
               ok(Json.obj(
                 "token" -> token,
                 "minutes" -> 10))
             }
-          }
         }
     }
   }
 
-  def signOut = SecuredApiAction { implicit request =>
-    ApiToken.delete(request.token).flatMap { _ =>
+  def signOut: Action[Unit] = SecuredApiAction { implicit request =>
+    ApiTokenFake.delete(request.token).flatMap { _ =>
       noContent()
     }
   }
 
-  implicit val signUpInfoReads: Reads[Tuple3[String, String, User]] = (
+  implicit val signUpInfoReads: Reads[(String, String, UserFake)] =
     (__ \ "email").read[String](Reads.email) and
       (__ \ "password").read[String](Reads.minLength[String](6)) and
-      (__ \ "user").read[User] tupled)
+      (__ \ "user").read[UserFake] tupled
 
-  def signUp = ApiActionWithBody { implicit request =>
-    readFromRequest[Tuple3[String, String, User]] {
+  def signUp: Action[JsValue] = ApiActionWithBody { implicit request =>
+    readFromRequest[(String, String, UserFake)] {
       case (email, password, user) =>
-        User.findByEmail(email).flatMap {
-          case Some(anotherUser) => errorCustom("api.error.signup.email.exists")
-          case None => User.insert(email, password, user.name).flatMap {
-            case (id, user) =>
+        UserFake.findByEmail(email).flatMap {
+          case Some(_ /*anotherUser*/ ) => errorCustom("api.error.signup.email.exists")
+          case None => UserFake.insert(email, password, user.name).flatMap {
+            case (id, user_) =>
 
               // Send confirmation email. You will have to catch the link and confirm the email and activate the user.
               // But meanwhile...
               system.scheduler.scheduleOnce(30 seconds) {
-                User.confirmEmail(id)
+                UserFake.confirmEmail(id)
               }
 
-              ok(user)
+              ok(user_)
           }
         }
     }

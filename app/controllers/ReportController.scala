@@ -22,7 +22,7 @@ import scala.concurrent.{ Await, ExecutionContext, Future }
 import scala.util.{ Failure, Success }
 
 class ReportController @Inject() (
-  dao: ReportDao,
+  dao: ReportDAO,
   cc: MessagesControllerComponents)(implicit ec: ExecutionContext)
   extends MessagesAbstractController(cc) {
 

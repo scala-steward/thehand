@@ -9,7 +9,7 @@
  *
  */
 
-package thehand.schemas
+import models._
 
 class ExtractorFixture() {
   private lazy val tasks =

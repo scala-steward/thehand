@@ -5,14 +5,13 @@ import play.api.db.slick.HasDatabaseConfigProvider
 import scm.{ SvnConnector, SvnConnectorFactory, SvnRepositoryData }
 import slick.jdbc.JdbcProfile
 import tasks.{ TaskParser, TaskParserCharp }
-import javax.inject.{ Inject, Singleton }
+import javax.inject.Inject
 import play.api.db.slick.DatabaseConfigProvider
 import tasks.{ TargetConnector, TaskConnector }
 
 import scala.concurrent.{ ExecutionContext, Future }
 
-@Singleton()
-class UpdateDao @Inject() (protected val dbConfigProvider: DatabaseConfigProvider, conf: play.api.Configuration)(implicit executionContext: ExecutionContext) extends HasDatabaseConfigProvider[JdbcProfile] {
+class UpdateDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider, conf: play.api.Configuration)(implicit executionContext: ExecutionContext) extends HasDatabaseConfigProvider[JdbcProfile] {
   private implicit val target: TaskConnector = TargetConnector(
     conf.get[String]("target.url"),
     conf.get[String]("target.user"),
@@ -49,7 +48,7 @@ class UpdateDao @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
     repository.flatMap(rep => rep.updateRange((from, to)))
   }
 
-  def update(suffix: Suffix, from: Option[Long], to: Option[Long]) = {
+  def update(suffix: Suffix, from: Option[Long], to: Option[Long]): Any = {
     if (from.isDefined && to.isDefined) updateRepositoryRange(suffix.suffix, from.get, to.get)
   }
 

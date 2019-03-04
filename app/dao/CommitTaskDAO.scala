@@ -1,7 +1,6 @@
 package dao
 
-//import java.util.Date
-import javax.inject.{ Inject, Singleton }
+import javax.inject.Inject
 
 import models._
 import play.api.db.slick.{ DatabaseConfigProvider, HasDatabaseConfigProvider }
@@ -22,7 +21,6 @@ trait CommitTaskComponent extends CommitComponent { self: HasDatabaseConfigProvi
   }
 }
 
-@Singleton()
 class CommitTaskDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(implicit executionContext: ExecutionContext)
   extends CommitTaskComponent
   with HasDatabaseConfigProvider[JdbcProfile] {
@@ -37,7 +35,7 @@ class CommitTaskDAO @Inject() (protected val dbConfigProvider: DatabaseConfigPro
   def insert(entries: Seq[CommitTasks], suffix: Suffix): Future[Seq[Int]] = db.run {
     val commits = TableQuery[CommitTable]((tag: Tag) => new CommitTable(tag, suffix))
     val commitTasks = TableQuery[CommitTasksTable]((tag: Tag) => new CommitTasksTable(tag, suffix))
-    def upsert(ct: CommitTasks, id: Option[Long], commitId: Option[Long]) = {
+    def updateInsert(ct: CommitTasks, id: Option[Long], commitId: Option[Long]) = {
       if (id.isEmpty)
         commitTasks += ct.copy(commitId = commitId.head)
       else
@@ -51,7 +49,7 @@ class CommitTaskDAO @Inject() (protected val dbConfigProvider: DatabaseConfigPro
     def tryInsert(commitTask: CommitTasks) = for {
       commitId <- swapRevisionByTableId(commitTask.commitId)
       id <- commitTasks.filter(_.id === commitTask.id).map(_.id).result.headOption
-      u <- upsert(commitTask, id, commitId) //.asTry
+      u <- updateInsert(commitTask, id, commitId) //.asTry
     } yield u
 
     DBIO.sequence(entries.map(tryInsert)).transactionally

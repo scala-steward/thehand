@@ -50,7 +50,7 @@ class PersonController @Inject() (
    *
    * This is asynchronous, since we're invoking the asynchronous methods on PersonRepository.
    */
-  def addPerson = Action.async { implicit request =>
+  def addPerson: Action[AnyContent] = Action.async { implicit request =>
     // Bind the form first, then fold the result, passing a function to handle errors, and a function to handle succes.
     personForm.bindFromRequest.fold(
       // The error function. We return the index page with the error form, which will render the errors.

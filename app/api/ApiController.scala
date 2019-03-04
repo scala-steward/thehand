@@ -3,51 +3,49 @@ package api
 import api.ApiError._
 import api.Api.Sorting._
 import javax.inject.Inject
-import models.{ ApiKey, ApiToken }
+import models.{ ApiKeyFake, ApiTokenFake }
 import org.joda.time.DateTime
 import play.api.mvc._
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
-import play.api.i18n.{ Lang, Langs, Messages, MessagesApi }
+import play.api.i18n.{ Lang, Langs, Messages }
 
-import scala.util.{ Failure, Success, Try }
+import scala.util.{ Failure, Success }
 import play.api.libs.json._
 
 /*
 * Controller for the API
 */
-class ApiController @Inject() (langs: Langs, mcc: MessagesControllerComponents)
+class ApiController @Inject() (l: Langs, mcc: MessagesControllerComponents)
   extends MessagesAbstractController(mcc) {
 
   //val messagesApi: MessagesApi
-  implicit val m: Messages = mcc.messagesApi.preferred(langs.availables)
+  implicit val m: Messages = mcc.messagesApi.preferred(l.availables)
 
-  //////////////////////////////////////////////////////////////////////
   // Implicit transformation utilities
 
   implicit def objectToJson[T](o: T)(implicit tjs: Writes[T]): JsValue = Json.toJson(o)
   implicit def result2FutureResult(r: ApiResult): Future[ApiResult] = Future.successful(r)
 
-  //////////////////////////////////////////////////////////////////////
   // Custom Actions
 
-  def ApiAction(action: ApiRequest[Unit] => Future[ApiResult]) =
+  def ApiAction(action: ApiRequest[Unit] => Future[ApiResult]): Action[Unit] =
     ApiActionWithParser(parse.empty)(action)
 
-  def ApiActionWithBody(action: ApiRequest[JsValue] => Future[ApiResult]) =
+  def ApiActionWithBody(action: ApiRequest[JsValue] => Future[ApiResult]): Action[JsValue] =
     ApiActionWithParser(parse.json)(action)
 
-  def SecuredApiAction(action: SecuredApiRequest[Unit] => Future[ApiResult]) =
+  def SecuredApiAction(action: SecuredApiRequest[Unit] => Future[ApiResult]): Action[Unit] =
     SecuredApiActionWithParser(parse.empty)(action)
 
-  def SecuredApiActionWithBody(action: SecuredApiRequest[JsValue] => Future[ApiResult]) =
+  def SecuredApiActionWithBody(action: SecuredApiRequest[JsValue] => Future[ApiResult]): Action[JsValue] =
     SecuredApiActionWithParser(parse.json)(action)
 
-  def UserAwareApiAction(action: UserAwareApiRequest[Unit] => Future[ApiResult]) =
+  def UserAwareApiAction(action: UserAwareApiRequest[Unit] => Future[ApiResult]): Action[Unit] =
     UserAwareApiActionWithParser(parse.empty)(action)
 
-  def UserAwareApiActionWithBody(action: UserAwareApiRequest[JsValue] => Future[ApiResult]) =
+  def UserAwareApiActionWithBody(action: UserAwareApiRequest[JsValue] => Future[ApiResult]): Action[JsValue] =
     UserAwareApiActionWithParser(parse.json)(action)
 
   // Creates an Action checking that the Request has all the common necessary headers with their correct values (X-Api-Key, Date)
@@ -68,23 +66,23 @@ class ApiController @Inject() (langs: Langs, mcc: MessagesControllerComponents)
     }
   }
   // Basic Api Action
-  private def ApiActionWithParser[A](parser: BodyParser[A])(action: ApiRequest[A] => Future[ApiResult]) = ApiActionCommon(parser) { (apiRequest, apiKey, date) =>
-    ApiKey.isActive(apiKey).flatMap {
-      case None => errorApiKeyUnknown
-      case Some(false) => errorApiKeyDisabled
-      case Some(true) => action(apiRequest)
+  private def ApiActionWithParser[A](parser: BodyParser[A])(action: ApiRequest[A] => Future[ApiResult]) =
+    ApiActionCommon(parser) { (apiRequest, apiKey, _) =>
+      ApiKeyFake.isActive(apiKey).flatMap {
+        case None => errorApiKeyUnknown
+        case Some(false) => errorApiKeyDisabled
+        case Some(true) => action(apiRequest)
+      }
     }
-  }
   // Secured Api Action that requires authentication. It checks the Request has the correct X-Auth-Token heaader
   private def SecuredApiActionWithParser[A](parser: BodyParser[A])(action: SecuredApiRequest[A] => Future[ApiResult]) = ApiActionCommon(parser) { (apiRequest, apiKey, date) =>
     apiRequest.tokenOpt match {
       case None => errorTokenNotFound
-      case Some(token) => ApiToken.findByTokenAndApiKey(token, apiKey).flatMap {
+      case Some(token) => ApiTokenFake.findByTokenAndApiKey(token, apiKey).flatMap {
         case None => errorTokenUnknown
-        case Some(apiToken) if apiToken.isExpired => {
-          ApiToken.delete(token)
+        case Some(apiToken) if apiToken.isExpired =>
+          ApiTokenFake.delete(token)
           errorTokenExpired
-        }
         case Some(apiToken) => action(SecuredApiRequest(apiRequest.request, apiKey, date, token, apiToken.userId))
       }
     }
@@ -92,23 +90,21 @@ class ApiController @Inject() (langs: Langs, mcc: MessagesControllerComponents)
   // User Aware Api Action that requires authentication. It checks the Request has the correct X-Auth-Token heaader
   private def UserAwareApiActionWithParser[A](parser: BodyParser[A])(action: UserAwareApiRequest[A] => Future[ApiResult]) = ApiActionCommon(parser) { (apiRequest, apiKey, date) =>
     apiRequest.tokenOpt match {
-      case None => ApiKey.isActive(apiKey).flatMap {
+      case None => ApiKeyFake.isActive(apiKey).flatMap {
         case None => errorApiKeyUnknown
         case Some(false) => errorApiKeyDisabled
         case Some(true) => action(UserAwareApiRequest(apiRequest.request, apiKey, date, None, None))
       }
-      case Some(token) => ApiToken.findByTokenAndApiKey(token, apiKey).flatMap {
+      case Some(token) => ApiTokenFake.findByTokenAndApiKey(token, apiKey).flatMap {
         case None => errorTokenUnknown
-        case Some(apiToken) if apiToken.isExpired => {
-          ApiToken.delete(token)
+        case Some(apiToken) if apiToken.isExpired =>
+          ApiTokenFake.delete(token)
           errorTokenExpired
-        }
         case Some(apiToken) => action(UserAwareApiRequest(apiRequest.request, apiKey, date, Some(token), Some(apiToken.userId)))
       }
     }
   }
 
-  //////////////////////////////////////////////////////////////////////
   // Auxiliar methods to create ApiResults from writable JSON objects
 
   def ok[A](obj: A, headers: (String, String)*)(implicit w: Writes[A]): Future[ApiResult] = Future.successful(ApiResponse.ok(obj, headers: _*))
@@ -145,8 +141,7 @@ class ApiController @Inject() (langs: Langs, mcc: MessagesControllerComponents)
 
   def noContent(headers: (String, String)*): Future[ApiResult] = Future.successful(ApiResponse.noContent(headers: _*))
 
-  //////////////////////////////////////////////////////////////////////
-  // More auxiliar methods
+  // More aux methods
 
   // Reads an object from an ApiRequest[JsValue] handling a possible malformed error
   def readFromRequest[T](f: T => Future[ApiResult])(implicit request: ApiRequest[JsValue], rds: Reads[T], req: RequestHeader): Future[ApiResult] = {

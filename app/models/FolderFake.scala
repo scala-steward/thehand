@@ -2,27 +2,30 @@ package models
 
 import api.Page
 import api.Api.Sorting._
-import java.util.Date
+import play.api.libs.json.{ Json, OFormat }
+
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-case class Folder(
+case class FolderFake(
   id: Long,
   userId: Long,
   order: Int,
   name: String)
 
-object Folder {
+object FolderFake {
   import FakeDB.folders
+
+  implicit val parserFormat: OFormat[FolderFake] = Json.format[FolderFake]
 
   private def last(userId: Long): Int = (-1 +: folders.filter(_.userId == userId).map(_.order)).max
 
-  def findById(id: Long): Future[Option[Folder]] = Future.successful {
+  def findById(id: Long): Future[Option[FolderFake]] = Future.successful {
     folders.get(id)
   }
 
-  def insert(userId: Long, name: String): Future[(Long, Folder)] = Future.successful {
-    folders.insert(Folder(_, userId, order = last(userId) + 1, name))
+  def insert(userId: Long, name: String): Future[(Long, FolderFake)] = Future.successful {
+    folders.insert(FolderFake(_, userId, order = last(userId) + 1, name))
   }
 
   def basicUpdate(id: Long, name: String): Future[Boolean] = Future.successful {
@@ -57,21 +60,21 @@ object Folder {
     }
   }
 
-  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////
   // PAGINATION utilities
 
   /*
 	* Returns a Page[Folder] with the user's folders
 	* - sortFields: list of sorting params indicating their fields and if it should be ordered in ascending or descending order. Ex: Seq(("+", "order"), ("-", "name"))
 	*/
-  def page(userId: Long, sortingFields: Seq[(String, Boolean)], p: Int, s: Int): Future[Page[Folder]] = Future.successful {
+  def page(userId: Long, sortingFields: Seq[(String, Boolean)], p: Int, s: Int): Future[Page[FolderFake]] = Future.successful {
     folders.page(p, s)(_.userId == userId)(sortingFields.map(sortingFunc): _*)
   }
 
   // List with all the available sorting fields.
   val sortingFields = Seq("id", "order", "name")
   // Defines a sorting function for the pair (field, order)
-  def sortingFunc(fieldsWithOrder: (String, Boolean)): (Folder, Folder) => Boolean = fieldsWithOrder match {
+  def sortingFunc(fieldsWithOrder: (String, Boolean)): (FolderFake, FolderFake) => Boolean = fieldsWithOrder match {
     case ("id", ASC) => _.id < _.id
     case ("id", DESC) => _.id > _.id
     case ("order", ASC) => _.order < _.order
