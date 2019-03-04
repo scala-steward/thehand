@@ -2,114 +2,131 @@ package dao
 
 import java.sql.Date
 
-import api.Api.Sorting.{ASC, DESC}
-import api.Page
+import api.Api.Sorting.{ ASC, DESC }
 import javax.inject.Inject
 import models._
-import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
-import play.api.libs.json.{Json, OFormat}
+import play.api.db.slick.{ DatabaseConfigProvider, HasDatabaseConfigProvider }
 import slick.jdbc.JdbcProfile
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 
-trait PeriodComponent { self: HasDatabaseConfigProvider[JdbcProfile] =>
+trait TermComponent { self: HasDatabaseConfigProvider[JdbcProfile] =>
   import profile.api._
 
-  class PeriodTable(tag: Tag) extends Table[Period](tag, "PERIODS") {
-    def periodId = column[Long]("folder_id")
-    def order = column[Int]("order")
+  class TermTable(tag: Tag) extends Table[Term](tag, "TERMS") {
+    def phaseId = column[Long]("term_id")
+    def order = column[Long]("order")
     def text = column[String]("text")
     def date = column[Date]("date")
     def deadline = column[Option[Date]]("deadline")
     def done = column[Boolean]("done")
     def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
 
-    def * = (periodId, order, text, date, deadline, done, id) <> ((Period.apply _).tupled, Period.unapply)
+    def * = (phaseId, order, text, date, deadline, done, id) <> ((Term.apply _).tupled, Term.unapply)
   }
 }
 
-class PeriodDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(implicit executionContext: ExecutionContext)
-  extends PeriodComponent  with HasDatabaseConfigProvider[JdbcProfile] {
+class TermDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(implicit executionContext: ExecutionContext)
+  extends TermComponent with HasDatabaseConfigProvider[JdbcProfile] {
 
   import profile.api._
-  val tasks = TableQuery[PeriodTable]((tag: Tag) => new PeriodTable(tag))
+  val terms = TableQuery[TermTable]((tag: Tag) => new TermTable(tag))
 
-  private def maxIdPeriod(periodId: Long) = db.run {
-    tasks.filter(_.periodId === periodId).map(_.id).max.result
+  private def lastInPhase(phaseId: Long): Future[Long] = db.run {
+    terms.filter(_.phaseId === phaseId)
+      .map(_.id)
+      .max.result
+      .map(i => i.getOrElse(-1L))
   }
 
-  private def lastInPeriod(periodId: Long) = {
-    maxIdPeriod(periodId).map(i => i.getOrElse(-1L))
-
-    //(-1 +: tasks.filter(_.folderId == folderId).map(_.order)).max
+  def findById(id: Long): Future[Option[Term]] = db.run {
+    terms.filter(_.id === id).result.headOption
   }
 
-  private def lastInFolder(folderId: Long): Int = (-1 +: tasks.filter(_.folderId == folderId).map(_.order)).max
-
-  def findById(id: Long): Future[Option[TaskFake]] = Future.successful {
-    tasks.get(id)
+  def insert(phaseId: Long, text: String, date: Date, deadline: Option[Date]) = {
+    lastInPhase(phaseId)
+      .flatMap(max =>
+        db.run(terms += Term(phaseId, order = max + 1L, text, date, deadline, done = false)))
   }
 
-  def insert(folderId: Long, text: String, date: Date, deadline: Option[Date]): Future[(Long, TaskFake)] = Future.successful {
-    tasks.insert(TaskFake(_, folderId, order = lastInFolder(folderId) + 1, text, date, deadline, done = false))
+  def basicUpdate(id: Long, text: String, deadline: Option[Date]): Future[Int] = db.run {
+    for {
+      u <- terms.filter(_.id === id).result.headOption
+      i <- terms.update(u.get.copy(text = text, deadline = deadline)) if u.isDefined
+    } yield i
   }
 
-  def basicUpdate(id: Long, text: String, deadline: Option[Date]): Future[Boolean] = Future.successful {
-    tasks.update(id)(_.copy(text = text, deadline = deadline))
+  private def updateDecrementOder(phaseId: Long, newOrder: Long, oldOrder: Long): Future[Seq[Future[Int]]] = {
+    def getTerms: Future[Seq[Term]] = db.run {
+      terms
+        .filter(_.phaseId === phaseId)
+        .filter(_.order > oldOrder)
+        .filter(_.order <= newOrder)
+        .result
+    }
+    getTerms.map(s => s.map(u => db.run { terms.update(u.copy(order = u.order - 1L)) }))
   }
-  def updateOrder(id: Long, order: Int): Future[Boolean] = Future.successful {
-    tasks.update(id) { task =>
-      val newOrder = Math.max(0, Math.min(lastInFolder(task.folderId), order))
-      val oldOrder = task.order
-      if (newOrder == oldOrder)
-        task
-      else {
-        if (newOrder > oldOrder) {
-          tasks.filter(t => t.folderId == task.folderId && t.order > oldOrder && t.order <= newOrder).map { t =>
-            tasks.update(t.id)(_.copy(order = t.order - 1))
-          }
-        } else if (newOrder < oldOrder) {
-          tasks.filter(t => t.folderId == task.folderId && t.order >= newOrder && t.order < oldOrder).map { t =>
-            tasks.update(t.id)(_.copy(order = t.order + 1))
-          }
-        }
-        task.copy(order = newOrder)
-      }
+
+  private def updateIncrementOder(phaseId: Long, newOrder: Long, oldOrder: Long): Future[Seq[Future[Int]]] = {
+    def getTerms: Future[Seq[Term]] = db.run {
+      terms
+        .filter(_.phaseId === phaseId)
+        .filter(_.order >= newOrder)
+        .filter(_.order < oldOrder)
+        .result
+    }
+
+    getTerms.map(s => s.map(u => db.run { terms.update(u.copy(order = u.order + 1L)) }))
+  }
+
+  def updateOthers(phaseId: Long, newOrder: Long, oldOrder: Long): Future[Seq[Future[Int]]] = {
+    if (newOrder > oldOrder) {
+      updateDecrementOder(phaseId, newOrder, oldOrder)
+    } else if (newOrder < oldOrder) {
+      updateIncrementOder(phaseId, newOrder, oldOrder)
+    } else {
+      Future.failed(new Exception)
     }
   }
-  def updateFolder(id: Long, folderId: Long): Future[Boolean] = updateOrder(id, Int.MaxValue).map { hasUpdated =>
-    if (hasUpdated)
-      tasks.update(id)(_.copy(folderId = folderId, order = lastInFolder(folderId) + 1))
-    else false
-  }
-  def updateDone(id: Long, done: Boolean): Future[Boolean] = Future.successful {
-    tasks.update(id)(_.copy(done = done))
+
+  def newOrder(term: Term, order: Int): Future[Long] = {
+    lastInPhase(term.phaseId)
+      .map(max => Math.min(max, order))
+      .map(min => Math.max(0, min))
+      .map(newOrder => newOrder)
   }
 
-  def delete(id: Long): Future[Unit] = updateOrder(id, Int.MaxValue).map { hasUpdated =>
-    if (hasUpdated)
-      tasks.delete(id)
+  def updateOrder(id: Long, order: Int): Future[Int] = {
+    findById(id)
+      .flatMap(t => newOrder(t.get, order)
+        .flatMap(n => updateOthers(t.get.phaseId, n, t.get.order)
+          .flatMap(x => Future.sequence(x)
+            .map(y => y.sum))))
   }
 
-  // PAGINATION utilities
-
-  /*
-	* Returns a Page[Task] with the user's tasks
-	* - sortFields: list of sorting params indicating their fields and if it should be ordered in ascending or descending order. Ex: Seq(("+", "order"), ("-", "date"))
-	*/
-  def page(folderId: Long, query: Option[String], done: Option[Boolean], sortingFields: Seq[(String, Boolean)], p: Int, s: Int): Future[Page[TaskFake]] = Future.successful {
-    val filterFunc: TaskFake => Boolean = { task =>
-      task.folderId == folderId &&
-        query.forall(q => task.text.toLowerCase.contains(q.toLowerCase)) &&
-        done.forall(task.done == _)
-    }
-    tasks.page(p, s)(filterFunc)(sortingFields.map(sortingFunc): _*)
+  def updatePhase(id: Long, phaseId: Long) = {
+    for {
+      _ <- updateOrder(id, Int.MaxValue)
+      s <- findById(id)
+      o <- lastInPhase(phaseId)
+      i <- db.run { terms.update(s.get.copy(phaseId = phaseId, order = o + 1)) }
+    } yield i
   }
+
+  def updateDone(id: Long, done: Boolean): Future[Int] = db.run {
+    for {
+      u <- terms.filter(_.id === id).result.headOption
+      i <- terms.update(u.get.copy(done = done)) if u.isDefined
+    } yield i
+  }
+
+  def delete(id: Long): Future[Unit] =
+    db.run(terms.filter(_.id === id).delete).map(_ => ())
 
   // List with all the available sorting fields.
   val sortingFields = Seq("id", "order", "date", "deadline", "done")
   // Defines a sorting function for the pair (field, order)
-  def sortingFunc(fieldsWithOrder: (String, Boolean)): (TaskFake, TaskFake) => Boolean = fieldsWithOrder match {
+  def sortingFunc(fieldsWithOrder: (String, Boolean)): (Term, Term) => Boolean = fieldsWithOrder match {
     case ("id", ASC) => _.id < _.id
     case ("id", DESC) => _.id > _.id
     case ("order", ASC) => _.order < _.order
@@ -117,7 +134,7 @@ class PeriodDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
     case ("date", ASC) => _.date before _.date
     case ("date", DESC) => _.date after _.date
     case ("deadline", ASC) => (a, b) => a.deadline.exists(ad => b.deadline.forall(bd => ad before bd))
-    case ("deadline", DESC) => (a, b) => a.deadline.exists(ad => b.deadline.map(bd => ad after bd).getOrElse(true))
+    case ("deadline", DESC) => (a, b) => a.deadline.exists(ad => b.deadline.forall(bd => ad after bd))
     case ("done", ASC) => _.done > _.done
     case ("done", DESC) => _.done < _.done
     case _ => (_, _) => false

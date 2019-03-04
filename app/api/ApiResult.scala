@@ -51,7 +51,7 @@ trait ApiResult {
     (status match {
       case STATUS_CREATED => if (js == JsNull) Created else Created(js)
       case STATUS_ACCEPTED => if (js == JsNull) Accepted else Accepted(js)
-      case STATUS_NOCONTENT => NoContent
+      case STATUS_NO_CONTENT => NoContent
       case s if s < 300 => if (js == JsNull) Ok else Ok(js)
 
       case STATUS_BADREQUEST => BadRequest(js)
