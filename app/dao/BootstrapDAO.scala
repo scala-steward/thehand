@@ -24,6 +24,7 @@ class BootstrapDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProv
   with ApiLogComponent
   with PhaseComponent
   with TermComponent
+  with UserComponent
   with HasDatabaseConfigProvider[JdbcProfile] {
 
   import profile.api._
@@ -35,13 +36,15 @@ class BootstrapDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProv
     val phase = TableQuery[PhaseTable]((tag: Tag) => new PhaseTable(tag))
     val term = TableQuery[TermTable]((tag: Tag) => new TermTable(tag))
     val person = TableQuery[PeopleTable]((tag: Tag) => new PeopleTable(tag))
+    val user = TableQuery[UserTable]((tag: Tag) => new UserTable(tag))
 
     exec(apiLog.schema.create.asTry andThen
       apiToken.schema.create.asTry andThen
       apiKey.schema.create.asTry andThen
       phase.schema.create.asTry andThen
       term.schema.create.asTry andThen
-      person.schema.create.asTry) onComplete {
+      person.schema.create.asTry andThen
+      user.schema.create.asTry) onComplete {
       case Success(_) => HandLogger.debug("correct create default tables")
       case Failure(e) =>
         HandLogger.error("error in create tables " + e.getMessage)
