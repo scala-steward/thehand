@@ -2,12 +2,14 @@ package api
 
 import api.ApiError._
 import api.Api.Sorting._
+import dao.{ ApiKeyDAO, ApiTokenDAO }
 import javax.inject.Inject
 import models.{ ApiKeyFake, ApiTokenFake }
 import org.joda.time.DateTime
+import play.api.db.slick.DatabaseConfigProvider
 import play.api.mvc._
 
-import scala.concurrent.Future
+import scala.concurrent.{ ExecutionContext, Future }
 import scala.concurrent.ExecutionContext.Implicits.global
 import play.api.i18n.{ Lang, Langs, Messages }
 
@@ -17,8 +19,11 @@ import play.api.libs.json._
 /*
 * Controller for the API
 */
-class ApiController @Inject() (l: Langs, mcc: MessagesControllerComponents)
+class ApiController @Inject() (val dbc: DatabaseConfigProvider, l: Langs, mcc: MessagesControllerComponents)
   extends MessagesAbstractController(mcc) {
+
+  val apiKeyDao = new ApiKeyDAO(dbc)
+  val apiTokenDao = new ApiTokenDAO(dbc)
 
   //val messagesApi: MessagesApi
   implicit val m: Messages = mcc.messagesApi.preferred(l.availables)
@@ -68,7 +73,7 @@ class ApiController @Inject() (l: Langs, mcc: MessagesControllerComponents)
   // Basic Api Action
   private def ApiActionWithParser[A](parser: BodyParser[A])(action: ApiRequest[A] => Future[ApiResult]) =
     ApiActionCommon(parser) { (apiRequest, apiKey, _) =>
-      ApiKeyFake.isActive(apiKey).flatMap {
+      apiKeyDao.isActive(apiKey).flatMap {
         case None => errorApiKeyUnknown
         case Some(false) => errorApiKeyDisabled
         case Some(true) => action(apiRequest)
@@ -78,10 +83,10 @@ class ApiController @Inject() (l: Langs, mcc: MessagesControllerComponents)
   private def SecuredApiActionWithParser[A](parser: BodyParser[A])(action: SecuredApiRequest[A] => Future[ApiResult]) = ApiActionCommon(parser) { (apiRequest, apiKey, date) =>
     apiRequest.tokenOpt match {
       case None => errorTokenNotFound
-      case Some(token) => ApiTokenFake.findByTokenAndApiKey(token, apiKey).flatMap {
+      case Some(token) => apiTokenDao.findByTokenAndApiKey(token, apiKey).flatMap {
         case None => errorTokenUnknown
         case Some(apiToken) if apiToken.isExpired =>
-          ApiTokenFake.delete(token)
+          apiTokenDao.delete(token)
           errorTokenExpired
         case Some(apiToken) => action(SecuredApiRequest(apiRequest.request, apiKey, date, token, apiToken.userId))
       }
@@ -90,15 +95,15 @@ class ApiController @Inject() (l: Langs, mcc: MessagesControllerComponents)
   // User Aware Api Action that requires authentication. It checks the Request has the correct X-Auth-Token heaader
   private def UserAwareApiActionWithParser[A](parser: BodyParser[A])(action: UserAwareApiRequest[A] => Future[ApiResult]) = ApiActionCommon(parser) { (apiRequest, apiKey, date) =>
     apiRequest.tokenOpt match {
-      case None => ApiKeyFake.isActive(apiKey).flatMap {
+      case None => apiKeyDao.isActive(apiKey).flatMap {
         case None => errorApiKeyUnknown
         case Some(false) => errorApiKeyDisabled
         case Some(true) => action(UserAwareApiRequest(apiRequest.request, apiKey, date, None, None))
       }
-      case Some(token) => ApiTokenFake.findByTokenAndApiKey(token, apiKey).flatMap {
+      case Some(token) => apiTokenDao.findByTokenAndApiKey(token, apiKey).flatMap {
         case None => errorTokenUnknown
         case Some(apiToken) if apiToken.isExpired =>
-          ApiTokenFake.delete(token)
+          apiTokenDao.delete(token)
           errorTokenExpired
         case Some(apiToken) => action(UserAwareApiRequest(apiRequest.request, apiKey, date, Some(token), Some(apiToken.userId)))
       }

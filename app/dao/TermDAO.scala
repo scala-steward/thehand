@@ -3,7 +3,8 @@ package dao
 import java.sql.Date
 
 import api.Api.Sorting.{ ASC, DESC }
-import javax.inject.Inject
+import api.Page
+import javax.inject.{ Inject, Singleton }
 import models._
 import play.api.db.slick.{ DatabaseConfigProvider, HasDatabaseConfigProvider }
 import slick.jdbc.JdbcProfile
@@ -13,8 +14,9 @@ import scala.concurrent.{ ExecutionContext, Future }
 trait TermComponent { self: HasDatabaseConfigProvider[JdbcProfile] =>
   import profile.api._
 
+  @Singleton
   class TermTable(tag: Tag) extends Table[Term](tag, "TERMS") {
-    def phaseId = column[Long]("term_id")
+    def phaseId = column[Long]("phase_id")
     def order = column[Long]("order")
     def text = column[String]("text")
     def date = column[Date]("date")
@@ -125,19 +127,35 @@ class TermDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)
 
   // List with all the available sorting fields.
   val sortingFields = Seq("id", "order", "date", "deadline", "done")
-  // Defines a sorting function for the pair (field, order)
-  def sortingFunc(fieldsWithOrder: (String, Boolean)): (Term, Term) => Boolean = fieldsWithOrder match {
-    case ("id", ASC) => _.id < _.id
-    case ("id", DESC) => _.id > _.id
-    case ("order", ASC) => _.order < _.order
-    case ("order", DESC) => _.order > _.order
-    case ("date", ASC) => _.date before _.date
-    case ("date", DESC) => _.date after _.date
-    case ("deadline", ASC) => (a, b) => a.deadline.exists(ad => b.deadline.forall(bd => ad before bd))
-    case ("deadline", DESC) => (a, b) => a.deadline.exists(ad => b.deadline.forall(bd => ad after bd))
-    case ("done", ASC) => _.done > _.done
-    case ("done", DESC) => _.done < _.done
-    case _ => (_, _) => false
+
+  private def filterSort(phaseId: Long, done: Option[Boolean], fieldsWithOrder: (String, Boolean)): Future[Seq[Term]] = {
+    val b = terms.filter(_.phaseId === phaseId).filter(_.done === done)
+    fieldsWithOrder match {
+      case ("id", ASC) => db.run { b.sortBy(_.id.asc).result }
+      case ("id", DESC) => db.run { b.sortBy(_.id.desc).result }
+      case ("order", ASC) => db.run { b.sortBy(_.order.asc).result }
+      case ("order", DESC) => db.run { b.sortBy(_.order.desc).result }
+      case ("date", ASC) => db.run { b.sortBy(_.date.asc).result }
+      case ("date", DESC) => db.run { b.sortBy(_.date.desc).result }
+      case ("deadline", ASC) => db.run { b.sortBy(_.deadline.asc).result }
+      case ("deadline", DESC) => db.run { b.sortBy(_.deadline.asc).result }
+      case ("done", ASC) => db.run { b.sortBy(_.done.asc).result }
+      case ("done", DESC) => db.run { b.sortBy(_.done.desc).result }
+      case _ => db.run { b.result }
+    }
+  }
+
+  def createPage(phases: Seq[Term], p: Int, s: Int): Page[Term] = {
+    Page(
+      items = phases.slice((p - 1) * s, (p - 1) * s + s),
+      page = p,
+      size = s,
+      total = phases.size)
+  }
+
+  def page(userId: Long, done: Option[Boolean], sortingFields: Seq[(String, Boolean)], p: Int, s: Int) = {
+    filterSort(userId, done, sortingFields.head)
+      .map(seq => createPage(seq, p, s))
   }
 
 }

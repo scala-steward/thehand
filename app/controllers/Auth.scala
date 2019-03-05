@@ -12,12 +12,13 @@ import api.ApiController
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import javax.inject.Inject
+import play.api.db.slick.DatabaseConfigProvider
 
 import scala.language.postfixOps
 import play.api.i18n.Langs
 
-class Auth @Inject() (l: Langs, mcc: MessagesControllerComponents, system: ActorSystem)
-  extends ApiController(l, mcc) {
+class Auth @Inject() (override val dbc: DatabaseConfigProvider, l: Langs, mcc: MessagesControllerComponents, system: ActorSystem)
+  extends ApiController(dbc, l, mcc) {
 
   implicit val loginInfoReads: Reads[(String, String)] =
     (__ \ "email").read[String](Reads.email) and

@@ -1,9 +1,7 @@
 package dao
 
-package dao
-
 import api.ApiRequestHeader
-import javax.inject.Inject
+import javax.inject.{ Inject, Singleton }
 import models._
 import org.joda.time.DateTime
 import play.api.db.slick.{ DatabaseConfigProvider, HasDatabaseConfigProvider }
@@ -16,10 +14,11 @@ import scala.concurrent.{ ExecutionContext, Future }
 trait ApiLogComponent { self: HasDatabaseConfigProvider[JdbcProfile] =>
   import profile.api._
 
-  object PortableJodaSupport extends com.github.tototoshi.slick.GenericJodaSupport(dbConfig.profile)
-  import PortableJodaSupport._
-
+  @Singleton
   class ApiLogTable(tag: Tag) extends Table[ApiLog](tag, "API_LOG") {
+    object PortableJodaSupport extends com.github.tototoshi.slick.GenericJodaSupport(dbConfig.profile)
+    import PortableJodaSupport._
+
     def date = column[DateTime]("date")
     def ip = column[String]("ip")
     def apiKey = column[Option[String]]("api_key")

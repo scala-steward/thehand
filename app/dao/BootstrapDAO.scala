@@ -2,7 +2,7 @@ package dao
 
 import scala.concurrent.duration._
 import scala.language.postfixOps
-import javax.inject.Inject
+import javax.inject.{ Inject, Singleton }
 import models._
 import play.api.db.slick.{ DatabaseConfigProvider, HasDatabaseConfigProvider }
 import slick.jdbc.JdbcProfile
@@ -11,6 +11,7 @@ import telemetrics.HandLogger
 import scala.concurrent.{ Await, ExecutionContext, Future }
 import scala.util.{ Failure, Success }
 
+@Singleton
 class BootstrapDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(implicit executionContext: ExecutionContext)
   extends AuthorComponent
   with CommitComponent
@@ -18,14 +19,30 @@ class BootstrapDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProv
   with CommitTaskComponent
   with TaskComponent
   with PersonComponent
+  with ApiKeyComponent
+  with ApiTokenComponent
+  with ApiLogComponent
+  with PhaseComponent
+  with TermComponent
   with HasDatabaseConfigProvider[JdbcProfile] {
 
   import profile.api._
 
   def createSchemas(): Unit = {
+    val apiLog = TableQuery[ApiLogTable]((tag: Tag) => new ApiLogTable(tag))
+    val apiToken = TableQuery[ApiTokenTable]((tag: Tag) => new ApiTokenTable(tag))
+    val apiKey = TableQuery[ApiKeyTable]((tag: Tag) => new ApiKeyTable(tag))
+    val phase = TableQuery[PhaseTable]((tag: Tag) => new PhaseTable(tag))
+    val term = TableQuery[TermTable]((tag: Tag) => new TermTable(tag))
     val person = TableQuery[PeopleTable]((tag: Tag) => new PeopleTable(tag))
-    exec(person.schema.create.asTry) onComplete {
-      case Success(_) => HandLogger.debug("correct create tables")
+
+    exec(apiLog.schema.create.asTry andThen
+      apiToken.schema.create.asTry andThen
+      apiKey.schema.create.asTry andThen
+      phase.schema.create.asTry andThen
+      term.schema.create.asTry andThen
+      person.schema.create.asTry) onComplete {
+      case Success(_) => HandLogger.debug("correct create default tables")
       case Failure(e) =>
         HandLogger.error("error in create tables " + e.getMessage)
     }

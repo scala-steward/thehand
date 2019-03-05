@@ -2,7 +2,7 @@ package dao
 
 import java.util.UUID
 
-import javax.inject.Inject
+import javax.inject.{ Inject, Singleton }
 import models._
 import org.joda.time.DateTime
 import play.api.db.slick.{ DatabaseConfigProvider, HasDatabaseConfigProvider }
@@ -13,10 +13,11 @@ import scala.concurrent.{ ExecutionContext, Future }
 trait ApiTokenComponent { self: HasDatabaseConfigProvider[JdbcProfile] =>
   import profile.api._
 
-  object PortableJodaSupport extends com.github.tototoshi.slick.GenericJodaSupport(dbConfig.profile)
-  import PortableJodaSupport._
-
+  @Singleton
   class ApiTokenTable(tag: Tag) extends Table[ApiToken](tag, "API_TOKENS") {
+    object PortableJodaSupport extends com.github.tototoshi.slick.GenericJodaSupport(dbConfig.profile)
+    import PortableJodaSupport._
+
     def token: Rep[String] = column[String]("token", O.Unique)
     def apiKey: Rep[String] = column[String]("api_key")
     def expirationTime: Rep[DateTime] = column[DateTime]("expiration_time")

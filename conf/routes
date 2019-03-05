@@ -19,24 +19,24 @@ PUT			/account						controllers.Account.update
 PUT			/account/password		controllers.Account.updatePassword
 DELETE	/account						controllers.Account.delete
 
-# FOLDERS
-GET			/folders						controllers.Folders.list(sort: Option[String], page: Int ?= 1, size: Int ?= 10)
-POST		/folders						controllers.Folders.insert
-GET			/folders/:id				controllers.Folders.info(id: Long)
-PUT			/folders/:id				controllers.Folders.update(id: Long)
-PUT			/folders/:id/order/:newOrder	controllers.Folders.updateOrder(id: Long, newOrder: Int)
-DELETE	/folders/:id				controllers.Folders.delete(id: Long)
+# PHASES
+GET			/phases						controllers.PhasesController.list(sort: Option[String], page: Int ?= 1, size: Int ?= 10)
+POST		/phases						controllers.PhasesController.insert
+GET			/phases/:id				controllers.PhasesController.info(id: Long)
+PUT			/phases/:id				controllers.PhasesController.update(id: Long)
+PUT			/phases/:id/order/:newOrder	controllers.PhasesController.updateOrder(id: Long, newOrder: Int)
+DELETE	/phases/:id				controllers.PhasesController.delete(id: Long)
 
-# TASKS
-GET			/folders/:id/tasks	controllers.Tasks.list(id: Long, q: Option[String], done: Option[Boolean], sort: Option[String], page: Int ?= 1, size: Int ?= 10)
-POST		/folders/:id/tasks	controllers.Tasks.insert(id: Long)
-GET			/tasks/:id					controllers.Tasks.info(id: Long)
-PUT			/tasks/:id					controllers.Tasks.update(id: Long)
-PUT			/tasks/:id/order/:newOrder	controllers.Tasks.updateOrder(id: Long, newOrder: Int)
-PUT			/tasks/:id/folder/:folder		controllers.Tasks.updateFolder(id: Long, folder: Long)
-PUT			/tasks/:id/done			controllers.Tasks.updateDone(id: Long, done: Boolean = true)
-DELETE	/tasks/:id/done			controllers.Tasks.updateDone(id: Long, done: Boolean = false)
-DELETE	/tasks/:id					controllers.Tasks.delete(id: Long)
+# TERM
+GET			/phases/:id/term	controllers.TermController.list(id: Long, done: Option[Boolean], sort: Option[String], page: Int ?= 1, size: Int ?= 10)
+POST		/phases/:id/term	controllers.TermController.insert(id: Long)
+GET			/term/:id					controllers.TermController.info(id: Long)
+PUT			/term/:id					controllers.TermController.update(id: Long)
+PUT			/term/:id/order/:newOrder	controllers.TermController.updateOrder(id: Long, newOrder: Int)
+PUT			/term/:id/folder/:folder		controllers.TermController.updateFolder(id: Long, folder: Long)
+PUT			/term/:id/done			controllers.TermController.updateDone(id: Long, done: Boolean = true)
+DELETE	/term/:id/done			controllers.TermController.updateDone(id: Long, done: Boolean = false)
+DELETE	/term/:id					controllers.TermController.delete(id: Long)
 
 # SHOW FAKE DB DATA
 # Auxiliar to check the FakeDB information. It's only for testing purpose. You should remove it.

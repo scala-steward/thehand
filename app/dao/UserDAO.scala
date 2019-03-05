@@ -1,7 +1,6 @@
 package dao
 
-import javax.inject.Inject
-
+import javax.inject.{ Inject, Singleton }
 import models._
 import play.api.db.slick.{ DatabaseConfigProvider, HasDatabaseConfigProvider }
 import slick.jdbc.JdbcProfile
@@ -11,6 +10,7 @@ import scala.concurrent.{ ExecutionContext, Future }
 trait UserComponent { self: HasDatabaseConfigProvider[JdbcProfile] =>
   import profile.api._
 
+  @Singleton
   class UserTable(tag: Tag) extends Table[User](tag, "USERS") {
     def email = column[String]("email", O.Unique)
     def password = column[String]("password")

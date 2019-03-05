@@ -11,10 +11,10 @@ import scala.concurrent.{ ExecutionContext, Future }
 trait CommitComponent extends AuthorComponent { self: HasDatabaseConfigProvider[JdbcProfile] =>
   import profile.api._
 
-  object PortableJodaSupport extends com.github.tototoshi.slick.GenericJodaSupport(dbConfig.profile)
-  import PortableJodaSupport._
-
   class CommitTable(tag: Tag, suffix: Suffix) extends Table[CommitEntry](tag, suffix.suffix + "commits") {
+    object PortableJodaSupport extends com.github.tototoshi.slick.GenericJodaSupport(dbConfig.profile)
+    import PortableJodaSupport._
+
     def message: Rep[Option[String]] = column[Option[String]]("message")
     def date: Rep[Option[DateTime]] = column[Option[DateTime]]("date")
     def revision: Rep[Long] = column[Long]("revision", O.Unique)
