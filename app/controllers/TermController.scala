@@ -1,5 +1,7 @@
 package controllers
 
+import java.time.LocalDate
+
 import api._
 import api.ApiError._
 import play.api.mvc._
@@ -28,7 +30,7 @@ class TermController @Inject() (override val dbc: DatabaseConfigProvider, l: Lan
   // Returns the task information within the content body, but not the Location header.
   def insert(folderId: Long): Action[JsValue] = SecuredApiActionWithBody { implicit request =>
     readFromRequest[Term] { term =>
-      termDao.insert(folderId, term.text, java.sql.Date.valueOf(new java.util.Date().toString), term.deadline).flatMap {
+      termDao.insert(folderId, term.text, java.time.LocalDate.now(), term.deadline).flatMap {
         case (newTerm) => created(newTerm)
       }
     }

@@ -51,6 +51,19 @@ class BootstrapDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProv
     }
   }
 
+  def populateWithFixture() = {
+    val apiKey = TableQuery[ApiKeyTable]((tag: Tag) => new ApiKeyTable(tag))
+    val phase = TableQuery[PhaseTable]((tag: Tag) => new PhaseTable(tag))
+    val term = TableQuery[TermTable]((tag: Tag) => new TermTable(tag))
+    val user = TableQuery[UserTable]((tag: Tag) => new UserTable(tag))
+
+    val f = new FixtureDB
+    db.run((apiKey ++= f.apiKeys).asTry andThen
+      (user ++= f.users).asTry andThen
+      (phase ++= f.phases).asTry andFinally
+      (term ++= f.terms).asTry)
+  }
+
   def createSchemas(suffix: Suffix): Unit = {
     val commitTasks = TableQuery[CommitTasksTable]((tag: Tag) => new CommitTasksTable(tag, suffix))
     val tasks = TableQuery[TaskTable]((tag: Tag) => new TaskTable(tag, suffix))

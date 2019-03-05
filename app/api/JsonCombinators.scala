@@ -1,5 +1,7 @@
 package api
 
+import java.time.LocalDate
+
 import models._
 import java.util.Date
 
@@ -43,6 +45,6 @@ object JsonCombinators {
 
   implicit val termReads: Reads[Term] = (
     (__ \ "text").read[String](minLength[String](1)) and
-    (__ \ "deadline").readNullable[java.sql.Date])((text, deadline) => Term(0L, 0, text, null, deadline, done = false, 0L))
+    (__ \ "deadline").readNullable[LocalDate])((text, deadline) => Term(0L, 0, text, null, deadline, done = false, 0L))
 
 }

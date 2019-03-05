@@ -15,7 +15,7 @@ trait PhaseComponent { self: HasDatabaseConfigProvider[JdbcProfile] =>
   import profile.api._
 
   @Singleton
-  class PhaseTable(tag: Tag) extends Table[Phase](tag, "TERMS") {
+  class PhaseTable(tag: Tag) extends Table[Phase](tag, "PHASES") {
     def userId = column[Long]("user_id")
     def order = column[Long]("order")
     def name = column[String]("text")

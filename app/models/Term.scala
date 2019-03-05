@@ -1,6 +1,6 @@
 package models
 
-import java.sql.Date
+import java.time.LocalDate
 
 import play.api.libs.json.{ Json, OFormat }
 
@@ -8,8 +8,8 @@ case class Term(
   phaseId: Long,
   order: Long,
   text: String,
-  date: Date,
-  deadline: Option[Date],
+  date: LocalDate,
+  deadline: Option[LocalDate],
   done: Boolean,
   id: Long = 0L)
 

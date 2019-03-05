@@ -6,6 +6,7 @@ import api.Api.Sorting.{ ASC, DESC }
 import api.Page
 import javax.inject.{ Inject, Singleton }
 import models._
+import java.time.LocalDate
 import play.api.db.slick.{ DatabaseConfigProvider, HasDatabaseConfigProvider }
 import slick.jdbc.JdbcProfile
 
@@ -19,8 +20,8 @@ trait TermComponent { self: HasDatabaseConfigProvider[JdbcProfile] =>
     def phaseId = column[Long]("phase_id")
     def order = column[Long]("order")
     def text = column[String]("text")
-    def date = column[Date]("date")
-    def deadline = column[Option[Date]]("deadline")
+    def date = column[LocalDate]("date")
+    def deadline = column[Option[LocalDate]]("deadline")
     def done = column[Boolean]("done")
     def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
 
@@ -45,13 +46,13 @@ class TermDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)
     terms.filter(_.id === id).result.headOption
   }
 
-  def insert(phaseId: Long, text: String, date: Date, deadline: Option[Date]) = {
+  def insert(phaseId: Long, text: String, date: LocalDate, deadline: Option[LocalDate]) = {
     lastInPhase(phaseId)
       .flatMap(max =>
         db.run(terms += Term(phaseId, order = max + 1L, text, date, deadline, done = false)))
   }
 
-  def basicUpdate(id: Long, text: String, deadline: Option[Date]): Future[Int] = db.run {
+  def basicUpdate(id: Long, text: String, deadline: Option[LocalDate]): Future[Int] = db.run {
     for {
       u <- terms.filter(_.id === id).result.headOption
       i <- terms.update(u.get.copy(text = text, deadline = deadline)) if u.isDefined
