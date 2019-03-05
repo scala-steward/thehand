@@ -31,4 +31,7 @@ class ApiKeyDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
   def isActive(apiKey: String): Future[Option[Boolean]] = db.run {
     apiKeys.filter(_.apiKey === apiKey).map(_.active).result.headOption
   }
+
+  def delete(id: Long): Future[Unit] =
+    db.run(apiKeys.filter(_.id === id).delete).map(_ => ())
 }

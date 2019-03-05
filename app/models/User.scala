@@ -11,5 +11,5 @@ case class User(
   id: Long = 0L)
 
 object User {
-  implicit val taskManagerFormat: OFormat[UserFake] = Json.format[UserFake]
+  implicit val taskManagerFormat: OFormat[User] = Json.format[User]
 }

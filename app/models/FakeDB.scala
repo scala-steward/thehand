@@ -13,36 +13,36 @@ object FakeDB {
 
   // API KEYS
   val apiKeys = FakeTable(
-    1L -> ApiKeyFake(apiKey = "AbCdEfGhIjK1", name = "ios-app", active = true),
-    2L -> ApiKeyFake(apiKey = "AbCdEfGhIjK2", name = "android-app", active = true))
+    1L -> ApiKey(apiKey = "AbCdEfGhIjK1", name = "ios-app", active = true),
+    2L -> ApiKey(apiKey = "AbCdEfGhIjK2", name = "android-app", active = true))
 
   // TOKENS
-  val tokens: FakeTable[ApiTokenFake] = FakeTable[ApiTokenFake]()
+  val tokens: FakeTable[ApiToken] = FakeTable[ApiToken]()
 
   // API REQUEST LOG
-  val logs: FakeTable[ApiLogFake] = FakeTable[ApiLogFake]()
+  val logs: FakeTable[ApiLog] = FakeTable[ApiLog]()
 
   // USERS
   val users = FakeTable(
-    1L -> UserFake(1L, "user1@mail.com", "123456", "User 1", emailConfirmed = true, active = true),
-    2L -> UserFake(2L, "user2@mail.com", "123456", "User 2", emailConfirmed = true, active = true),
-    3L -> UserFake(3L, "user3@mail.com", "123456", "User 3", emailConfirmed = true, active = true))
+    1L -> User("user1@mail.com", "123456", "User 1", emailConfirmed = true, active = true, 1L),
+    2L -> User("user2@mail.com", "123456", "User 2", emailConfirmed = true, active = true, 2L),
+    3L -> User("user3@mail.com", "123456", "User 3", emailConfirmed = true, active = true, 3L))
 
   // FOLDERS
   val folders = FakeTable(
-    1L -> FolderFake(1L, 1L, 0, "Personal"),
-    2L -> FolderFake(2L, 1L, 1, "Work"),
-    3L -> FolderFake(3L, 1L, 2, "Home"))
+    1L -> Phase(1L, 0, "Personal", 1L),
+    2L -> Phase(1L, 1, "Work", 2L),
+    3L -> Phase(1L, 2, "Home", 3L))
 
   // TASKS
   val tasks = FakeTable(
-    1L -> TaskFake(1L, 1L, 0, "Shirts on dry cleaner", dt.parse("2015-09-06 10:11:00"), Some(dt.parse("2015-09-08 17:00:00")), done = true),
-    2L -> TaskFake(2L, 1L, 1, "Gift for Mum's birthday", dt.parse("2015-09-05 12:24:32"), Some(dt.parse("2015-10-22 00:00:00")), done = false),
-    3L -> TaskFake(3L, 1L, 2, "Plan the Barcelona's trip", dt.parse("2015-09-06 14:41:11"), None, done = false),
-    4L -> TaskFake(4L, 2L, 0, "Check monday's report", dt.parse("2015-09-06 09:21:00"), Some(dt.parse("2015-09-08 18:00:00")), done = false),
-    5L -> TaskFake(5L, 2L, 1, "Call conference with Jonh", dt.parse("2015-09-06 11:37:00"), Some(dt.parse("2015-09-07 18:00:00")), done = false),
-    6L -> TaskFake(6L, 3L, 0, "Fix the lamp", dt.parse("2015-08-16 21:22:00"), None, done = false),
-    7L -> TaskFake(7L, 3L, 1, "Buy coffee", dt.parse("2015-09-05 08:12:00"), None, done = false))
+    1L -> Term(1L, 0, "Shirts on dry cleaner", java.sql.Date.valueOf("2015-09-06 10:11:00"), Some(java.sql.Date.valueOf("2015-09-08 17:00:00")), done = true, 1L),
+    2L -> Term(1L, 1, "Gift for Mum's birthday", java.sql.Date.valueOf("2015-09-05 12:24:32"), Some(java.sql.Date.valueOf("2015-10-22 00:00:00")), done = false, 2L),
+    3L -> Term(1L, 2, "Plan the Barcelona's trip", java.sql.Date.valueOf("2015-09-06 14:41:11"), None, done = false, 3L),
+    4L -> Term(2L, 0, "Check monday's report", java.sql.Date.valueOf("2015-09-06 09:21:00"), Some(java.sql.Date.valueOf("2015-09-08 18:00:00")), done = false, 4L),
+    5L -> Term(2L, 1, "Call conference with Jonh", java.sql.Date.valueOf("2015-09-06 11:37:00"), Some(java.sql.Date.valueOf("2015-09-07 18:00:00")), done = false, 5L),
+    6L -> Term(3L, 0, "Fix the lamp", java.sql.Date.valueOf("2015-08-16 21:22:00"), None, done = false, 6L),
+    7L -> Term(3L, 1, "Buy coffee", java.sql.Date.valueOf("2015-09-05 08:12:00"), None, done = false, 7L))
 
   /*
 	* Fake table that emulates a SQL table with an auto-increment index

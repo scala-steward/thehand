@@ -2,14 +2,13 @@ package api
 
 import api.ApiError._
 import api.Api.Sorting._
-import dao.{ ApiKeyDAO, ApiTokenDAO }
+import dao.{ ApiKeyDAO, ApiLogDAO, ApiTokenDAO }
 import javax.inject.Inject
-import models.{ ApiKeyFake, ApiTokenFake }
 import org.joda.time.DateTime
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.mvc._
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import play.api.i18n.{ Lang, Langs, Messages }
 
@@ -24,6 +23,7 @@ class ApiController @Inject() (val dbc: DatabaseConfigProvider, l: Langs, mcc: M
 
   val apiKeyDao = new ApiKeyDAO(dbc)
   val apiTokenDao = new ApiTokenDAO(dbc)
+  val apiLogDao = new ApiLogDAO(dbc)
 
   //val messagesApi: MessagesApi
   implicit val m: Messages = mcc.messagesApi.preferred(l.availables)
@@ -70,6 +70,7 @@ class ApiController @Inject() (val dbc: DatabaseConfigProvider, l: Langs, mcc: M
       case response: ApiResponse => response.toResult
     }
   }
+
   // Basic Api Action
   private def ApiActionWithParser[A](parser: BodyParser[A])(action: ApiRequest[A] => Future[ApiResult]) =
     ApiActionCommon(parser) { (apiRequest, apiKey, _) =>

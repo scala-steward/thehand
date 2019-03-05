@@ -3,8 +3,9 @@ package controllers
 import api.ApiController
 import api.ApiError._
 import api.JsonCombinators._
-import models.{ ApiTokenFake, UserFake }
+import models.{ ApiToken, User }
 import play.api.mvc._
+import dao.UserDAO
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import javax.inject.Inject
@@ -16,14 +17,16 @@ import play.api.i18n.Langs
 class Account @Inject() (override val dbc: DatabaseConfigProvider, l: Langs, mcc: MessagesControllerComponents)
   extends ApiController(dbc, l, mcc) {
 
+  val userDao = new UserDAO(dbc)
+
   def info: Action[Unit] = SecuredApiAction { implicit request =>
-    maybeItem(UserFake.findById(request.userId))
+    maybeItem(userDao.findById(request.userId))
   }
 
   def update: Action[JsValue] = SecuredApiActionWithBody { implicit request =>
-    readFromRequest[UserFake] { user =>
-      UserFake.update(request.userId, user.name).flatMap { isOk =>
-        if (isOk) noContent() else errorInternal
+    readFromRequest[User] { user =>
+      userDao.update(request.userId, user.name).flatMap { isOk =>
+        if (isOk != 0) noContent() else errorInternal
       }
     }
   }
@@ -35,19 +38,19 @@ class Account @Inject() (override val dbc: DatabaseConfigProvider, l: Langs, mcc
   def updatePassword: Action[JsValue] = SecuredApiActionWithBody { implicit request =>
     readFromRequest[(String, String)] {
       case (oldPwd, newPwd) =>
-        UserFake.findById(request.userId).flatMap {
+        userDao.findById(request.userId).flatMap {
           case None => errorUserNotFound
           case Some(user) if oldPwd != user.password => errorCustom("api.error.reset.pwd.old.incorrect")
-          case Some(_) => UserFake.updatePassword(request.userId, newPwd).flatMap { isOk =>
-            if (isOk) noContent() else errorInternal
+          case Some(_) => userDao.updatePassword(request.userId, newPwd).flatMap { isOk =>
+            if (isOk != 0) noContent() else errorInternal
           }
         }
     }
   }
 
   def delete: Action[Unit] = SecuredApiAction { implicit request =>
-    ApiTokenFake.delete(request.token).flatMap { _ =>
-      UserFake.delete(request.userId).flatMap { _ =>
+    apiTokenDao.delete(request.token).flatMap { _ =>
+      userDao.delete(request.userId).flatMap { _ =>
         noContent()
       }
     }

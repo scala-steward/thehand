@@ -1,7 +1,7 @@
 package controllers
 
 import api._
-import models.UserFake
+import dao.UserDAO
 import play.api.mvc._
 import play.api.libs.json._
 
@@ -13,8 +13,10 @@ import play.api.i18n.Langs
 class Users @Inject() (override val dbc: DatabaseConfigProvider, l: Langs, mcc: MessagesControllerComponents)
   extends ApiController(dbc, l, mcc) {
 
+  val userDao = new UserDAO(dbc)
+
   def usernames: Action[Unit] = ApiAction { implicit request =>
-    UserFake.list.flatMap { list =>
+    userDao.list.flatMap { list =>
       ok(list.map(u => Json.obj("id" -> u.id, "name" -> u.name)))
     }
   }

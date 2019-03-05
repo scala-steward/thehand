@@ -2,7 +2,6 @@ package api
 
 import ApiResponse._
 import ApiError._
-import models.ApiLogFake
 import play.api.mvc.Results._
 import play.api.mvc.{ Result, RequestHeader }
 import play.api.libs.json._
@@ -26,7 +25,7 @@ trait ApiResult {
   //  }
 
   def saveLog[R <: RequestHeader](request: ApiRequestHeader[R]): ApiResult = {
-    ApiLogFake.insert(request, status, json)
+    //HIRO ApiLogFake.insert(request, status, json)
     this
   }
 

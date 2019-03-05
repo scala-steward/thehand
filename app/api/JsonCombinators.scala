@@ -1,6 +1,6 @@
 package api
 
-import models.{ TaskFake, _ }
+import models._
 import java.util.Date
 
 import play.api.libs.json._
@@ -15,34 +15,34 @@ object JsonCombinators {
 
   implicit val dateReads: Reads[Date] = Reads.dateReads("dd-MM-yyyy HH:mm:ss")
 
-  implicit val userWrites: Writes[UserFake] = (u: UserFake) => Json.obj(
-    "id" -> u.id,
+  implicit val userWrites: Writes[User] = (u: User) => Json.obj(
     "email" -> u.email,
-    "name" -> u.name)
+    "name" -> u.name,
+    "id" -> u.id)
 
-  implicit val userReads: Reads[UserFake] =
-    (__ \ "name").read[String](minLength[String](1)).map(name => UserFake(0L, null, null, name, emailConfirmed = false, active = false))
+  implicit val userReads: Reads[User] =
+    (__ \ "name").read[String](minLength[String](1)).map(name => User(null, null, name, emailConfirmed = false, active = false, 0L))
 
-  implicit val folderWrites: Writes[FolderFake] = (f: FolderFake) => Json.obj(
-    "id" -> f.id,
+  implicit val phasesWrites: Writes[Phase] = (f: Phase) => Json.obj(
     "userId" -> f.userId,
     "order" -> f.order,
-    "name" -> f.name)
+    "name" -> f.name,
+    "id" -> f.id)
 
-  implicit val folderReads: Reads[FolderFake] =
-    (__ \ "name").read[String](minLength[String](1)).map(name => FolderFake(0L, 0L, 0, name))
+  implicit val phasesReads: Reads[Phase] =
+    (__ \ "name").read[String](minLength[String](1)).map(name => Phase(0L, 0, name, 0L))
 
-  implicit val taskWrites: Writes[TaskFake] = (t: TaskFake) => Json.obj(
-    "id" -> t.id,
-    "folderId" -> t.folderId,
+  implicit val termWrites: Writes[Term] = (t: Term) => Json.obj(
+    "folderId" -> t.phaseId,
     "order" -> t.order,
     "text" -> t.text,
     "date" -> t.date,
     "deadline" -> t.deadline,
-    "done" -> t.done)
+    "done" -> t.done,
+    "id" -> t.id)
 
-  implicit val taskReads: Reads[TaskFake] = (
+  implicit val termReads: Reads[Term] = (
     (__ \ "text").read[String](minLength[String](1)) and
-    (__ \ "deadline").readNullable[Date])((text, deadline) => TaskFake(0L, 0L, 0, text, null, deadline, done = false))
+    (__ \ "deadline").readNullable[java.sql.Date])((text, deadline) => Term(0L, 0, text, null, deadline, done = false, 0L))
 
 }
