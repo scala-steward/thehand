@@ -8,17 +8,17 @@ import org.joda.time.DateTime
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.mvc._
 
-import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{ ExecutionContext, Future }
 import play.api.i18n.{ Lang, Langs, Messages }
 
 import scala.util.{ Failure, Success }
 import play.api.libs.json._
+import telemetrics.HandLogger
 
 /*
 * Controller for the API
 */
-class ApiController @Inject() (val dbc: DatabaseConfigProvider, l: Langs, mcc: MessagesControllerComponents)
+class ApiController @Inject() (val dbc: DatabaseConfigProvider, l: Langs, mcc: MessagesControllerComponents)(implicit executionContext: ExecutionContext)
   extends MessagesAbstractController(mcc) {
 
   val apiKeyDao = new ApiKeyDAO(dbc)
@@ -57,6 +57,7 @@ class ApiController @Inject() (val dbc: DatabaseConfigProvider, l: Langs, mcc: M
   private def ApiActionCommon[A](parser: BodyParser[A])(action: (ApiRequest[A], String, DateTime) => Future[ApiResult]) = Action.async(parser) { implicit request =>
     val apiRequest = ApiRequest(request)
     implicit val lang: Lang = request.messages.lang
+
     val futureApiResult: Future[ApiResult] = apiRequest.apiKeyOpt match {
       case None => errorApiKeyNotFound
       case Some(apiKey) => apiRequest.dateOptTry match {
@@ -80,16 +81,19 @@ class ApiController @Inject() (val dbc: DatabaseConfigProvider, l: Langs, mcc: M
         case Some(true) => action(apiRequest)
       }
     }
-  // Secured Api Action that requires authentication. It checks the Request has the correct X-Auth-Token heaader
-  private def SecuredApiActionWithParser[A](parser: BodyParser[A])(action: SecuredApiRequest[A] => Future[ApiResult]) = ApiActionCommon(parser) { (apiRequest, apiKey, date) =>
-    apiRequest.tokenOpt match {
-      case None => errorTokenNotFound
-      case Some(token) => apiTokenDao.findByTokenAndApiKey(token, apiKey).flatMap {
-        case None => errorTokenUnknown
-        case Some(apiToken) if apiToken.isExpired =>
-          apiTokenDao.delete(token)
-          errorTokenExpired
-        case Some(apiToken) => action(SecuredApiRequest(apiRequest.request, apiKey, date, token, apiToken.userId))
+  // Secured Api Action that requires authentication. It checks the Request has the correct X-Auth-Token header
+  private def SecuredApiActionWithParser[A](parser: BodyParser[A])(action: SecuredApiRequest[A] => Future[ApiResult]) = {
+    ApiActionCommon(parser) { (apiRequest, apiKey, date) =>
+      apiRequest.tokenOpt match {
+        case None => errorTokenNotFound
+        case Some(token) => apiTokenDao.findByTokenAndApiKey(token, apiKey).flatMap {
+          case None => errorTokenUnknown
+          case Some(apiToken) if apiToken.isExpired => {
+            apiTokenDao.delete(token)
+            errorTokenExpired
+          }
+          case Some(apiToken) => action(SecuredApiRequest(apiRequest.request, apiKey, date, token, apiToken.userId))
+        }
       }
     }
   }

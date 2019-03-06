@@ -60,10 +60,6 @@ class ApiLogDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
       responseBody = if (json == JsNull) None else Some(Json.prettyPrint(json)))
   }
 
-  def delete(id: Long): Future[Int] = db.run {
-    val toDelete = for {
-      deleteLog <- logs.filter(_.id === id)
-    } yield deleteLog
-    toDelete.delete
-  }
+  def delete(id: Long): Future[Unit] =
+    db.run(logs.filter(_.id === id).delete).map(_ => ())
 }

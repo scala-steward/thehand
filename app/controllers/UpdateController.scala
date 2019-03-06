@@ -9,24 +9,34 @@
 
 package controllers
 
+import api.ApiController
 import javax.inject._
 import dao._
 import models.Suffix
+import play.api.db.slick.DatabaseConfigProvider
+import play.api.i18n.Langs
 import play.api.mvc._
 
-class UpdateController @Inject() (
-  dao: UpdateDAO,
-  cc: MessagesControllerComponents)
-  extends MessagesAbstractController(cc) {
+import scala.concurrent.ExecutionContext
 
-  def updateAll(): Action[AnyContent] = Action {
+class UpdateController @Inject() (override val dbc: DatabaseConfigProvider, dao: UpdateDAO, l: Langs, mcc: MessagesControllerComponents)(implicit executionContext: ExecutionContext)
+  extends ApiController(dbc, l, mcc) {
+
+  def unsafeUpdateAll(): Action[AnyContent] = Action {
     dao.updateAll()
     Ok("Updated All")
   }
 
-  def update(suffix: String, from: Option[Long], to: Option[Long]): Action[AnyContent] = Action {
+  def updateAll(): Action[Unit] = SecuredApiAction { implicit request =>
+    dao.updateAll().flatMap { _ =>
+      noContent()
+    }
+  }
+
+  def update(suffix: String, from: Option[Long], to: Option[Long]): Action[Unit] = SecuredApiAction { implicit request =>
     val s = Suffix(suffix)
-    dao.update(s, from, to)
-    Ok("Updated")
+    dao.update(s, from, to).flatMap { _ =>
+      noContent()
+    }
   }
 }

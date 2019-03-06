@@ -49,8 +49,8 @@ class UpdateDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
     repository.flatMap(rep => rep.updateRange((from, to)))
   }
 
-  def update(suffix: Suffix, from: Option[Long], to: Option[Long]): Any = {
-    if (from.isDefined && to.isDefined) updateRepositoryRange(suffix.suffix, from.get, to.get)
+  def update(suffix: Suffix, from: Option[Long], to: Option[Long]) = {
+    updateRepositoryRange(suffix.suffix, from.getOrElse(-1), to.getOrElse(-1))
   }
 
   def updateAll(): Future[Seq[Int]] = {

@@ -7,14 +7,15 @@ import models.{ ApiToken, User }
 import play.api.mvc._
 import dao.UserDAO
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import javax.inject.Inject
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 import play.api.i18n.Langs
 
-class Account @Inject() (override val dbc: DatabaseConfigProvider, l: Langs, mcc: MessagesControllerComponents)
+import scala.concurrent.ExecutionContext
+
+class Account @Inject() (override val dbc: DatabaseConfigProvider, l: Langs, mcc: MessagesControllerComponents)(implicit executionContext: ExecutionContext)
   extends ApiController(dbc, l, mcc) {
 
   val userDao = new UserDAO(dbc)

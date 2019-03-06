@@ -15,9 +15,4 @@ class BootstrapController @Inject() (
     dao.createSchemas()
     Ok("run")
   }
-
-  def populateWithFixture(): Action[AnyContent] = Action {
-    dao.populateWithFixture()
-    Ok("populate")
-  }
 }

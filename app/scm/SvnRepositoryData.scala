@@ -39,8 +39,19 @@ class SvnRepositoryData @Inject() (protected val dbConfigProvider: DatabaseConfi
     if (lastIdDB != lastIdSvn) (lastIdDB, lastIdSvn) else (1, 1)
   }
 
+  def fixRange(range: (Long, Long)): (Long, Long) = {
+    lazy val last = repository.latestId
+    range match {
+      case (from, to) if from < 1 && ((to < 1) || (to > last)) => (1, last)
+      case (from, to) if from < 1 => (1, to)
+      case (from, to) if to > last => (from, last)
+      case (from, to) => (from, to)
+    }
+  }
+
   def updateRange(range: (Long, Long), steps: Long = 1000): Future[Seq[Int]] = {
-    doStep(range._1, range._2, steps)
+    val r = fixRange(range)
+    doStep(r._1, r._2, steps)
   }
 
   def doStep(from: Long, to: Long, step: Long): Future[Seq[Int]] = {

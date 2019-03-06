@@ -34,6 +34,7 @@ class UserDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)
   def findById(id: Long): Future[Option[User]] = db.run {
     users.filter(_.id === id).result.headOption
   }
+
   def findByEmail(email: String): Future[Option[User]] = db.run {
     users.filter(_.email === email).result.headOption
   }
@@ -44,7 +45,7 @@ class UserDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)
       users.filter(_.email === email).result.headOption
   }
 
-  def confirmEmail(id: Long) = db.run {
+  def confirmEmail(id: Long): Future[Int] = db.run {
     for {
       u <- users.filter(_.id === id).result.headOption
       i <- users.update(u.get.copy(emailConfirmed = true, active = true)) if u.isDefined

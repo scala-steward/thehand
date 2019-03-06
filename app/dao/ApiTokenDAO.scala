@@ -56,20 +56,17 @@ class ApiTokenDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvi
   private def insert(token: String, apiKey: String, userId: Long) = {
     val expirationTime = new DateTime() plusMinutes 10
     (tokens += ApiToken(token, apiKey, expirationTime, userId)) andThen
-      tokens.filter(t => t.token === token).result.headOption
+      tokens.filter(t => t.token === token).map(_.token).result.headOption
   }
 
-  def create(apiKey: String, userId: Long): Future[Option[ApiToken]] = {
+  def create(apiKey: String, userId: Long): Future[Option[String]] = {
     newUUID.flatMap(token => db.run {
       insert(token, apiKey, userId)
     })
   }
 
-  def delete(token: String): Future[Int] = db.run {
-    val toDelete = for {
-      deleteToken <- tokens.filter(_.token === token)
-    } yield deleteToken
-    toDelete.delete
+  def delete(token: String) = {
+    db.run(tokens.filter(_.token === token).delete).map(_ => ())
   }
 
 }
