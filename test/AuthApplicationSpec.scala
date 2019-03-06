@@ -13,7 +13,7 @@ import play.api.mvc.Result
 
 import scala.concurrent.Future
 import scala.util.Try
-import play.api.libs.json.{ JsNull, Json }
+import play.api.libs.json.{ JsNull, JsValue, Json }
 
 class AuthApplicationSpec extends PlaySpecification with JsonMatchers {
 
@@ -108,9 +108,9 @@ class AuthApplicationSpec extends PlaySpecification with JsonMatchers {
         "/signin",
         Json.obj("email" -> "user1@mail.com", "password" -> "123456"))
       status(result) must equalTo(OK)
-      //      val response: JsValue = Json.parse(contentAsString(result))
-      //      (response \ "token").asOpt[String] must beSome
-      //      (response \ "minutes").asOpt[Int] must beSome
+      val response: JsValue = Json.parse(contentAsString(result))
+      (response \ "token").asOpt[String] must beSome
+      //(response \ "minutes").asOpt[Int] must beSome
     }
     "respond to authorized requests" in new Scope {
       signIn.map { token =>
