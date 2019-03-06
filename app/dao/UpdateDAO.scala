@@ -11,7 +11,8 @@ import tasks.{ TargetConnector, TaskConnector }
 
 import scala.concurrent.{ ExecutionContext, Future }
 
-class UpdateDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider, conf: play.api.Configuration)(implicit executionContext: ExecutionContext) extends HasDatabaseConfigProvider[JdbcProfile] {
+class UpdateDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider, conf: play.api.Configuration)(implicit executionContext: ExecutionContext)
+  extends HasDatabaseConfigProvider[JdbcProfile] {
   private implicit val target: TaskConnector = TargetConnector(
     conf.get[String]("target.url"),
     conf.get[String]("target.user"),
