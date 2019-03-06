@@ -13,9 +13,9 @@ import play.api.mvc.Result
 
 import scala.concurrent.Future
 import scala.util.Try
-import play.api.libs.json.{ JsNull, JsValue, Json }
+import play.api.libs.json.{ JsNull, Json }
 
-class ApplicationSpec extends PlaySpecification with JsonMatchers {
+class AuthApplicationSpec extends PlaySpecification with JsonMatchers {
 
   lazy val app = new GuiceApplicationBuilder().
     configure(
