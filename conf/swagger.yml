@@ -7,3 +7,31 @@ consumes:
 - application/json
 produces:
 - application/json
+securityDefinitions:
+  apiKey:
+    type: apiKey
+    in: header
+    name: X-API-Key
+  apiToken:
+    type: apiKey
+    in: header
+    name: X-AUTH-Token
+  apiDate:
+    type: apiKey
+    in: header
+    name: DATE
+  apiAcceptLanguage:
+    type: apiKey
+    in: header
+    name: Accept-Language
+security:
+- apiKey: [] # AbCdEfGhIjK1
+  apiDate: [] # Thu, 07 Mar 2019 18:16:07 GMT
+  apiAcceptLanguage: [] # en
+  apiToken: []
+
+#  # /path?api_key=AbCdEfGhIjK1
+#  APIKeyQueryParam:
+#    type: apiKey
+#    in: query
+#    name: api_key

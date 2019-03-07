@@ -3,9 +3,13 @@
 # ~~~~
 
 # WIP
+### NoDocs ###
 GET     /person                             controllers.PersonController.index
+### NoDocs ###
 POST    /person                             controllers.PersonController.addPerson
+### NoDocs ###
 #GET     /persons                           controllers.PersonController.getPersons
+### NoDocs ###
 GET     /test                               controllers.PersonController.test
 
 # AUTHENTICATION
@@ -48,7 +52,9 @@ DELETE	/api/v1/term/:id					controllers.TermController.delete(id: Long)
 GET     /api/v1/update                     controllers.UpdateController.updateAll
 
 # UNSAFE - COMMENT AFTER SETUP
+### NoDocs ###
 GET     /api/v1/unsafe/update              controllers.UpdateController.unsafeUpdateAll
+### NoDocs ###
 GET     /api/v1/unsafe/bootstrap           controllers.BootstrapController.createDefaultTables
 
 # SUFFIX
@@ -64,6 +70,7 @@ GET     /api/v1/:suffix/bugsfiles           controllers.ReportController.getFile
 GET     /api/v1/:suffix/bugsfiles/:author   controllers.ReportController.getAuthorBugs(author: String, suffix: String)
 
 # Map static resources from the /public folder to the /assets URL path
+### NoDocs ###
 GET     /assets/*file                       controllers.Assets.versioned(path="/public", file: Asset)
 
 ### NoDocs ###

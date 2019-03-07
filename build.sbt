@@ -43,7 +43,7 @@ lazy val root = (project in file(".")).settings(
 //  case x => MergeStrategy.last
 //}
 
-swaggerDomainNameSpaces := Seq("models")
+swaggerDomainNameSpaces := Seq("io.github.0um.models")
 
 scalacOptions ++= Seq(                 // for scala 2.12
   "-deprecation",                      // Emit warning and location for usages of deprecated APIs.

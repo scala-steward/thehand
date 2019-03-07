@@ -35,7 +35,7 @@ class AuthAPIV1Spec extends PlaySpecification with JsonMatchers {
   val basicHeaders = Headers(
     HEADER_CONTENT_TYPE -> "application/json",
     HEADER_ACCEPT_LANGUAGE -> "en",
-    HEADER_DATE -> printHeaderDate(new DateTime()),
+    HEADER_DATE -> printHeaderDate(new DateTime()), //Thu, 07 Mar 2019 18:16:07 GMT
     HEADER_API_KEY -> "AbCdEfGhIjK1")
   def basicHeadersWithToken(token: String): Headers = basicHeaders.add(HEADER_AUTH_TOKEN -> token)
 

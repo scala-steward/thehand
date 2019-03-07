@@ -20,8 +20,8 @@ object Api {
   final val HEADER_ACCEPT_LANGUAGE = "Accept-Language"
   final val HEADER_DATE = "Date"
   final val HEADER_LOCATION = "Location"
-  final val HEADER_API_KEY = "X-Api-Key"
-  final val HEADER_AUTH_TOKEN = "X-Auth-Token"
+  final val HEADER_API_KEY = "X-API-Key"
+  final val HEADER_AUTH_TOKEN = "X-AUTH-Token"
 
   final val HEADER_PAGE = "X-Page"
   final val HEADER_PAGE_FROM = "X-Page-From"
@@ -35,8 +35,7 @@ object Api {
   def locationHeader(uri: String): (String, String) = HEADER_LOCATION -> uri
   def locationHeader(call: Call)(implicit request: RequestHeader): (String, String) = locationHeader(call.absoluteURL())
 
-  // Date and joda.DateTime utils
-
+  // Date and joda.DateTime utils - Thu, 07 Mar 2019 18:16:07 GMT
   private final val longDateTimeFormatter = DateTimeFormat.forPattern("E, dd MMM yyyy HH:mm:ss 'GMT'").withLocale(Locale.ENGLISH).withZoneUTC()
   def parseHeaderDate(dateStr: String): DateTime = longDateTimeFormatter.parseDateTime(dateStr)
   def printHeaderDate(date: DateTime): String = longDateTimeFormatter.print(date)

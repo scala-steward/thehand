@@ -22,7 +22,6 @@ class Auth @Inject() (override val dbc: DatabaseConfigProvider, l: Langs, mcc: M
   extends ApiController(dbc, l, mcc) {
 
   val userDao = new UserDAO(dbc)
-  //val apiTokenDao = new ApiTokenDAO(dbc)
 
   implicit val loginInfoReads: Reads[(String, String)] =
     (__ \ "email").read[String](Reads.email) and
