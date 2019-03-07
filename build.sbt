@@ -3,8 +3,7 @@ import Dependencies._
 enablePlugins(PackPlugin)
 enablePlugins(PlayScala)
 
-lazy val root = (project in file(".")).
-  settings(
+lazy val root = (project in file(".")).settings(
     inThisBuild(List(
       organization := "io.github.0um",
       scalaVersion := "2.12.8",
@@ -34,14 +33,17 @@ lazy val root = (project in file(".")).
       "com.typesafe.play" %% "play-json-joda" % "2.7.1",
       "org.eclipse.jgit" % "org.eclipse.jgit" % "5.2.1.201812262042-r",
       specs2 % Test,
-      "org.specs2" %% "specs2-matcher-extra" % "4.4.1" % Test
+      "org.specs2" %% "specs2-matcher-extra" % "4.4.1" % Test,
+      "org.webjars" % "swagger-ui" % "2.2.0"
     )
-  )
+  ).enablePlugins(PlayScala, SwaggerPlugin)
 
 //assemblyMergeStrategy in assembly := {
 //  case PathList("META-INF", xs @ _*) => MergeStrategy.discard
 //  case x => MergeStrategy.last
 //}
+
+swaggerDomainNameSpaces := Seq("models")
 
 scalacOptions ++= Seq(                 // for scala 2.12
   "-deprecation",                      // Emit warning and location for usages of deprecated APIs.
