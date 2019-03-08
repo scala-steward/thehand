@@ -1,13 +1,14 @@
 import Dependencies._
 
-enablePlugins(PackPlugin)
+//enablePlugins(PackPlugin)
+enablePlugins(SwaggerPlugin)
 enablePlugins(PlayScala)
 
 lazy val root = (project in file(".")).settings(
     inThisBuild(List(
       organization := "io.github.0um",
       scalaVersion := "2.12.8",
-      version      := "0.1.1-SNAPSHOT"
+      version      := "0.1.2-SNAPSHOT"
     )),
     name := "thehand",
     //mainClass in Compile := Some("cross.MainControl"),
@@ -16,27 +17,26 @@ lazy val root = (project in file(".")).settings(
     libraryDependencies ++= Seq(
       guice,
       "org.tmatesoft.svnkit" % "svnkit" % "1.9.3",
-      "commons-codec" % "commons-codec" % "1.9",
-      "com.typesafe.play" % "play-json_2.12" % "2.7.0-M1",
-      "org.xerial" % "sqlite-jdbc" % "3.7.2",
-      "org.postgresql" % "postgresql" % "9.3-1100-jdbc41",
-      "com.h2database" % "h2" % "1.4.185",
-      "com.typesafe.slick" %% "slick" % "3.2.3",
-      "com.typesafe.scala-logging" % "scala-logging_2.12" % "3.9.0",
+      "commons-codec" % "commons-codec" % "1.12",
+      "org.postgresql" % "postgresql" % "42.2.5",
+      "com.h2database" % "h2" % "1.4.198",
       "ch.qos.logback" % "logback-classic" % "1.2.3",
-      "com.github.tototoshi" %% "slick-joda-mapper" % "2.3.0",
-      "com.typesafe" % "config" % "1.3.2",
-      "joda-time" % "joda-time" % "2.10",
-      "org.joda" % "joda-convert" % "2.1.1",
+      "com.github.tototoshi" %% "slick-joda-mapper" % "2.4.0",
+      "joda-time" % "joda-time" % "2.10.1",
+      "org.joda" % "joda-convert" % "2.2.0",
       "com.github.tototoshi" %% "scala-csv" % "1.3.5",
+      "com.typesafe" % "config" % "1.3.3",
+      "com.typesafe.scala-logging" % "scala-logging_2.12" % "3.9.2",
+      "com.typesafe.slick" %% "slick" % "3.3.0",
+      "com.typesafe.play" % "play-json_2.12" % "2.7.1",
       "com.typesafe.play" %% "play-slick" % "4.0.0",
       "com.typesafe.play" %% "play-json-joda" % "2.7.1",
       "org.eclipse.jgit" % "org.eclipse.jgit" % "5.2.1.201812262042-r",
       specs2 % Test,
       "org.specs2" %% "specs2-matcher-extra" % "4.4.1" % Test,
-      "org.webjars" % "swagger-ui" % "2.2.0"
+      "org.webjars" % "swagger-ui" % "2.2.10-1"
     )
-  ).enablePlugins(PlayScala, SwaggerPlugin)
+  )
 
 //assemblyMergeStrategy in assembly := {
 //  case PathList("META-INF", xs @ _*) => MergeStrategy.discard
@@ -44,6 +44,7 @@ lazy val root = (project in file(".")).settings(
 //}
 
 swaggerDomainNameSpaces := Seq("io.github.0um.models")
+swaggerPrettyJson := true
 
 scalacOptions ++= Seq(                 // for scala 2.12
   "-deprecation",                      // Emit warning and location for usages of deprecated APIs.

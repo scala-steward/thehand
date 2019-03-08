@@ -1,8 +1,8 @@
 ---
 swagger: "2.0"
 info:
-title: "The Hand API"
-description: "The Hand API"
+  title: "The Hand"
+  description: "API endpoints documentation"
 consumes:
 - application/json
 produces:
@@ -12,26 +12,26 @@ securityDefinitions:
     type: apiKey
     in: header
     name: X-API-Key
-  apiToken:
-    type: apiKey
-    in: header
-    name: X-AUTH-Token
+    description: Requests should pass an X-API-Key header.
   apiDate:
     type: apiKey
     in: header
-    name: DATE
+    name: Date
+    description: Date time in format Thu, 07 Mar 2019 18:16:07 GMT
   apiAcceptLanguage:
     type: apiKey
     in: header
     name: Accept-Language
+    description: Language abreviation en es pt (optional)
+    required: false
+  apiToken:
+    type: apiKey
+    in: header
+    name: X-AUTH-Token
+    description: Corresponding Auth Token X-AUTH-Token (only for secured requests)
+    required: false
 security:
-- apiKey: [] # AbCdEfGhIjK1
-  apiDate: [] # Thu, 07 Mar 2019 18:16:07 GMT
-  apiAcceptLanguage: [] # en
-  apiToken: []
-
-#  # /path?api_key=AbCdEfGhIjK1
-#  APIKeyQueryParam:
-#    type: apiKey
-#    in: query
-#    name: api_key
+- apiKey: []
+  apiDate: []
+- apiAcceptLanguage: []
+- apiToken: []
