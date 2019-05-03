@@ -54,8 +54,8 @@ class UpdateDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
   }
 
   def updateAll(): Future[Seq[Int]] = {
-    def repositories = Seq(
-      updateRepositoryAuto("demo_"))
+    val repSuffixes = conf.get[Seq[String]]("repos")
+    val repositories = repSuffixes.map(updateRepositoryAuto)
     Future.sequence(repositories).map(_.flatten)
   }
 
