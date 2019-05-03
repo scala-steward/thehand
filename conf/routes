@@ -56,6 +56,7 @@ GET     /api/v1/update                     controllers.UpdateController.updateAl
 GET     /api/v1/unsafe/update              controllers.UpdateController.unsafeUpdateAll
 ### NoDocs ###
 GET     /api/v1/unsafe/bootstrap           controllers.BootstrapController.createDefaultTables
+GET     /api/v1/unsafe/:suffix/boot        controllers.BootstrapController.createTables(suffix: String)
 
 # SUFFIX
 GET     /api/v1/:suffix/update              controllers.UpdateController.update(suffix: String, from: Option[Long], to: Option[Long])
@@ -63,6 +64,7 @@ GET     /api/v1/:suffix/authors             controllers.AuthorController.getAuth
 GET     /api/v1/:suffix/commits             controllers.CommitController.getCommits(suffix: String, revision: Option[Long])
 GET     /api/v1/:suffix/commitstasks        controllers.CommitTaskController.getCommitsTasks(suffix)
 GET     /api/v1/:suffix/commitsentryfiles   controllers.CommitEntryFileController.getCommitEntryFiles(suffix: String)
+GET     /api/v1/:suffix/customfields        controllers.CustomFieldsController.getCustomFields(suffix: String)
 GET     /api/v1/:suffix/entyfiles           controllers.EntryFileController.getEntryFiles(suffix: String)
 GET     /api/v1/:suffix/tasks               controllers.TaskController.getTask(suffix: String)
 GET     /api/v1/:suffix/authorsReport       controllers.ReportController.getAuthors(suffix: String)

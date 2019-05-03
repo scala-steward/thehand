@@ -25,6 +25,7 @@ class BootstrapDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProv
   with PhaseComponent
   with TermComponent
   with UserComponent
+  with CustomFieldsComponent
   with HasDatabaseConfigProvider[JdbcProfile] {
 
   import profile.api._
@@ -58,6 +59,7 @@ class BootstrapDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProv
     val authors = TableQuery[AuthorsTable]((tag: Tag) => new AuthorsTable(tag, suffix))
     val commits = TableQuery[CommitTable]((tag: Tag) => new CommitTable(tag, suffix))
     val commitsFiles = TableQuery[CommitEntryFileTable]((tag: Tag) => new CommitEntryFileTable(tag, suffix))
+    val customFields = TableQuery[CustomFiledsTable]((tag: Tag) => new CustomFiledsTable(tag, suffix))
 
     exec(
       tasks.schema.create.asTry andThen
@@ -65,7 +67,8 @@ class BootstrapDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProv
         commits.schema.create.asTry andThen
         files.schema.create.asTry andThen
         commitsFiles.schema.create.asTry andThen
-        commitTasks.schema.create.asTry) onComplete {
+        commitTasks.schema.create.asTry andThen
+        customFields.schema.create.asTry) onComplete {
         case Success(_) => HandLogger.debug("correct create tables")
         case Failure(e) =>
           HandLogger.error("error in create tables " + e.getMessage)

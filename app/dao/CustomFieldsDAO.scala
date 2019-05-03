@@ -11,7 +11,7 @@ import scala.concurrent.{ ExecutionContext, Future }
 trait CustomFieldsComponent { self: HasDatabaseConfigProvider[JdbcProfile] =>
   import profile.api._
 
-  class CustomFiledsTable(tag: Tag, suffix: Suffix) extends Table[CustomFields](tag, suffix.suffix + "task") {
+  class CustomFiledsTable(tag: Tag, suffix: Suffix) extends Table[CustomFields](tag, suffix.suffix + "customfields") {
     def requestType: Rep[Option[String]] = column[Option[String]]("request_type")
     def taskId: Rep[Long] = column[Long]("task_id", O.Unique)
     def id: Rep[Long] = column[Long]("id", O.PrimaryKey, O.AutoInc)
