@@ -99,7 +99,7 @@ target = {
   url = "YOUR URL"
 }
 ```
-
+ 
 ### Run
 ```
 > sbt run
