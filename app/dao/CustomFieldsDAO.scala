@@ -1,12 +1,11 @@
 package dao
 
 import javax.inject.Inject
-
-import models.{ CustomFields, Suffix }
-import play.api.db.slick.{ DatabaseConfigProvider, HasDatabaseConfigProvider }
+import models.{CustomFields, Suffix}
+import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.jdbc.JdbcProfile
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
 trait CustomFieldsComponent { self: HasDatabaseConfigProvider[JdbcProfile] =>
   import profile.api._
@@ -32,14 +31,14 @@ class CustomFieldsDAO @Inject() (protected val dbConfigProvider: DatabaseConfigP
       if (customId.isEmpty) customs += cf else customs.insertOrUpdate(cf.copy(id = customId.head))
     }
 
-    def taskQuery(cf: CustomFields) = {
+    def customQuery(cf: CustomFields) = {
       for {
         customId <- customs.filter(_.taskId === cf.taskId).map(_.id).result.headOption
         u <- updateInsert(cf, customId)
       } yield u
     }
 
-    DBIO.sequence(ts.map(taskQuery)).transactionally
+    DBIO.sequence(ts.map(customQuery)).transactionally
   }
 
   def countTasks(suffix: Suffix): Future[Int] = db.run {

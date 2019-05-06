@@ -27,6 +27,7 @@ class SvnRepositoryData @Inject() (protected val dbConfigProvider: DatabaseConfi
   lazy val tp = ProcessTargetConnector(taskConnector)
 
   lazy val daoTasks = new TaskDAO(dbConfigProvider)
+  lazy val daoCustomFields = new CustomFieldsDAO(dbConfigProvider)
   lazy val daoCommits = new CommitDAO(dbConfigProvider)
   lazy val daoAuthors = new AuthorDAO(dbConfigProvider)
   lazy val daoFiles = new EntryFileDAO(dbConfigProvider)
@@ -74,6 +75,7 @@ class SvnRepositoryData @Inject() (protected val dbConfigProvider: DatabaseConfi
     val insertAll: Future[Seq[Int]] =
       for {
         _ <- daoTasks.insert(extractor.extractTasks.flatMap(tp.process), suffix)
+        _ <- daoCustomFields.insert(extractor.extractTasks.flatMap(tp.processCustomFields), suffix)
         _ <- daoAuthors.insert(extractor.extractAuthors, suffix)
         _ <- daoCommits.insert(extractor.extractCommits, suffix)
         _ <- daoFiles.insert(extractor.extractFiles, suffix)
@@ -82,5 +84,4 @@ class SvnRepositoryData @Inject() (protected val dbConfigProvider: DatabaseConfi
       } yield c
     insertAll
   }
-
 }

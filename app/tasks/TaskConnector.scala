@@ -13,4 +13,6 @@ package tasks
 
 trait TaskConnector {
   def assignables(id: Long, options: String = ""): String
+
+  def customFields(id: Long, options: String = ""): String
 }

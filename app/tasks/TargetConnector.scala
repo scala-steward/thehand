@@ -52,7 +52,9 @@ class TargetConnector(url: String, user: String, password: String) extends TaskC
   }
 
   def jsonData(url: String, options: String): String = {
-    val response = Try { fromURL(url + "/?" + options + token + "&format=json").mkString }
+    val response = Try {
+      fromURL(url + "/?" + options + token + "&format=json").mkString
+    }
     response match {
       case Success(json) =>
         HandLogger.debug("get data from " + url)
@@ -102,6 +104,10 @@ class TargetConnector(url: String, user: String, password: String) extends TaskC
   def userTasks(id: Long, take: Option[String], options: String = "[Name,Project,Description,EntityType,Effort,Priority,TimeSpent,EntityState]"): String = {
     val takeOption = if (take.isEmpty) "" else "&take=" + take
     jsonData(url + "/Users/" + id.toString + "/Assignables", "&include=" + options + takeOption)
+  }
+
+  def customFields(id: Long, options: String = "[CustomFields]"): String = {
+    jsonData(url + "/Assignables/" + id.toString, "&include" + options)
   }
 }
 
