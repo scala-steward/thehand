@@ -22,46 +22,32 @@ object ProcessTargetConnector {
 }
 
 class ProcessTargetConnector(t: TaskConnector) {
-  private def parseTask(json: JsValue): Try[Task] = Try {
+  private def parseAssignableJson(json: JsValue): Option[Task] = {
     val typeTask = (json \ "EntityType" \ "Name").validateOpt[String].get
     val typeTaskId = (json \ "EntityType" \ "Id").validateOpt[Long].get
     val timeSpend = (json \ "TimeSpent").validateOpt[Double].get
     val parentId = (json \ "Project" \ "Id").validateOpt[Long].get
-    val id = (json \ "Id").validate[Long].get
-    Task(typeTask, typeTaskId, timeSpend, parentId, id)
-  }
-
-  private def parseAssignableJson(jsonValue: JsValue): Option[Task] = {
-    parseTask(jsonValue) match {
-      case Success(task) => Some(task)
-      case Failure(e) =>
-        HandLogger.error("error in parse the json task data " + e)
-        None
-    }
+    val id = (json \ "Id").validateOpt[Long].get
+    if (id.isDefined) Some(Task(typeTask, typeTaskId, timeSpend, parentId, id.get)) else None
   }
 
   private def filterRequestType(json: JsValue) : Boolean = {
-    (json \ "Name").validateOpt[String].get.getOrElse("") == "Request Type"
+    val name = (json \ "Name").validateOpt[String].get
+    name.isDefined && name.get == "Request Type"
   }
 
-  private def extractRequestType(json: JsValue) : Option[String] = {
-    (json \ "Value").validateOpt[String].get
-  }
+  private def parseCustomFieldJson(json: JsValue): Option[CustomFields] =  {
+    val requestType =
+      (json \ "CustomFields")
+      .validateOpt[JsArray]
+      .get
+      .filter(filterRequestType)
+      .map(js => (js \ "Value").validateOpt[String])
+      .map(_.get)
+      .getOrElse(None)
 
-  private def parseCustomField(json: JsValue): Try[CustomFields] = Try {
-    val customFields = (json \ "CustomFields").validateOpt[JsArray].get
-    val requestType = customFields.filter(filterRequestType).map(extractRequestType).getOrElse(None)
-    val id = (json \ "Id").validate[Long].get
-    CustomFields(requestType, id)
-  }
-
-  private def parseCustomFieldJson(jsonValue: JsValue): Option[CustomFields] = {
-    parseCustomField(jsonValue) match {
-      case Success(customFields) => Some(customFields)
-      case Failure(e) =>
-        HandLogger.error("error in parse the json custom field data " + e)
-        None
-    }
+    val id = (json \ "Id").validateOpt[Long].get
+    if (id.isDefined && requestType.isDefined) Some(CustomFields(requestType, id.get)) else None
   }
 
   def process(id: Long): Option[Task] = {
