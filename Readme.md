@@ -102,7 +102,7 @@ target = {
  
 ### Run
 ```
-> sbt run
+> sbt start -Dconfig.file=/... path .../application.conf
 ```
 
 #### Test
