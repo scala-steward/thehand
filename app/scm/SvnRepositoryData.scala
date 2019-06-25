@@ -84,4 +84,13 @@ class SvnRepositoryData @Inject() (protected val dbConfigProvider: DatabaseConfi
       } yield c
     insertAll
   }
+
+  def updateCustomFields(startId: Long, endId: Long): Future[Seq[Int]] = {
+    lazy val extractor = new SvnExtractor(repository.log(startId, endId), parser)
+    val insertAll: Future[Seq[Int]] =
+      for {
+        c <- daoCustomFields.insert(extractor.extractTasks.flatMap(tp.processCustomFields), suffix)
+      } yield c
+    insertAll
+  }
 }

@@ -37,14 +37,10 @@ class ProcessTargetConnector(t: TaskConnector) {
   }
 
   private def parseCustomFieldJson(json: JsValue): Option[CustomFields] =  {
-    val requestType =
-      (json \ "CustomFields")
-      .validateOpt[JsArray]
-      .get
+    val requestType = (json \ "CustomFields").as[Seq[JsValue]]
       .filter(filterRequestType)
-      .map(js => (js \ "Value").validateOpt[String])
-      .map(_.get)
-      .getOrElse(None)
+      .map(js => (js \ "Value").validateOpt[String].get)
+      .head
 
     val id = (json \ "Id").validateOpt[Long].get
     if (id.isDefined && requestType.isDefined) Some(CustomFields(requestType, id.get)) else None

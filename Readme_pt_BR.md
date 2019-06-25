@@ -98,7 +98,7 @@ target = {
 
 ### Rodar
 ```
-> sbt run
+> sbt run -Dconfig.file=/... path .../application.conf
 ```
 
 #### Testar

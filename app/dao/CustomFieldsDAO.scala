@@ -4,6 +4,7 @@ import javax.inject.Inject
 import models.{CustomFields, Suffix}
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.jdbc.JdbcProfile
+import telemetrics.HandLogger
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -32,12 +33,12 @@ class CustomFieldsDAO @Inject() (protected val dbConfigProvider: DatabaseConfigP
     }
 
     def customQuery(cf: CustomFields) = {
+      HandLogger.debug(cf.toString)
       for {
         customId <- customs.filter(_.taskId === cf.taskId).map(_.id).result.headOption
         u <- updateInsert(cf, customId)
       } yield u
     }
-
     DBIO.sequence(ts.map(customQuery)).transactionally
   }
 

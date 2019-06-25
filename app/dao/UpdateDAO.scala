@@ -49,7 +49,7 @@ class UpdateDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
     repository.flatMap(rep => rep.updateRange((from, to)))
   }
 
-  def update(suffix: Suffix, from: Option[Long], to: Option[Long]) = {
+  def update(suffix: Suffix, from: Option[Long], to: Option[Long]): Future[Seq[Int]] = {
     updateRepositoryRange(suffix.suffix, from.getOrElse(-1), to.getOrElse(-1))
   }
 
@@ -57,6 +57,11 @@ class UpdateDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
     val repSuffixes = conf.get[Seq[String]]("repos")
     val repositories = repSuffixes.map(updateRepositoryAuto)
     Future.sequence(repositories).map(_.flatten)
+  }
+
+  def updateCustomFields(suffix: Suffix, from: Option[Long], to: Option[Long]): Future[Seq[Int]] = {
+    val repository = loadSvnRepository(suffix.suffix)
+    repository.flatMap(rep => rep.updateCustomFields(from.getOrElse(-1), to.getOrElse(-1)))
   }
 
 }

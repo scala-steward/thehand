@@ -39,4 +39,9 @@ class UpdateController @Inject() (override val dbc: DatabaseConfigProvider, dao:
       noContent()
     }
   }
+
+  def updateCustomFields(suffix: String, from: Option[Long], to: Option[Long]): Action[AnyContent] = Action {
+    dao.updateCustomFields(Suffix(suffix), from, to)
+    Ok("Updating")
+  }
 }
