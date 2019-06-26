@@ -51,7 +51,7 @@ DELETE	/api/v1/term/:id					controllers.TermController.delete(id: Long)
 # GENERAL
 GET     /api/v1/update                     controllers.UpdateController.updateAll
 
-GET     /api/vi/cf                         controllers.UpdateController.updateCustomFields(suffix: String, from: Option[Long], to: Option[Long])
+GET     /api/v1/cf                         controllers.UpdateController.updateCustomFields(suffix: String, from: Option[Long], to: Option[Long])
 # UNSAFE - COMMENT AFTER SETUP
 ### NoDocs ###
 GET     /api/v1/unsafe/update              controllers.UpdateController.unsafeUpdateAll

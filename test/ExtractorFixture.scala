@@ -12,7 +12,7 @@
 import models._
 
 class ExtractorFixture() {
-  val extractTasks =
+  val extractTasks: Seq[Task] =
     Seq(
       Task(Some("Task"), Some(5L), Some(20), None, 1),
       Task(Some("Task"), Some(5L), Some(20), None, 2),
@@ -20,7 +20,7 @@ class ExtractorFixture() {
       Task(Some("Bug"), Some(8L), Some(20), Some(2), 4),
       Task(Some("Bug"), Some(8L), Some(20), Some(2), 5))
 
-  val extractAuthors = Seq(Author("john"), Author("philips"), Author("thomas"))
+  val extractAuthors: Seq[Author] = Seq(Author("john"), Author("philips"), Author("thomas"))
 
   private lazy val commitOne = CommitEntry(Some("Task #1"), None, 1, 0)
   private lazy val commitTwo = CommitEntry(Some("Task #2"), None, 2, 0)
@@ -28,7 +28,7 @@ class ExtractorFixture() {
   private lazy val commitFour = CommitEntry(Some("Bug #4"), None, 2, 0)
   private lazy val commitFive = CommitEntry(Some("Bug #5"), None, 3, 0)
 
-  val extractCommits =
+  val extractCommits: Seq[(CommitEntry, String)] =
     Seq(
       (commitOne, "john"),
       (commitTwo, "philips"),
@@ -56,12 +56,12 @@ class ExtractorFixture() {
   private lazy val commitFilesFive =
     Seq(CommitEntryWriter(CommitEntryFile(Some('D'), None, Some(5), 0, 0), "/zip", ""))
 
-  val extractCommitsFiles = Seq(
+  val extractCommitsFiles: Seq[(Seq[CommitEntryWriter], Long)] = Seq(
     (commitFilesOne, 1L),
     (commitFilesTwo, 2L),
     (commitFilesThree, 2L),
     (commitFilesFour, 2L),
     (commitFilesFive, 3L))
 
-  val extractCommitsTasks = Seq(CommitTasks(1, 1), CommitTasks(2, 3), CommitTasks(3, 2), CommitTasks(5, 3))
+  val extractCommitsTasks: Seq[CommitTasks] = Seq(CommitTasks(1, 1), CommitTasks(2, 3), CommitTasks(3, 2), CommitTasks(5, 3))
 }

@@ -30,9 +30,8 @@ class TermController @Inject() (override val dbc: DatabaseConfigProvider, l: Lan
   // Returns the task information within the content body, but not the Location header.
   def insert(folderId: Long): Action[JsValue] = SecuredApiActionWithBody { implicit request =>
     readFromRequest[Term] { term =>
-      termDao.insert(folderId, term.text, java.time.LocalDate.now(), term.deadline).flatMap {
-        case (newTerm) => created(newTerm)
-      }
+      termDao.insert(folderId, term.text, java.time.LocalDate.now(), term.deadline)
+        .flatMap(newTerm => created(newTerm))
     }
   }
 

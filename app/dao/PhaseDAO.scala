@@ -124,11 +124,11 @@ class PhaseDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider
       total = phases.size)
   }
 
-  def page(userId: Long, sortingFields: Seq[(String, Boolean)], p: Int, s: Int) = {
+  def page(userId: Long, sortingFields: Seq[(String, Boolean)], p: Int, s: Int): Future[Page[Phase]] = {
     filterSort(userId, sortingFields.head)
       .map(seq => createPage(seq, p, s))
   }
 
   // List with all the available sorting fields.
-  val sortingFields = Seq("id", "order", "name")
+  val sortingFields: Seq[String] = Seq("id", "order", "name")
 }

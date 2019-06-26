@@ -59,7 +59,7 @@ class BootstrapDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProv
     val authors = TableQuery[AuthorsTable]((tag: Tag) => new AuthorsTable(tag, suffix))
     val commits = TableQuery[CommitTable]((tag: Tag) => new CommitTable(tag, suffix))
     val commitsFiles = TableQuery[CommitEntryFileTable]((tag: Tag) => new CommitEntryFileTable(tag, suffix))
-    val customFields = TableQuery[CustomFiledsTable]((tag: Tag) => new CustomFiledsTable(tag, suffix))
+    val customFields = TableQuery[CustomFieldsTable]((tag: Tag) => new CustomFieldsTable(tag, suffix))
 
     exec(
       tasks.schema.create.asTry andThen

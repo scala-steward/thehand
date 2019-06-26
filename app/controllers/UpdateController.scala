@@ -28,16 +28,11 @@ class UpdateController @Inject() (override val dbc: DatabaseConfigProvider, dao:
   }
 
   def updateAll(): Action[Unit] = SecuredApiAction { implicit request =>
-    dao.updateAll().flatMap { _ =>
-      noContent()
-    }
+    dao.updateAll().flatMap { _ => noContent() }
   }
 
   def update(suffix: String, from: Option[Long], to: Option[Long]): Action[Unit] = SecuredApiAction { implicit request =>
-    val s = Suffix(suffix)
-    dao.update(s, from, to).flatMap { _ =>
-      noContent()
-    }
+    dao.update(Suffix(suffix), from, to).flatMap { _ => noContent() }
   }
 
   def updateCustomFields(suffix: String, from: Option[Long], to: Option[Long]): Action[AnyContent] = Action {

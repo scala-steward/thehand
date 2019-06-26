@@ -31,21 +31,21 @@ class DatabaseFixture @Inject() (protected val dbConfigProvider: DatabaseConfigP
     java.time.LocalDate.parse(s, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
   }
 
-  private implicit val apiKeys = Seq(
+  private implicit val apiKeys: Seq[ApiKey] = Seq(
     ApiKey(apiKey = "AbCdEfGhIjK1", name = "ios-app", active = true),
     ApiKey(apiKey = "AbCdEfGhIjK2", name = "android-app", active = true))
 
-  private implicit val users = Seq(
+  private implicit val users: Seq[User] = Seq(
     User("user1@mail.com", "123456", "User 1", emailConfirmed = true, active = true, 1L),
     User("user2@mail.com", "123456", "User 2", emailConfirmed = true, active = true, 2L),
     User("user3@mail.com", "123456", "User 3", emailConfirmed = true, active = true, 3L))
 
-  private implicit val phases = Seq(
+  private implicit val phases: Seq[Phase] = Seq(
     Phase(1L, 0, "Personal", 1L),
     Phase(1L, 1, "Work", 2L),
     Phase(1L, 2, "Home", 3L))
 
-  private implicit val terms = Seq(
+  private implicit val terms: Seq[Term] = Seq(
     Term(1L, 0, "Shirts on dry cleaner", parseDateTime("2015-09-06T10:11:00"), Some(parseDateTime("2015-09-08T17:00:00")), done = true, 1L),
     Term(1L, 1, "Gift for Mum's birthday", parseDateTime("2015-09-05T12:24:32"), Some(parseDateTime("2015-10-22T00:00:00")), done = false, 2L),
     Term(1L, 2, "Plan the Barcelona's trip", parseDateTime("2015-09-06T14:41:11"), None, done = false, 3L),

@@ -47,7 +47,7 @@ class ApiLogDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
   }
 
   //old Future[(Long, ApiLog)]
-  def insert[R <: RequestHeader](request: ApiRequestHeader[R], status: Int, json: JsValue) = db.run {
+  def insert[R <: RequestHeader](request: ApiRequestHeader[R], status: Int, json: JsValue): Future[Int] = db.run {
     logs += ApiLog(
       date = request.dateOrNow,
       ip = request.RremoteAddress,

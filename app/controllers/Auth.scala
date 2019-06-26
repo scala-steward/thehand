@@ -62,16 +62,15 @@ class Auth @Inject() (override val dbc: DatabaseConfigProvider, l: Langs, mcc: M
         userDao.findByEmail(email).flatMap {
           case Some(_ /*anotherUser*/ ) => errorCustom("api.error.signup.email.exists")
           case None => userDao.insert(email, password, user.name).flatMap {
-            case Some(user) => {
+            case Some(user_) =>
 
               // HIRO Send confirmation email. You will have to catch the link and confirm the email and activate the user.
               // But meanwhile...
               system.scheduler.scheduleOnce(30 seconds) {
-                userDao.confirmEmail(user.id)
+                userDao.confirmEmail(user_.id)
               }
 
-              ok(user.name)
-            }
+              ok(user_.name)
             case None => errorCustom("api.error.user.notfound")
           }
         }

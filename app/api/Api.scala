@@ -28,7 +28,7 @@ object Api {
   final val HEADER_PAGE_SIZE = "X-Page-Size"
   final val HEADER_PAGE_TOTAL = "X-Page-Total"
 
-  def basicHeaders(implicit lang: Lang) = Seq(
+  def basicHeaders(implicit lang: Lang): Seq[(String, String)] = Seq(
     HEADER_DATE -> printHeaderDate(new DateTime()),
     HEADER_CONTENT_LANGUAGE -> lang.language)
 
@@ -47,8 +47,6 @@ object Api {
   private final val dateFormatter = new SimpleDateFormat("dd-MM-yyyy")
   def parseDate(dateStr: String): Date = dateFormatter.parse(dateStr)
   def printDate(date: Date): String = dateFormatter.format(date)
-
-  // Sorting
 
   object Sorting {
     final val ASC = false

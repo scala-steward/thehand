@@ -18,7 +18,7 @@ import telemetrics.HandLogger
 
 class AuthAPIV1Spec extends PlaySpecification with JsonMatchers {
 
-  lazy val app = new GuiceApplicationBuilder().
+  lazy val app: Application = new GuiceApplicationBuilder().
     configure(
       "slick.dbs.mydb.driver" -> "slick.driver.H2Driver$",
       "slick.dbs.mydb.db.driver" -> "org.h2.Driver",
@@ -26,10 +26,10 @@ class AuthAPIV1Spec extends PlaySpecification with JsonMatchers {
       "slick.dbs.mydb.db.user" -> "test",
       "slick.dbs.mydb.db.password" -> "").build
 
-  val daoBootstrap = Application.instanceCache[BootstrapDAO].apply(app)
+  val daoBootstrap: BootstrapDAO = Application.instanceCache[BootstrapDAO].apply(app)
   daoBootstrap.createSchemas()
 
-  val fixture = Application.instanceCache[DatabaseFixture].apply(app)
+  val fixture: DatabaseFixture = Application.instanceCache[DatabaseFixture].apply(app)
   fixture.populate()
 
   val basicHeaders = Headers(

@@ -65,7 +65,7 @@ class ApiTokenDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvi
     })
   }
 
-  def delete(token: String) = {
+  def delete(token: String): Future[Unit] = {
     db.run(tokens.filter(_.token === token).delete).map(_ => ())
   }
 

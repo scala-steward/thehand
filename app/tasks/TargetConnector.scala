@@ -53,7 +53,10 @@ class TargetConnector(url: String, user: String, password: String) extends TaskC
 
   def jsonData(url: String, options: String): String = {
     val response = Try {
-      fromURL(url + "/?" + options + token + "&format=json").mkString
+      val jsonData = fromURL(url + "/?" + options + token + "&format=json")
+      val jsonDataString = jsonData.mkString
+      jsonData.close()
+      jsonDataString
     }
     response match {
       case Success(json) =>

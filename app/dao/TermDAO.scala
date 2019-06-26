@@ -46,7 +46,7 @@ class TermDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)
     terms.filter(_.id === id).result.headOption
   }
 
-  def insert(phaseId: Long, text: String, date: LocalDate, deadline: Option[LocalDate]) = {
+  def insert(phaseId: Long, text: String, date: LocalDate, deadline: Option[LocalDate]): Future[Int] = {
     lastInPhase(phaseId)
       .flatMap(max =>
         db.run(terms += Term(phaseId, order = max + 1L, text, date, deadline, done = false)))
@@ -107,7 +107,7 @@ class TermDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)
             .map(y => y.sum))))
   }
 
-  def updatePhase(id: Long, phaseId: Long) = {
+  def updatePhase(id: Long, phaseId: Long): Future[Int] = {
     for {
       _ <- updateOrder(id, Int.MaxValue)
       s <- findById(id)
@@ -127,7 +127,7 @@ class TermDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)
     db.run(terms.filter(_.id === id).delete).map(_ => ())
 
   // List with all the available sorting fields.
-  val sortingFields = Seq("id", "order", "date", "deadline", "done")
+  val sortingFields: Seq[String] = Seq("id", "order", "date", "deadline", "done")
 
   private def filterSort(phaseId: Long, done: Option[Boolean], fieldsWithOrder: (String, Boolean)): Future[Seq[Term]] = {
     val b = terms.filter(_.phaseId === phaseId).filter(_.done === done)
@@ -154,7 +154,7 @@ class TermDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)
       total = phases.size)
   }
 
-  def page(userId: Long, done: Option[Boolean], sortingFields: Seq[(String, Boolean)], p: Int, s: Int) = {
+  def page(userId: Long, done: Option[Boolean], sortingFields: Seq[(String, Boolean)], p: Int, s: Int): Future[Page[Term]] = {
     filterSort(userId, done, sortingFields.head)
       .map(seq => createPage(seq, p, s))
   }

@@ -88,10 +88,9 @@ class ApiController @Inject() (val dbc: DatabaseConfigProvider, l: Langs, mcc: M
         case None => errorTokenNotFound
         case Some(token) => apiTokenDao.findByTokenAndApiKey(token, apiKey).flatMap {
           case None => errorTokenUnknown
-          case Some(apiToken) if apiToken.isExpired => {
+          case Some(apiToken) if apiToken.isExpired =>
             apiTokenDao.delete(token)
             errorTokenExpired
-          }
           case Some(apiToken) => action(SecuredApiRequest(apiRequest.request, apiKey, date, token, apiToken.userId))
         }
       }

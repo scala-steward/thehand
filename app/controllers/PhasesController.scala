@@ -27,9 +27,8 @@ class PhasesController @Inject() (override val dbc: DatabaseConfigProvider, l: L
   // Returns the Location header, but not the folder information within the content body.
   def insert: Action[JsValue] = SecuredApiActionWithBody { implicit request =>
     readFromRequest[Phase] { folder =>
-      phaseDao.insert(request.userId, folder.name).flatMap {
-        case (id) => created(Api.locationHeader(routes.PhasesController.info(id)))
-      }
+      phaseDao.insert(request.userId, folder.name)
+        .flatMap(id => created(Api.locationHeader(routes.PhasesController.info(id))))
     }
   }
 

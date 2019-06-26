@@ -52,25 +52,19 @@ class UserDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)
     } yield i
   }
 
-  def update(id: Long, name: String) = db.run {
+  def update(id: Long, name: String): Future[Int] = db.run {
     for {
       u <- users.filter(_.id === id).result.headOption
       i <- users.update(u.get.copy(name = name)) if u.isDefined
     } yield i
   }
 
-  def updatePassword(id: Long, password: String) = db.run {
+  def updatePassword(id: Long, password: String): Future[Int] = db.run {
     for {
       u <- users.filter(_.id === id).result.headOption
       i <- users.update(u.get.copy(password = password)) if u.isDefined
     } yield i
   }
-
-  //  def delete(id: Long): Future[Unit] = db.run {
-  //    FakeDB.folders.map(f => FakeDB.tasks.delete(_.folderId == f.id))
-  //    FakeDB.folders.delete(_.userId == id)
-  //    users.delete(id)
-  //  }
 
   def delete(id: Long): Future[Unit] =
     db.run(users.filter(_.id === id).delete).map(_ => ())
