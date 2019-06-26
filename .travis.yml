@@ -1,7 +1,7 @@
 language: scala
 
-script: "sbt ++$TRAVIS_SCALA_VERSION coverage test coverageReport"
-after_success: "sbt coveralls"
+script: "sbt clean coverage test"
+after_success: "sbt coverageReport coveralls"
 
 scala:
 - 2.12.8
