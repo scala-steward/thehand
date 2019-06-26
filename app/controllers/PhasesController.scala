@@ -28,7 +28,7 @@ class PhasesController @Inject() (override val dbc: DatabaseConfigProvider, l: L
   def insert: Action[JsValue] = SecuredApiActionWithBody { implicit request =>
     readFromRequest[Phase] { folder =>
       phaseDao.insert(request.userId, folder.name)
-        .flatMap(id => created(Api.locationHeader(routes.PhasesController.info(id))))
+        .flatMap(id => created(Api.locationHeader(routes.PhasesController.info(id.toLong))))
     }
   }
 
@@ -44,7 +44,7 @@ class PhasesController @Inject() (override val dbc: DatabaseConfigProvider, l: L
     }
   }
 
-  def updateOrder(id: Long, newOrder: Int): Action[Unit] = SecuredApiAction { implicit request =>
+  def updateOrder(id: Long, newOrder: Long): Action[Unit] = SecuredApiAction { implicit request =>
     phaseDao.updateOrder(id, newOrder).flatMap { isOk =>
       if (isOk != 0) noContent() else errorInternal
     }

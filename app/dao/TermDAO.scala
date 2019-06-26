@@ -92,14 +92,14 @@ class TermDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)
     }
   }
 
-  def newOrder(term: Term, order: Int): Future[Long] = {
+  def newOrder(term: Term, order: Long): Future[Long] = {
     lastInPhase(term.phaseId)
       .map(max => Math.min(max, order))
       .map(min => Math.max(0, min))
       .map(newOrder => newOrder)
   }
 
-  def updateOrder(id: Long, order: Int): Future[Int] = {
+  def updateOrder(id: Long, order: Long): Future[Int] = {
     findById(id)
       .flatMap(t => newOrder(t.get, order)
         .flatMap(n => updateOthers(t.get.phaseId, n, t.get.order)
@@ -151,7 +151,7 @@ class TermDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)
       items = phases.slice((p - 1) * s, (p - 1) * s + s),
       page = p,
       size = s,
-      total = phases.size)
+      total = phases.size.toLong)
   }
 
   def page(userId: Long, done: Option[Boolean], sortingFields: Seq[(String, Boolean)], p: Int, s: Int): Future[Page[Term]] = {

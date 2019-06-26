@@ -88,14 +88,14 @@ class PhaseDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider
     }
   }
 
-  def newOrder(phase: Phase, order: Int): Future[Long] = {
+  def newOrder(phase: Phase, order: Long): Future[Long] = {
     last(phase.userId)
       .map(max => Math.min(max, order))
       .map(min => Math.max(0, min))
       .map(newOrder => newOrder)
   }
 
-  def updateOrder(id: Long, order: Int): Future[Int] = {
+  def updateOrder(id: Long, order: Long): Future[Int] = {
     findById(id)
       .flatMap(t => newOrder(t.get, order)
         .flatMap(n => updateOthers(t.get.userId, n, t.get.order)
@@ -121,7 +121,7 @@ class PhaseDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider
       items = phases.slice((p - 1) * s, (p - 1) * s + s),
       page = p,
       size = s,
-      total = phases.size)
+      total = phases.size.toLong)
   }
 
   def page(userId: Long, sortingFields: Seq[(String, Boolean)], p: Int, s: Int): Future[Page[Phase]] = {

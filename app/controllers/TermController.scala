@@ -47,7 +47,7 @@ class TermController @Inject() (override val dbc: DatabaseConfigProvider, l: Lan
     }
   }
 
-  def updateOrder(id: Long, newOrder: Int): Action[Unit] = SecuredApiAction { implicit request =>
+  def updateOrder(id: Long, newOrder: Long): Action[Unit] = SecuredApiAction { implicit request =>
     termDao.updateOrder(id, newOrder).flatMap { isOk =>
       if (isOk != 0) noContent() else errorInternal
     }

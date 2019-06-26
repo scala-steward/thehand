@@ -34,7 +34,7 @@ GET		/api/v1/phases						controllers.PhasesController.list(sort: Option[String],
 POST	/api/v1/phases						controllers.PhasesController.insert
 GET		/api/v1/phases/:id			    	controllers.PhasesController.info(id: Long)
 PUT		/api/v1/phases/:id			    	controllers.PhasesController.update(id: Long)
-PUT		/api/v1/phases/:id/order/:newOrder	controllers.PhasesController.updateOrder(id: Long, newOrder: Int)
+PUT		/api/v1/phases/:id/order/:newOrder	controllers.PhasesController.updateOrder(id: Long, newOrder: Long)
 DELETE	/api/v1/phases/:id			       	controllers.PhasesController.delete(id: Long)
 
 # TERM
@@ -42,7 +42,7 @@ GET		/api/v1/phases/:id/term	            controllers.TermController.list(id: Lon
 POST	/api/v1/phases/:id/term	            controllers.TermController.insert(id: Long)
 GET		/api/v1/term/:id					controllers.TermController.info(id: Long)
 PUT		/api/v1/term/:id					controllers.TermController.update(id: Long)
-PUT		/api/v1/term/:id/order/:newOrder	controllers.TermController.updateOrder(id: Long, newOrder: Int)
+PUT		/api/v1/term/:id/order/:newOrder	controllers.TermController.updateOrder(id: Long, newOrder: Long)
 PUT		/api/v1/term/:id/folder/:folder		controllers.TermController.updateFolder(id: Long, folder: Long)
 PUT		/api/v1/term/:id/done			    controllers.TermController.updateDone(id: Long, done: Boolean = true)
 DELETE	/api/v1/term/:id/done			    controllers.TermController.updateDone(id: Long, done: Boolean = false)

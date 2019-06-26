@@ -64,10 +64,11 @@ class Auth @Inject() (override val dbc: DatabaseConfigProvider, l: Langs, mcc: M
           case None => userDao.insert(email, password, user.name).flatMap {
             case Some(user_) =>
 
-              // HIRO Send confirmation email. You will have to catch the link and confirm the email and activate the user.
+              // HIRO Send confirmation email.
+              // You will have to catch the link and confirm the email and activate the user.
               // But meanwhile...
               system.scheduler.scheduleOnce(30 seconds) {
-                userDao.confirmEmail(user_.id)
+                userDao.confirmEmail(user_.id).onComplete(_ -> Unit)
               }
 
               ok(user_.name)
