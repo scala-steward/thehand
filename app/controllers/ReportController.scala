@@ -158,12 +158,13 @@ class ReportController @Inject() (
         // hiro fix path and correct parametrize in other function
         val localDirectory = new java.io.File(".").getCanonicalPath
         val reportDirectory = s"${localDirectory}/report/"
-        val file = s"${suffix.toLowerCase}_commits_bugs_counter.csv"
+        val file = s"${suffix.toLowerCase}_commits_bugs_counter"
         lazy val filename = s"${reportDirectory}${file}"
         reportCommitByCustomField(Suffix(suffix), fieldValue, times._1, times._2).map { a =>
           writer.write(filename, a.sortBy(i => i._2))
-          Ok.sendFile(new File(filename), inline=true)
-            .withHeaders(CACHE_CONTROL->"max-age=3600",CONTENT_DISPOSITION->s"attachment; filename=${file}", CONTENT_TYPE->"application/x-download");
+
+          Ok.sendFile(new File(filename+".csv"), inline=true)
+            .withHeaders(CACHE_CONTROL->"max-age=3600",CONTENT_DISPOSITION->s"attachment; filename=${file}.csv", CONTENT_TYPE->"application/x-download");
         }
       case Failure(_) => Future(BadRequest("valid date format => yyyy-MM-dd"))
     }
