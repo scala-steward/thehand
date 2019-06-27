@@ -9,6 +9,10 @@
 
 package controllers
 
+import java.io.File
+import java.sql.Timestamp
+import java.text.SimpleDateFormat
+
 import javax.inject._
 import dao._
 import models.Suffix
@@ -18,8 +22,8 @@ import reportio.CvsIO
 import telemetrics.HandLogger
 
 import scala.concurrent.duration.Duration
-import scala.concurrent.{ Await, ExecutionContext, Future }
-import scala.util.{ Failure, Success }
+import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 class ReportController @Inject() (
   dao: ReportDAO,
@@ -44,8 +48,8 @@ class ReportController @Inject() (
     dao.fileAuthorCommitsBugsCounter(authorName, suffix)
   }
 
-  private def reportCommitByCustomField(suffix: Suffix, customField: String): Future[Seq[(String, Int)]] = {
-    dao.countCommitByCustomField(suffix, customField)
+  private def reportCommitByCustomField(suffix: Suffix, customField: String, initialTime: Timestamp, finalTime: Timestamp): Future[Seq[(String, Int)]] = {
+    dao.countCommitByCustomField(suffix, customField, initialTime, finalTime)
   }
 
   private def exec[T](f: Future[T]) = {
@@ -134,10 +138,28 @@ class ReportController @Inject() (
     }
   }
 
-  def getCommitByCustomField(suffix: String, customField: String): Action[AnyContent] = Action.async {
+  def getCommitByCustomField(suffix: String, customField: String, fromTime: String, toTime: String): Action[AnyContent] = Action.async {
     val s = Suffix(suffix)
-    reportCommitByCustomField(s, customField).map { a =>
+    val format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS")
+    val initialTime = new Timestamp(format.parse(fromTime).getTime)
+    val finalTime = new Timestamp(format.parse(toTime).getTime)
+    reportCommitByCustomField(s, customField, initialTime, finalTime).map { a =>
       Ok(Json.toJson(a.sortBy(i => -i._2)))
+    }
+  }
+
+  def getCommitByCustomFieldCsv(suffix: String, customField: String, fromTime: String, toTime: String): Action[AnyContent] = Action.async {
+    val s = Suffix(suffix)
+    val format = new SimpleDateFormat("yyyy-MM-dd")
+    val initialTime = new Timestamp(format.parse(fromTime).getTime)
+    val finalTime = new Timestamp(format.parse(toTime).getTime)
+    val localDirectory = new java.io.File(".").getCanonicalPath
+    val reportDirectory = s"${localDirectory}/report/"
+    val file = s"${suffix.toLowerCase}_commits_bugs_counter.csv"
+    lazy val filename = s"${reportDirectory}${file}"
+    reportCommitByCustomField(s, customField, initialTime, finalTime).map { a =>
+       writer.write(filename, a.sortBy(i => i._2))
+       Ok.sendFile(new File(filename), inline=true).withHeaders(CACHE_CONTROL->"max-age=3600",CONTENT_DISPOSITION->s"attachment; filename=${file}", CONTENT_TYPE->"application/x-download");
     }
   }
 }
