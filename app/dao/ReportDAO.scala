@@ -1,9 +1,9 @@
 package dao
 
+import org.joda.time.DateTime
 import javax.inject.Inject
-
 import models._
-import play.api.db.slick.{ DatabaseConfigProvider, HasDatabaseConfigProvider }
+import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.jdbc.JdbcProfile
 
 import scala.concurrent.Future
@@ -13,6 +13,7 @@ class ReportDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
   with CommitComponent
   with CommitEntryFileComponent
   with CommitTaskComponent
+  with CustomFieldsComponent
   with TaskComponent
   with HasDatabaseConfigProvider[JdbcProfile] {
 
@@ -98,5 +99,33 @@ class ReportDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
   def authorsNames(suffix: Suffix): Future[Seq[String]] = db.run {
     val authors = TableQuery[AuthorsTable]((tag: Tag) => new AuthorsTable(tag, suffix))
     authors.map(_.author).result
+  }
+
+  def countCommitByCustomField(suffix: Suffix, customField: String) : Future[Seq[(String, Int)]] = db.run {
+    val commitTasks = TableQuery[CommitTasksTable]((tag: Tag) => new CommitTasksTable(tag, suffix))
+    val tasks = TableQuery[TaskTable]((tag: Tag) => new TaskTable(tag, suffix))
+    val files = TableQuery[EntryFilesTable]((tag: Tag) => new EntryFilesTable(tag, suffix))
+    val commits = TableQuery[CommitTable]((tag: Tag) => new CommitTable(tag, suffix))
+    val commitsFiles = TableQuery[CommitEntryFileTable]((tag: Tag) => new CommitEntryFileTable(tag, suffix))
+    val customFields = TableQuery[CustomFieldsTable]((tag: Tag) => new CustomFieldsTable(tag, suffix))
+
+    //val dateI: org.joda.time.DateTime = new DateTime("2019-06-01 01:01:01.000")
+
+    def countCommitTask(customField: String)= for {
+      cs <- customFields if cs.requestType === customField
+      taskParents <- tasks if cs.taskId === taskParents.taskId
+      tsk <- tasks if tsk.parentId === taskParents.taskId || tsk.taskId === taskParents.taskId
+      co <- commits
+      ct <- commitTasks if ct.commitId === co.id
+      cf <- commitsFiles if cf.revisionId === co.id
+      fi <- files if fi.id === cf.pathId
+    } yield fi
+    val countCommits = countCommitTask(customField)
+      .groupBy(_.path)
+      .map {
+        case (path, group) =>
+          (path, group.length)
+      }
+    countCommits.result.transactionally
   }
 }

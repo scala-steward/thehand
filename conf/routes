@@ -71,6 +71,7 @@ GET     /api/v1/:suffix/tasks               controllers.TaskController.getTask(s
 GET     /api/v1/:suffix/authorsReport       controllers.ReportController.getAuthors(suffix: String)
 GET     /api/v1/:suffix/bugsfiles           controllers.ReportController.getFilesBugs(suffix: String)
 GET     /api/v1/:suffix/bugsfiles/:author   controllers.ReportController.getAuthorBugs(author: String, suffix: String)
+GET     /api/v1/:suffix/cccf                controllers.ReportController.getCommitByCustomField(suffix: String, customField: String)
 
 # Map static resources from the /public folder to the /assets URL path
 ### NoDocs ###

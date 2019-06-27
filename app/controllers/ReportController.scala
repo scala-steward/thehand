@@ -26,7 +26,6 @@ class ReportController @Inject() (
   cc: MessagesControllerComponents)(implicit ec: ExecutionContext)
   extends MessagesAbstractController(cc) {
 
-  private val repositoryName = "AHHAHAHA"
   implicit val writer: CvsIO.type = CvsIO
 
   private def authors(suffix: Suffix): Future[Seq[String]] = {
@@ -45,6 +44,10 @@ class ReportController @Inject() (
     dao.fileAuthorCommitsBugsCounter(authorName, suffix)
   }
 
+  private def reportCommitByCustomField(suffix: Suffix, customField: String): Future[Seq[(String, Int)]] = {
+    dao.countCommitByCustomField(suffix, customField)
+  }
+
   private def exec[T](f: Future[T]) = {
     val result = Await.ready(f, Duration.Inf).value.get
     val resultEither = result match {
@@ -55,17 +58,17 @@ class ReportController @Inject() (
   }
 
   def reportFilesBugsCounter(suffix: Suffix): Unit = {
-    lazy val filename = s"./reports/report_bugs_${repositoryName.toLowerCase}_counter"
+    lazy val filename = s"./reports/report_bugs_${suffix.suffix.toLowerCase}_counter"
     reportFilesBugCounter(suffix) onComplete {
       case scala.util.Success(value) =>
         writer.write(filename, value.sortBy(_._2))
-        HandLogger.info("generate " + repositoryName + " files bugs report")
+        HandLogger.info("generate " + suffix.suffix + " files bugs report")
       case scala.util.Failure(e) => HandLogger.error("error" + e.getMessage)
     }
   }
 
   private def authorReport(authorName: String, suffix: Suffix): Unit = {
-    lazy val filename = s"./reports/author_${authorName.toLowerCase()}_${repositoryName.toLowerCase}_commits_counter"
+    lazy val filename = s"./reports/author_${authorName.toLowerCase()}_${suffix.suffix.toLowerCase}_commits_counter"
     exec[Seq[(String, Int)]](reportAuthorCommitsCounter(authorName, suffix)) match {
       case Right(values) =>
         writer.write(filename, values.sortBy(_._2))
@@ -82,7 +85,7 @@ class ReportController @Inject() (
   }
 
   private def authorBugsReport(authorName: String, suffix: Suffix): Unit = {
-    lazy val filename = s"./reports/author_${authorName.toLowerCase()}_${repositoryName.toLowerCase}_commits_bugs_counter"
+    lazy val filename = s"./reports/author_${authorName.toLowerCase()}_${suffix.suffix.toLowerCase}_commits_bugs_counter"
     exec[Seq[(String, Int)]](reportAuthorBugsCommitsCounter(authorName, suffix)) match {
       case Right(values) =>
         writer.write(filename, values.sortBy(_._2))
@@ -128,6 +131,13 @@ class ReportController @Inject() (
     val s = Suffix(suffix)
     authorBugsReportToAction(author, s).map { a =>
       Ok(Json.toJson(a))
+    }
+  }
+
+  def getCommitByCustomField(suffix: String, customField: String): Action[AnyContent] = Action.async {
+    val s = Suffix(suffix)
+    reportCommitByCustomField(s, customField).map { a =>
+      Ok(Json.toJson(a.sortBy(i => -i._2)))
     }
   }
 }
