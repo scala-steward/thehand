@@ -13,7 +13,6 @@ package scm
 
 import java.sql.Timestamp
 
-import org.joda.time.DateTime
 import org.tmatesoft.svn.core.{SVNLogEntry, SVNLogEntryPath}
 import tasks.TaskParser
 import models._
@@ -34,7 +33,7 @@ class SvnExtractor(val svnData: Seq[SVNLogEntry], parser: TaskParser) {
 
   def extractCommits: Seq[(CommitEntry, String)] = {
     svnData.map(s =>
-      (CommitEntry(Some(s.getMessage), Some(new DateTime(s.getDate)), Some(new Timestamp(s.getDate.getTime)), s.getRevision, 0), s.getAuthor))
+      (CommitEntry(Some(s.getMessage), Some(new Timestamp(s.getDate.getTime)), s.getRevision, 0), s.getAuthor))
   }
 
   def extractFiles: Seq[EntryFile] = {

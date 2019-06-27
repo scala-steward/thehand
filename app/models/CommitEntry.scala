@@ -12,13 +12,10 @@ package models
 import java.sql.Timestamp
 import java.text.SimpleDateFormat
 
-import org.joda.time.DateTime
 import play.api.libs.json._
-import play.api.libs.json.{JodaReads, JodaWrites}
 
 case class CommitEntry(
   message: Option[String],
-  date: Option[DateTime],
   timestamp: Option[Timestamp],
   revision: Long,
   authorId: Long,
@@ -34,7 +31,5 @@ object CommitEntry {
     def writes(ts: Timestamp) = JsString(format.format(ts))
   }
 
-  implicit val dateTimeWriter: Writes[DateTime] = JodaWrites.jodaDateWrites("yyyy-MM-dd HH:mm:ss.SSS")
-  implicit val dateTimeJsReader: Reads[DateTime] = JodaReads.jodaDateReads("yyyy-MM-dd HH:mm:ss.SSS")
   implicit val commitEntryFormat: OFormat[CommitEntry] = Json.format[CommitEntry]
 }

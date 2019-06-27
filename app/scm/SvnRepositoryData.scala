@@ -75,7 +75,7 @@ class SvnRepositoryData @Inject() (protected val dbConfigProvider: DatabaseConfi
     val insertAll: Future[Seq[Int]] =
       for {
         _ <- daoTasks.insert(extractor.extractTasks.flatMap(tp.process), suffix)
-        _ <- daoCustomFields.insert(extractor.extractTasks.flatMap(tp.processCustomFields), suffix)
+        _ <- daoCustomFields.insert(extractor.extractTasks.flatMap(tp.processCustomFields(_, "Request Type")), suffix)
         _ <- daoAuthors.insert(extractor.extractAuthors, suffix)
         _ <- daoCommits.insert(extractor.extractCommits, suffix)
         _ <- daoFiles.insert(extractor.extractFiles, suffix)
@@ -85,11 +85,11 @@ class SvnRepositoryData @Inject() (protected val dbConfigProvider: DatabaseConfi
     insertAll
   }
 
-  def updateCustomFields(startId: Long, endId: Long): Future[Seq[Int]] = {
+  def updateCustomFields(field: String, startId: Long, endId: Long): Future[Seq[Int]] = {
     lazy val extractor = new SvnExtractor(repository.log(startId, endId), parser)
     val insertAll: Future[Seq[Int]] =
       for {
-        c <- daoCustomFields.insert(extractor.extractTasks.flatMap(tp.processCustomFields), suffix)
+        c <- daoCustomFields.insert(extractor.extractTasks.flatMap(tp.processCustomFields(_, field)), suffix)
       } yield c
     insertAll
   }

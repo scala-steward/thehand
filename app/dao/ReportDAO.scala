@@ -101,7 +101,7 @@ class ReportDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
     authors.map(_.author).result
   }
 
-  def countCommitByCustomField(suffix: Suffix, customField: String, initialTime: Timestamp, finalTime: Timestamp) : Future[Seq[(String, Int)]] = db.run {
+  def countCommitByCustomField(suffix: Suffix, fieldValue: String, initialTime: Timestamp, finalTime: Timestamp) : Future[Seq[(String, Int)]] = db.run {
     val commitTasks = TableQuery[CommitTasksTable]((tag: Tag) => new CommitTasksTable(tag, suffix))
     val tasks = TableQuery[TaskTable]((tag: Tag) => new TaskTable(tag, suffix))
     val files = TableQuery[EntryFilesTable]((tag: Tag) => new EntryFilesTable(tag, suffix))
@@ -109,8 +109,8 @@ class ReportDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
     val commitsFiles = TableQuery[CommitEntryFileTable]((tag: Tag) => new CommitEntryFileTable(tag, suffix))
     val customFields = TableQuery[CustomFieldsTable]((tag: Tag) => new CustomFieldsTable(tag, suffix))
 
-    def countCommitTask(customField: String, initialTime: Timestamp, finalTime: Timestamp)= for {
-      cs <- customFields if cs.requestType === customField
+    def countCommitTask(field_value: String, initialTime: Timestamp, finalTime: Timestamp)= for {
+      cs <- customFields if cs.field_value === fieldValue
       taskParents <- tasks if cs.taskId === taskParents.taskId
       tsk <- tasks if tsk.taskId === taskParents.taskId || tsk.parentId === taskParents.taskId
       co <- commits if co.timestamp >= initialTime && co.timestamp <= finalTime
@@ -118,7 +118,7 @@ class ReportDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
       cf <- commitsFiles if cf.revisionId === co.id
       fi <- files if fi.id === cf.pathId
     } yield fi
-    val countCommits = countCommitTask(customField, initialTime, finalTime)
+    val countCommits = countCommitTask(fieldValue, initialTime, finalTime)
       .groupBy(_.path)
       .map {
         case (path, group) =>

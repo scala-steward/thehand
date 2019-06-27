@@ -12,7 +12,7 @@
 package tasks
 
 import models.{CustomFields, Task}
-import play.api.libs.json.{JsArray, JsValue, Json}
+import play.api.libs.json.{JsValue, Json}
 import telemetrics.HandLogger
 
 import scala.util.{Failure, Success, Try}
@@ -31,15 +31,15 @@ class ProcessTargetConnector(t: TaskConnector) {
     if (id.isDefined) Some(Task(typeTask, typeTaskId, timeSpend, parentId, id.get)) else None
   }
 
-  private def filterRequestType(json: JsValue) : Boolean = {
+  private def filterRequestType(json: JsValue, field: String) : Boolean = {
     val name = (json \ "Name").validateOpt[String].get
-    name.isDefined && name.get == "Request Type"
+    name.isDefined && name.get == field
   }
 
-  private def parseRequestType(json: JsValue) : Option[String] = {
+  private def parseRequestType(json: JsValue, field: String) : Option[String] = {
     val request = (json \ "CustomFields").validateOpt[Seq[JsValue]].get
     if (request.isDefined) {
-      val requestType = request.get.filter(filterRequestType)
+      val requestType = request.get.filter(filterRequestType(_, field))
         .map(js => (js \ "Value").validateOpt[String].get)
       if (requestType.nonEmpty) {
         return requestType.head
@@ -48,10 +48,10 @@ class ProcessTargetConnector(t: TaskConnector) {
     None
   }
 
-  private def parseCustomFieldJson(json: JsValue): Option[CustomFields] =  {
+  private def parseCustomFieldJson(json: JsValue, field: String): Option[CustomFields] =  {
     val id = (json \ "Id").validateOpt[Long].get
-    val requestType = parseRequestType(json)
-    if (id.isDefined && requestType.isDefined) Some(CustomFields(requestType, id.get)) else None
+    val requestType = parseRequestType(json, field)
+    if (id.isDefined && requestType.isDefined) Some(CustomFields(requestType, field, id.get)) else None
   }
 
   def process(id: Long): Option[Task] = {
@@ -65,11 +65,11 @@ class ProcessTargetConnector(t: TaskConnector) {
     }
   }
 
-  def processCustomFields(id: Long): Option[CustomFields] = {
+  def processCustomFields(id: Long, field: String): Option[CustomFields] = {
     Try {
       Json.parse(t.customFields(id))
     } match {
-      case Success(s) => parseCustomFieldJson(s)
+      case Success(s) => parseCustomFieldJson(s, field)
       case Failure(e) =>
         HandLogger.error("error in parse the custom field data " + e)
         None

@@ -4,19 +4,19 @@ import javax.inject.Inject
 import models.{CustomFields, Suffix}
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.jdbc.JdbcProfile
-import telemetrics.HandLogger
 
 import scala.concurrent.{ExecutionContext, Future}
 
 trait CustomFieldsComponent { self: HasDatabaseConfigProvider[JdbcProfile] =>
   import profile.api._
 
-  class CustomFieldsTable(tag: Tag, suffix: Suffix) extends Table[CustomFields](tag, suffix.suffix + "customfields") {
-    def requestType: Rep[Option[String]] = column[Option[String]]("request_type")
+  class CustomFieldsTable(tag: Tag, suffix: Suffix) extends Table[CustomFields](tag, suffix.suffix + "custom_fields") {
+    def field_value: Rep[Option[String]] = column[Option[String]]("field_value")
+    def field: Rep[String] = column[String]("field")
     def taskId: Rep[Long] = column[Long]("task_id", O.Unique)
     def id: Rep[Long] = column[Long]("id", O.PrimaryKey, O.AutoInc)
 
-    def * = (requestType, taskId, id) <> ((CustomFields.apply _).tupled, CustomFields.unapply)
+    def * = (field_value, field, taskId, id) <> ((CustomFields.apply _).tupled, CustomFields.unapply)
   }
 }
 

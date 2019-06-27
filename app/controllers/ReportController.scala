@@ -23,7 +23,7 @@ import telemetrics.HandLogger
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, ExecutionContext, Future}
-import scala.util.{Failure, Success}
+import scala.util.{Failure, Success, Try}
 
 class ReportController @Inject() (
   dao: ReportDAO,
@@ -48,8 +48,8 @@ class ReportController @Inject() (
     dao.fileAuthorCommitsBugsCounter(authorName, suffix)
   }
 
-  private def reportCommitByCustomField(suffix: Suffix, customField: String, initialTime: Timestamp, finalTime: Timestamp): Future[Seq[(String, Int)]] = {
-    dao.countCommitByCustomField(suffix, customField, initialTime, finalTime)
+  private def reportCommitByCustomField(suffix: Suffix, fieldValue: String, initialTime: Timestamp, finalTime: Timestamp): Future[Seq[(String, Int)]] = {
+    dao.countCommitByCustomField(suffix, fieldValue, initialTime, finalTime)
   }
 
   private def exec[T](f: Future[T]) = {
@@ -138,28 +138,34 @@ class ReportController @Inject() (
     }
   }
 
+  private def parseTimestamp(fromTime: String, toTime: String) : Try[(Timestamp, Timestamp)] = Try {
+      val format = new SimpleDateFormat("yyyy-MM-dd")
+      (new Timestamp(format.parse(fromTime).getTime), new Timestamp(format.parse(toTime).getTime))
+    }
+
+
   def getCommitByCustomField(suffix: String, customField: String, fromTime: String, toTime: String): Action[AnyContent] = Action.async {
-    val s = Suffix(suffix)
-    val format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS")
-    val initialTime = new Timestamp(format.parse(fromTime).getTime)
-    val finalTime = new Timestamp(format.parse(toTime).getTime)
-    reportCommitByCustomField(s, customField, initialTime, finalTime).map { a =>
-      Ok(Json.toJson(a.sortBy(i => -i._2)))
+    parseTimestamp(fromTime, toTime) match {
+      case Success(times) =>
+        reportCommitByCustomField(Suffix(suffix), customField, times._1, times._2).map { a => Ok(Json.toJson(a.sortBy(i => -i._2))) }
+      case Failure(_) => Future(BadRequest("valid date format => yyyy-MM-dd"))
     }
   }
 
-  def getCommitByCustomFieldCsv(suffix: String, customField: String, fromTime: String, toTime: String): Action[AnyContent] = Action.async {
-    val s = Suffix(suffix)
-    val format = new SimpleDateFormat("yyyy-MM-dd")
-    val initialTime = new Timestamp(format.parse(fromTime).getTime)
-    val finalTime = new Timestamp(format.parse(toTime).getTime)
-    val localDirectory = new java.io.File(".").getCanonicalPath
-    val reportDirectory = s"${localDirectory}/report/"
-    val file = s"${suffix.toLowerCase}_commits_bugs_counter.csv"
-    lazy val filename = s"${reportDirectory}${file}"
-    reportCommitByCustomField(s, customField, initialTime, finalTime).map { a =>
-       writer.write(filename, a.sortBy(i => i._2))
-       Ok.sendFile(new File(filename), inline=true).withHeaders(CACHE_CONTROL->"max-age=3600",CONTENT_DISPOSITION->s"attachment; filename=${file}", CONTENT_TYPE->"application/x-download");
+  def getCommitByCustomFieldCsv(suffix: String, fieldValue: String, fromTime: String, toTime: String): Action[AnyContent] = Action.async {
+    parseTimestamp(fromTime, toTime) match {
+      case Success(times) =>
+        // hiro fix path and correct parametrize in other function
+        val localDirectory = new java.io.File(".").getCanonicalPath
+        val reportDirectory = s"${localDirectory}/report/"
+        val file = s"${suffix.toLowerCase}_commits_bugs_counter.csv"
+        lazy val filename = s"${reportDirectory}${file}"
+        reportCommitByCustomField(Suffix(suffix), fieldValue, times._1, times._2).map { a =>
+          writer.write(filename, a.sortBy(i => i._2))
+          Ok.sendFile(new File(filename), inline=true)
+            .withHeaders(CACHE_CONTROL->"max-age=3600",CONTENT_DISPOSITION->s"attachment; filename=${file}", CONTENT_TYPE->"application/x-download");
+        }
+      case Failure(_) => Future(BadRequest("valid date format => yyyy-MM-dd"))
     }
   }
 }

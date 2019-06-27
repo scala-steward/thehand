@@ -2,7 +2,6 @@ package dao
 
 import java.sql.Timestamp
 
-import org.joda.time.DateTime
 import javax.inject.Inject
 import models._
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
@@ -14,17 +13,13 @@ trait CommitComponent extends AuthorComponent { self: HasDatabaseConfigProvider[
   import profile.api._
 
   class CommitTable(tag: Tag, suffix: Suffix) extends Table[CommitEntry](tag, suffix.suffix + "commits") {
-    object PortableJodaSupport extends com.github.tototoshi.slick.GenericJodaSupport(dbConfig.profile)
-    import PortableJodaSupport._
-
     def message: Rep[Option[String]] = column[Option[String]]("message")
-    def date: Rep[Option[DateTime]] = column[Option[DateTime]]("date")
     def timestamp: Rep[Option[Timestamp]] = column[Option[Timestamp]]("timestamp")
     def revision: Rep[Long] = column[Long]("revision", O.Unique)
     def authorId: Rep[Long] = column[Long]("author")
     def id: Rep[Long] = column[Long]("id", O.PrimaryKey, O.AutoInc)
 
-    def * = (message, date, timestamp, revision, authorId, id) <> ((CommitEntry.apply _).tupled, CommitEntry.unapply)
+    def * = (message, timestamp, revision, authorId, id) <> ((CommitEntry.apply _).tupled, CommitEntry.unapply)
     def author = foreignKey("author_fk", authorId, TableQuery[AuthorsTable]((tag: Tag) => new AuthorsTable(tag, suffix)))(_.id, onDelete = ForeignKeyAction.SetNull)
   }
 }

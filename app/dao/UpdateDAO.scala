@@ -59,9 +59,9 @@ class UpdateDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
     Future.sequence(repositories).map(_.flatten)
   }
 
-  def updateCustomFields(suffix: Suffix, from: Option[Long], to: Option[Long]): Future[Seq[Int]] = {
+  def updateCustomFields(suffix: Suffix, field: String, from: Option[Long], to: Option[Long]): Future[Seq[Int]] = {
     val repository = loadSvnRepository(suffix.suffix)
-    repository.flatMap(rep => rep.updateCustomFields(from.getOrElse(-1), to.getOrElse(-1)))
+    repository.flatMap(rep => rep.updateCustomFields(field, from.getOrElse(-1), to.getOrElse(-1)))
   }
 
 }

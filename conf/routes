@@ -51,7 +51,7 @@ DELETE	/api/v1/term/:id					controllers.TermController.delete(id: Long)
 # GENERAL
 GET     /api/v1/update                     controllers.UpdateController.updateAll
 
-GET     /api/v1/cf                         controllers.UpdateController.updateCustomFields(suffix: String, from: Option[Long], to: Option[Long])
+GET     /api/v1/:suffix/custom/:customField  controllers.UpdateController.updateCustomFields(suffix: String, customField: String, from: Option[Long], to: Option[Long])
 # UNSAFE - COMMENT AFTER SETUP
 ### NoDocs ###
 GET     /api/v1/unsafe/update              controllers.UpdateController.unsafeUpdateAll
@@ -71,7 +71,8 @@ GET     /api/v1/:suffix/tasks               controllers.TaskController.getTask(s
 GET     /api/v1/:suffix/authorsReport       controllers.ReportController.getAuthors(suffix: String)
 GET     /api/v1/:suffix/bugsfiles           controllers.ReportController.getFilesBugs(suffix: String)
 GET     /api/v1/:suffix/bugsfiles/:author   controllers.ReportController.getAuthorBugs(author: String, suffix: String)
-GET     /api/v1/:suffix/cccf/:customField/:fromTime/:toTime controllers.ReportController.getCommitByCustomField(suffix: String, customField: String, fromTime: String, toTime: String)
+
+GET     /api/v1/:suffix/custom/:customField/:fromTime/:toTime controllers.ReportController.getCommitByCustomField(suffix: String, customField: String, fromTime: String, toTime: String)
 
 # CSV
 GET     /api/v1/:suffix/csv/custom/:customField/:fromTime/:toTime controllers.ReportController.getCommitByCustomFieldCsv(suffix: String, customField: String, fromTime: String, toTime: String)

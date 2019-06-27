@@ -22,11 +22,11 @@ class ExtractorFixture() {
 
   val extractAuthors: Seq[Author] = Seq(Author("john"), Author("philips"), Author("thomas"))
 
-  private lazy val commitOne = CommitEntry(Some("Task #1"), None, None, 1, 0)
-  private lazy val commitTwo = CommitEntry(Some("Task #2"), None, None, 2, 0)
-  private lazy val commitThree = CommitEntry(Some("Bug #3"), None, None, 2, 0)
-  private lazy val commitFour = CommitEntry(Some("Bug #4"), None, None, 2, 0)
-  private lazy val commitFive = CommitEntry(Some("Bug #5"), None, None, 3, 0)
+  private lazy val commitOne = CommitEntry(Some("Task #1"), None, 1, 0)
+  private lazy val commitTwo = CommitEntry(Some("Task #2"), None, 2, 0)
+  private lazy val commitThree = CommitEntry(Some("Bug #3"), None, 2, 0)
+  private lazy val commitFour = CommitEntry(Some("Bug #4"), None, 2, 0)
+  private lazy val commitFive = CommitEntry(Some("Bug #5"), None, 3, 0)
 
   val extractCommits: Seq[(CommitEntry, String)] =
     Seq(
