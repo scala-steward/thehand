@@ -1,5 +1,3 @@
-import Dependencies._
-
 enablePlugins(SwaggerPlugin)
 enablePlugins(PlayScala)
 
@@ -10,7 +8,6 @@ lazy val root = (project in file(".")).settings(
       version      := "0.1.2-SNAPSHOT"
     )),
     name := "thehand",
-    libraryDependencies += scalaTest % Test,
     libraryDependencies ++= Seq(
       guice,
       "org.tmatesoft.svnkit" % "svnkit" % "1.9.3",

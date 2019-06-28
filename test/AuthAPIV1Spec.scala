@@ -14,7 +14,6 @@ import play.api.mvc.Result
 import scala.concurrent.Future
 import scala.util.Try
 import play.api.libs.json.{ JsNull, JsValue, Json }
-import telemetrics.HandLogger
 
 class AuthAPIV1Spec extends PlaySpecification with JsonMatchers {
 
@@ -81,9 +80,9 @@ class AuthAPIV1Spec extends PlaySpecification with JsonMatchers {
       mustBeError(ERROR_TOKEN_HEADER_NOTFOUND, routeGET("/api/v1/account"))
     }
 
-    //    "send 404 on a bad request" in new Scope {
-    //      mustBeError(ERROR_NOTFOUND, routeGET("/boum"))
-    //    }
+//    "send 404 on a bad request" in new Scope {
+//      mustBeError(ERROR_NOTFOUND, routeGET("/boum"))
+//    }
 
     "render correctly the test page" in new Scope {
       val result: Future[Result] = routeGET("/api/v1/test")
