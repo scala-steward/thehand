@@ -1,6 +1,5 @@
 # The Hand - WIP
 
-[![Coverage Status](https://coveralls.io/repos/github/0um/thehand/badge.svg?branch=doc)](https://coveralls.io/github/0um/thehand?branch=doc)
 [![Build Status](https://travis-ci.org/0um/thehand.svg?branch=master)](https://travis-ci.org/0um/thehand)
 
 ## Requirements
