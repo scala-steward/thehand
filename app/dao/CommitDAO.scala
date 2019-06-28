@@ -65,11 +65,6 @@ class CommitDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
     DBIO.sequence(cs.map(commitQuery)).transactionally
   }
 
-  def countCommits(suffix: Suffix): Future[Int] = db.run {
-    val commits = TableQuery[CommitTable]((tag: Tag) => new CommitTable(tag, suffix))
-    commits.size.result
-  }
-
   def actionLatestRevision(suffix: Suffix): Future[Option[Long]] = {
     val commits = TableQuery[CommitTable]((tag: Tag) => new CommitTable(tag, suffix))
     db.run(commits.map(_.revision).max.result)

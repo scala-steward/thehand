@@ -10,7 +10,7 @@
  */
 
 import dao._
-import models.Suffix
+import models.{Author, CommitEntry, CommitEntryFile, CommitTasks, EntryFile, Suffix, Task}
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.matcher.FutureMatchers
 import play.api.Application
@@ -56,53 +56,45 @@ class UpdateDaoSpec(implicit ee: ExecutionEnv)  extends PlaySpecification with F
   }
   populate()
 
-
   "Table tasks" should {
-    "have five tasks" in {
-      val tasks = daoTasks.countTasks(suffix)
-      tasks must beEqualTo[Int](5).await
+    "list five tasks" in {
+      val tasks = daoTasks.list(suffix)
+      tasks must haveSize[Seq[Task]](5).await
     }
   }
 
   "Table authors" should {
-    "have three authors" in {
-      val counter = daoAuthors.countAuthors(suffix)
-      counter must beEqualTo[Int](3).await
+    "list three authors" in {
+      val counter = daoAuthors.list(suffix)
+      counter must haveSize[Seq[Author]](3).await
     }
   }
 
   "Table commits" should {
-    "have three commits" in {
-      val counter = daoCommits.countCommits(suffix)
-      counter must beEqualTo[Int](3).await
+    "list three commits" in {
+      val counter = daoCommits.list(suffix)
+      counter must haveSize[Seq[CommitEntry]](3).await
     }
   }
 
   "Table files" should {
-    "have three files" in {
-      val counter = daoFiles.countFiles(suffix)
-      counter must beEqualTo[Int](3).await
+    "list three files" in {
+      val counter = daoFiles.list(suffix)
+      counter must haveSize[Seq[EntryFile]](3).await
     }
   }
 
   "Table commits files" should {
-    "have eight commits files" in {
-      val counter = daoCommitFiles.countCommitsFiles(suffix)
-      counter must beEqualTo[Int](6).await
+    "list six commits files" in {
+      val counter = daoCommitFiles.list(suffix)
+      counter must haveSize[Seq[CommitEntryFile]](6).await
     }
   }
 
   "Table commits tasks" should {
-    "have three commits tasks" in {
-      val counter = daoCommitTasks.countCommitTasks(suffix)
-      counter must beEqualTo[Int](4).await
-    }
-  }
-
-  "Table commits tasks" should {
-    "have three commits tasks" in {
-      val commitTasks = daoCommitTasks.countCommitTasks(suffix)
-      commitTasks must beEqualTo[Int](4).await
+    "list three commits tasks" in {
+      val counter = daoCommitTasks.list(suffix)
+      counter must haveSize[Seq[CommitTasks]](4).await
     }
   }
 

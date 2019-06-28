@@ -45,9 +45,4 @@ class EntryFileDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProv
     lazy val files = TableQuery[EntryFilesTable]((tag: Tag) => new EntryFilesTable(tag, suffix))
     files.result
   }
-
-  def countFiles(suffix: Suffix): Future[Int] = db.run {
-    val files = TableQuery[EntryFilesTable]((tag: Tag) => new EntryFilesTable(tag, suffix))
-    files.size.result
-  }
 }

@@ -27,11 +27,6 @@ class CommitTaskDAO @Inject() (protected val dbConfigProvider: DatabaseConfigPro
 
   import profile.api._
 
-  def listCommitTasks_s(suffix: Suffix): Future[Seq[CommitTasks]] = db.run {
-    val commitTasks = TableQuery[CommitTasksTable]((tag: Tag) => new CommitTasksTable(tag, suffix))
-    commitTasks.result
-  }
-
   def insert(entries: Seq[CommitTasks], suffix: Suffix): Future[Seq[Int]] = db.run {
     val commits = TableQuery[CommitTable]((tag: Tag) => new CommitTable(tag, suffix))
     val commitTasks = TableQuery[CommitTasksTable]((tag: Tag) => new CommitTasksTable(tag, suffix))
@@ -53,11 +48,6 @@ class CommitTaskDAO @Inject() (protected val dbConfigProvider: DatabaseConfigPro
     } yield u
 
     DBIO.sequence(entries.map(tryInsert)).transactionally
-  }
-
-  def countCommitTasks(suffix: Suffix): Future[Int] = db run {
-    val commitTasks = TableQuery[CommitTasksTable]((tag: Tag) => new CommitTasksTable(tag, suffix))
-    commitTasks.size.result
   }
 
   def list(suffix: Suffix): Future[Seq[CommitTasks]] = db run {

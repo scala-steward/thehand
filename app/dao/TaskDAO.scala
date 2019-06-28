@@ -45,11 +45,6 @@ class TaskDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)
     DBIO.sequence(ts.map(taskQuery)).transactionally
   }
 
-  def countTasks(suffix: Suffix): Future[Int] = db.run {
-    val tasks = TableQuery[TaskTable]((tag: Tag) => new TaskTable(tag, suffix))
-    tasks.size.result
-  }
-
   def list(suffix: Suffix): Future[Seq[Task]] = db.run {
     val tasks = TableQuery[TaskTable]((tag: Tag) => new TaskTable(tag, suffix))
     tasks.result

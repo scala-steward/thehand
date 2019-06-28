@@ -72,9 +72,4 @@ class CommitEntryFileDAO @Inject() (protected val dbConfigProvider: DatabaseConf
     lazy val commits = TableQuery[CommitEntryFileTable]((tag: Tag) => new CommitEntryFileTable(tag, suffix))
     commits.result
   }
-
-  def countCommitsFiles(suffix: Suffix): Future[Int] = {
-    val commitsFiles = TableQuery[CommitEntryFileTable]((tag: Tag) => new CommitEntryFileTable(tag, suffix))
-    db.run(commitsFiles.size.result)
-  }
 }
