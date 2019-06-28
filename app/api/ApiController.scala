@@ -13,7 +13,6 @@ import play.api.i18n.{ Lang, Langs, Messages }
 
 import scala.util.{ Failure, Success }
 import play.api.libs.json._
-import telemetrics.HandLogger
 
 /*
 * Controller for the API

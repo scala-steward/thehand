@@ -1,7 +1,5 @@
 package dao
 
-import java.sql.Date
-
 import api.Api.Sorting.{ ASC, DESC }
 import api.Page
 import javax.inject.{ Inject, Singleton }

@@ -40,7 +40,7 @@ class GitConnector(repository: Repository) extends ScmConnector[RevCommit] {
       .toSeq
   }
 
-  def logRemoteAll(remoteUrl: String): Seq[Ref] = {
+  def logRemoteAll(remoteUrl: String) = {
     Git.lsRemoteRepository()
       .call
       .asScala

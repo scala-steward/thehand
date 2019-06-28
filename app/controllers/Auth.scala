@@ -2,13 +2,13 @@ package controllers
 
 import api.ApiError._
 import api.JsonCombinators._
-import models.{ ApiToken, User }
+import models.User
 import play.api.mvc._
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 import akka.actor.ActorSystem
 import api.ApiController
-import dao.{ ApiTokenDAO, UserDAO }
+import dao.UserDAO
 
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global

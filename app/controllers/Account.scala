@@ -3,7 +3,7 @@ package controllers
 import api.ApiController
 import api.ApiError._
 import api.JsonCombinators._
-import models.{ ApiToken, User }
+import models.User
 import play.api.mvc._
 import dao.UserDAO
 
