@@ -3,11 +3,11 @@ import java.time.format.DateTimeFormatter
 
 import dao._
 import javax.inject.Inject
-import models.{ ApiKey, Phase, Term, User }
-import play.api.db.slick.{ DatabaseConfigProvider, HasDatabaseConfigProvider }
+import models.{ApiKey, Author, CommitEntry, CommitEntryFile, CommitTasks, EntryFile, Phase, Suffix, Task, Term, User}
+import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.jdbc.JdbcProfile
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{Await, ExecutionContext, Future}
 
 class DatabaseFixture @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(implicit executionContext: ExecutionContext)
   extends AuthorComponent
@@ -26,7 +26,7 @@ class DatabaseFixture @Inject() (protected val dbConfigProvider: DatabaseConfigP
 
   import profile.api._
 
-  // no safe
+  @throws
   private def parseDateTime(s: String): LocalDate = {
     java.time.LocalDate.parse(s, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
   }
@@ -64,6 +64,60 @@ class DatabaseFixture @Inject() (protected val dbConfigProvider: DatabaseConfigP
       (user ++= users).asTry andThen
       (phase ++= phases).asTry andFinally
       (term ++= terms).asTry).map(_ => ())
+  }
+
+  private val tasks = Seq(
+    Task(Some("Task"), Some(5L), Some(20), None, 1),
+    Task(Some("Task"), Some(5L), Some(20), None, 2),
+    Task(Some("Bug"), Some(8L), Some(20), Some(1), 3),
+    Task(Some("Bug"), Some(8L), Some(20), Some(2), 4),
+    Task(Some("Bug"), Some(8L), Some(20), Some(2), 5))
+
+  private val authors =
+    Seq(Author("john"), Author("philips"), Author("thomas"))
+
+  private val commits = Seq(
+    CommitEntry(Some("Task #1"), None, 1, 0, 1),
+    CommitEntry(Some("Task #2"), None, 2, 0, 2),
+    CommitEntry(Some("Bug #3"), None, 2, 0, 3),
+    CommitEntry(Some("Bug #4"), None, 2, 0, 4),
+    CommitEntry(Some("Bug #5"), None, 3, 0, 5))
+
+  private val files = Seq(
+    EntryFile("/zip"),
+    EntryFile("/zap"),
+    EntryFile("/zop"),
+    EntryFile("/zip"))
+
+  private val comitFiles = Seq(
+    CommitEntryFile(Some('A'), None, Some(1), 0, 0),
+    CommitEntryFile(Some('A'), None, Some(1), 0, 0),
+    CommitEntryFile(Some('A'), None, Some(1), 0, 0),
+    CommitEntryFile(Some('M'), None, Some(2), 0, 0),
+    CommitEntryFile(Some('M'), None, Some(3), 0, 0),
+    CommitEntryFile(Some('M'), None, Some(4), 0, 0),
+    CommitEntryFile(Some('D'), None, Some(5), 0, 0))
+
+  private val commitsTasks = Seq(
+    CommitTasks(1, 1, 1),
+    CommitTasks(2, 3, 2),
+    CommitTasks(3, 2, 3),
+    CommitTasks(5, 3))
+
+  def populate(suffix: Suffix): Future[Unit] = {
+    val task = TableQuery[TaskTable]((tag: Tag) => new TaskTable(tag, suffix))
+    val author =TableQuery[AuthorsTable]((tag: Tag) => new AuthorsTable(tag, suffix))
+    val commit = TableQuery[CommitTable]((tag: Tag) => new CommitTable(tag, suffix))
+    val file = TableQuery[EntryFilesTable]((tag: Tag) => new EntryFilesTable(tag, suffix))
+    val commitFile = TableQuery[CommitEntryFileTable]((tag: Tag) => new CommitEntryFileTable(tag, suffix))
+    val commitTask = TableQuery[CommitTasksTable]((tag: Tag) => new CommitTasksTable(tag, suffix))
+
+    db.run((task ++= tasks).asTry andThen
+      (author ++= authors).asTry andThen
+      (commit ++= commits).asTry andThen
+      (file ++= files).asTry andThen
+      (commitFile ++= comitFiles).asTry andThen
+      (commitTask ++= commitsTasks).asTry).map(_ => ())
   }
 
 }

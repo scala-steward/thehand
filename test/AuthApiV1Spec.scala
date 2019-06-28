@@ -15,7 +15,7 @@ import scala.concurrent.Future
 import scala.util.Try
 import play.api.libs.json.{ JsNull, JsValue, Json }
 
-class AuthAPIV1Spec extends PlaySpecification with JsonMatchers {
+class AuthApiV1Spec extends PlaySpecification with JsonMatchers {
 
   lazy val app: Application = new GuiceApplicationBuilder().
     configure(
@@ -36,19 +36,41 @@ class AuthAPIV1Spec extends PlaySpecification with JsonMatchers {
     HEADER_ACCEPT_LANGUAGE -> "en",
     HEADER_DATE -> printHeaderDate(new DateTime()), //Thu, 07 Mar 2019 18:16:07 GMT
     HEADER_API_KEY -> "AbCdEfGhIjK1")
+
   def basicHeadersWithToken(token: String): Headers = basicHeaders.add(HEADER_AUTH_TOKEN -> token)
 
-  def routeGET(uri: String, headers: Headers = basicHeaders): Future[Result] = getRoute(GET, uri, AnyContentAsEmpty, headers)
-  def routePOST[A](uri: String, body: A, headers: Headers = basicHeaders)(implicit w: Writeable[A]): Future[Result] = getRoute(POST, uri, body, headers)
-  def routePUT[A](uri: String, body: A, headers: Headers = basicHeaders)(implicit w: Writeable[A]): Future[Result] = getRoute(PUT, uri, body, headers)
-  def routePATCH[A](uri: String, body: A, headers: Headers = basicHeaders)(implicit w: Writeable[A]): Future[Result] = getRoute(PATCH, uri, body, headers)
-  def routeDELETE(uri: String, headers: Headers = basicHeaders): Future[Result] = getRoute(DELETE, uri, AnyContentAsEmpty, headers)
-  def routeSecuredGET(token: String)(uri: String, headers: Headers = basicHeadersWithToken(token)): Future[Result] = routeGET(uri, headers)
-  def routeSecuredPOST[A](token: String)(uri: String, body: A, headers: Headers = basicHeadersWithToken(token))(implicit w: Writeable[A]): Future[Result] = routePOST(uri, body, headers)
-  def routeSecuredPUT[A](token: String)(uri: String, body: A, headers: Headers = basicHeadersWithToken(token))(implicit w: Writeable[A]): Future[Result] = routePUT(uri, body, headers)
-  def routeSecuredPATCH[A](token: String)(uri: String, body: A, headers: Headers = basicHeadersWithToken(token))(implicit w: Writeable[A]): Future[Result] = routePATCH(uri, body, headers)
-  def routeSecuredDELETE(token: String)(uri: String, headers: Headers = basicHeadersWithToken(token)): Future[Result] = routeDELETE(uri, headers)
-  def getRoute[A](method: String, uri: String, body: A, headers: Headers)(implicit w: Writeable[A]): Future[Result] = route(app, FakeRequest(method, uri, headers, body)).get
+  def routeGET(uri: String, headers: Headers = basicHeaders): Future[Result] =
+    getRoute(GET, uri, AnyContentAsEmpty, headers)
+
+  def routePOST[A](uri: String, body: A, headers: Headers = basicHeaders)(implicit w: Writeable[A]): Future[Result] =
+    getRoute(POST, uri, body, headers)
+
+  def routePUT[A](uri: String, body: A, headers: Headers = basicHeaders)(implicit w: Writeable[A]): Future[Result] =
+    getRoute(PUT, uri, body, headers)
+
+  def routePATCH[A](uri: String, body: A, headers: Headers = basicHeaders)(implicit w: Writeable[A]): Future[Result] =
+    getRoute(PATCH, uri, body, headers)
+
+  def routeDELETE(uri: String, headers: Headers = basicHeaders): Future[Result] =
+    getRoute(DELETE, uri, AnyContentAsEmpty, headers)
+
+  def routeSecuredGET(token: String)(uri: String, headers: Headers = basicHeadersWithToken(token)): Future[Result] =
+    routeGET(uri, headers)
+
+  def routeSecuredPOST[A](token: String)(uri: String, body: A, headers: Headers = basicHeadersWithToken(token))(implicit w: Writeable[A]): Future[Result] =
+    routePOST(uri, body, headers)
+
+  def routeSecuredPUT[A](token: String)(uri: String, body: A, headers: Headers = basicHeadersWithToken(token))(implicit w: Writeable[A]): Future[Result] =
+    routePUT(uri, body, headers)
+
+  def routeSecuredPATCH[A](token: String)(uri: String, body: A, headers: Headers = basicHeadersWithToken(token))(implicit w: Writeable[A]): Future[Result] =
+    routePATCH(uri, body, headers)
+
+  def routeSecuredDELETE(token: String)(uri: String, headers: Headers = basicHeadersWithToken(token)): Future[Result] =
+    routeDELETE(uri, headers)
+
+  def getRoute[A](method: String, uri: String, body: A, headers: Headers)(implicit w: Writeable[A]): Future[Result] =
+    route(app, FakeRequest(method, uri, headers, body)).get
 
   def mustBeError(code: Int, result: Future[Result]): MatchResult[String] = {
     status(result) must equalTo(ApiError.statusFromCode(code))
@@ -63,7 +85,6 @@ class AuthAPIV1Spec extends PlaySpecification with JsonMatchers {
   }
 
   "/api" should {
-
     s"warn if $HEADER_API_KEY header is not present" in {
       mustBeError(ERROR_APIKEY_NOTFOUND, routeGET("/api/v1/test", basicHeaders.remove(HEADER_API_KEY)))
     }
@@ -79,11 +100,9 @@ class AuthAPIV1Spec extends PlaySpecification with JsonMatchers {
     s"warn if $HEADER_AUTH_TOKEN is not present for a secured request" in new Scope {
       mustBeError(ERROR_TOKEN_HEADER_NOTFOUND, routeGET("/api/v1/account"))
     }
-
 //    "send 404 on a bad request" in new Scope {
 //      mustBeError(ERROR_NOTFOUND, routeGET("/boum"))
 //    }
-
     "render correctly the test page" in new Scope {
       val result: Future[Result] = routeGET("/api/v1/test")
       status(result) must equalTo(OK)
@@ -101,7 +120,6 @@ class AuthAPIV1Spec extends PlaySpecification with JsonMatchers {
       status(result) must equalTo(OK)
       header(HEADER_CONTENT_LANGUAGE, result) must beSome("es")
     }
-
     "not respond to unauthorized requests" in new Scope {
       mustBeError(ERROR_TOKEN_HEADER_NOTFOUND, routeGET("/api/v1/account"))
     }
@@ -124,6 +142,11 @@ class AuthAPIV1Spec extends PlaySpecification with JsonMatchers {
         status(routeSecuredPOST(token)("/api/v1/signout", JsNull)) must equalTo(NO_CONTENT)
       }
     }
+    "sign up is blocked" in new Scope {
+      val result: Future[Result] = routePOST("/api/v1/signup",
+        Json.obj("email" -> "user1@mail.com", "password" -> "123456", "user" -> "dummy_user"))
+      status(result) must equalTo(ERROR_BADREQUEST)
+    }
     "paginate correctly" in new Scope {
       signIn.map { token =>
         val result = routeSecuredGET(token)("/api/v1/phases")
@@ -136,7 +159,8 @@ class AuthAPIV1Spec extends PlaySpecification with JsonMatchers {
     }
     "not respond to unauthorized requests once signed out" in new Scope {
       signIn.map { token =>
-        routeSecuredPOST(token)("/api/v1/signout", JsNull)
+        val result = routeSecuredPOST(token)("/api/v1/signout", JsNull)
+        status(result) must equalTo(NO_CONTENT)
         mustBeError(ERROR_TOKEN_NOTFOUND, routeSecuredGET(token)("/api/v1/account"))
       }
     }

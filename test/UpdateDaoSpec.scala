@@ -56,71 +56,48 @@ class UpdateDaoSpec(implicit ee: ExecutionEnv)  extends PlaySpecification with F
   }
   populate()
 
-  "Table tasks" should {
-    "list five tasks" in {
+  "After populate suffix db with fixture data" should {
+    "list task tablle must have five tasks" in {
       val tasks = daoTasks.list(suffix)
       tasks must haveSize[Seq[Task]](5).await
     }
-  }
-
-  "Table authors" should {
-    "list three authors" in {
+    "list author table must have three authors" in {
       val counter = daoAuthors.list(suffix)
       counter must haveSize[Seq[Author]](3).await
     }
-  }
-
-  "Table commits" should {
-    "list three commits" in {
+    "list commit table must have three commits" in {
       val counter = daoCommits.list(suffix)
       counter must haveSize[Seq[CommitEntry]](3).await
     }
-  }
-
-  "Table commits" should {
-    "return commit revision tree" in {
+    "list commit entry table with a revision three must return one" in {
       val counter = daoCommits.list(suffix, Some(3))
       counter must haveSize[Seq[CommitEntry]](1).await
     }
-  }
-
-  "Table commits" should {
-    "return tree commits if revision not passed" in {
+    "list commit entry table with a revision nine must return none" in {
+      val counter = daoCommits.list(suffix, Some(9))
+      counter must haveSize[Seq[CommitEntry]](0).await
+    }
+    "list commit entry table without revision id return all" in {
       val counter = daoCommits.list(suffix, None)
       counter must haveSize[Seq[CommitEntry]](3).await
     }
-  }
-
-  "Table files" should {
-    "list three files" in {
+    "list table files must have three files" in {
       val counter = daoFiles.list(suffix)
       counter must haveSize[Seq[EntryFile]](3).await
     }
-  }
-
-  "Table commits files" should {
-    "list six commits files" in {
+    "list table commit entry file must have six commits files" in {
       val counter = daoCommitFiles.list(suffix)
       counter must haveSize[Seq[CommitEntryFile]](6).await
     }
-  }
-
-  "Table commits tasks" should {
-    "list three commits tasks" in {
+    "list table commit tasks must have three commits tasks" in {
       val counter = daoCommitTasks.list(suffix)
       counter must haveSize[Seq[CommitTasks]](4).await
     }
-  }
-
-  "Last commit revision" should {
-    "be three" in {
+    "last commit revision id must be three" in {
       val last = daoCommits.actionLatestRevision(suffix)
       last must beEqualTo[Option[Int]](Some(3)).await
     }
-  }
-
-  "Repeat insert a commitTask" should {
-    "update record" in {
+    "repeat insert a commitTask update record" in {
       val insert = daoCommitTasks.insert(ExtractorFixture.commitTaskChange, suffix)
       insert must beEqualTo[Seq[Int]](Seq(1)).await
     }

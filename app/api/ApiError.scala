@@ -47,6 +47,8 @@ object ApiError {
 
   final val ERROR_ITEM_NOTFOUND = 130
 
+  final val NO_CONTENT = 204
+
   final val ERROR_BADREQUEST = 400
   final val ERROR_UNAUTHORIZED = 401
   final val ERROR_FORBIDDEN = 403

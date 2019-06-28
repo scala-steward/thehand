@@ -4,9 +4,9 @@
 
 # WIP
 ### NoDocs ###
-GET     /person                             controllers.PersonController.index
+#GET     /person                             controllers.PersonController.index
 ### NoDocs ###
-POST    /person                             controllers.PersonController.addPerson
+#POST    /person                             controllers.PersonController.addPerson
 ### NoDocs ###
 #GET     /persons                           controllers.PersonController.getPersons
 ### NoDocs ###
