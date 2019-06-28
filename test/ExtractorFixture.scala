@@ -58,5 +58,7 @@ object ExtractorFixture {
       (commitFilesFour, 2L), (commitFilesFive, 3L))
 
   val extractCommitsTasks =
-    Seq(CommitTasks(1, 1), CommitTasks(2, 3), CommitTasks(3, 2), CommitTasks(5, 3))
+    Seq(CommitTasks(1, 1, 1), CommitTasks(2, 3, 2), CommitTasks(3, 2, 3), CommitTasks(5, 3))
+
+  val commitTaskChange = Seq(CommitTasks(1, 2, 1))
 }

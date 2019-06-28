@@ -77,6 +77,20 @@ class UpdateDaoSpec(implicit ee: ExecutionEnv)  extends PlaySpecification with F
     }
   }
 
+  "Table commits" should {
+    "return commit revision tree" in {
+      val counter = daoCommits.list(suffix, Some(3))
+      counter must haveSize[Seq[CommitEntry]](1).await
+    }
+  }
+
+  "Table commits" should {
+    "return tree commits if revision not passed" in {
+      val counter = daoCommits.list(suffix, None)
+      counter must haveSize[Seq[CommitEntry]](3).await
+    }
+  }
+
   "Table files" should {
     "list three files" in {
       val counter = daoFiles.list(suffix)
@@ -98,12 +112,17 @@ class UpdateDaoSpec(implicit ee: ExecutionEnv)  extends PlaySpecification with F
     }
   }
 
-  "Lastest commit revision" should {
+  "Last commit revision" should {
     "be three" in {
       val last = daoCommits.actionLatestRevision(suffix)
       last must beEqualTo[Option[Int]](Some(3)).await
     }
   }
 
-
+  "Repeat insert a commitTask" should {
+    "update record" in {
+      val insert = daoCommitTasks.insert(ExtractorFixture.commitTaskChange, suffix)
+      insert must beEqualTo[Seq[Int]](Seq(1)).await
+    }
+  }
 }
