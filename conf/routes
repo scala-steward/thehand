@@ -68,7 +68,7 @@ GET     /api/v1/:suffix/commitsentryfiles   controllers.CommitEntryFileControlle
 GET     /api/v1/:suffix/customfields        controllers.CustomFieldsController.getCustomFields(suffix: String)
 GET     /api/v1/:suffix/entyfiles           controllers.EntryFileController.getEntryFiles(suffix: String)
 GET     /api/v1/:suffix/tasks               controllers.TaskController.getTask(suffix: String)
-GET     /api/v1/:suffix/authorsReport       controllers.ReportController.getAuthors(suffix: String)
+GET     /api/v1/:suffix/authorsreport       controllers.ReportController.getAuthors(suffix: String)
 GET     /api/v1/:suffix/bugsfiles           controllers.ReportController.getFilesBugs(suffix: String)
 GET     /api/v1/:suffix/bugsfiles/:author   controllers.ReportController.getAuthorBugs(author: String, suffix: String)
 
@@ -82,7 +82,7 @@ GET     /api/v1/:suffix/csv/custom/:customField/:fromTime/:toTime controllers.Re
 GET     /assets/*file                       controllers.Assets.versioned(path="/public", file: Asset)
 
 ### NoDocs ###
-GET   /docs/swagger-ui/*file        controllers.Assets.at(path:String="/public/lib/swagger-ui", file:String)
+GET     /docs/swagger-ui/*file        controllers.Assets.at(path:String="/public/lib/swagger-ui", file:String)
 
 ### NoDocs ###
-GET   /assets/*file                 controllers.Assets.versioned(path="/public", file: Asset)
+GET     /assets/*file                 controllers.Assets.versioned(path="/public", file: Asset)
