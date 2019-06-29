@@ -8,9 +8,9 @@ import telemetrics.HandLogger
 import scala.collection.JavaConverters._
 
 class GitConnector(repository: Repository) extends ScmConnector[RevCommit] {
-  override def latestId: Long = {
+  override def latestId: Option[Long] = {
     val git = new Git(repository)
-    Seq(git.log.all).size.toLong
+    Some(Seq(git.log.all).size.toLong)
   }
 
   override def log(startRev: Long, endRev: Long): Seq[RevCommit] = {

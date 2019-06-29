@@ -1,13 +1,11 @@
-import api.Api.{HEADER_ACCEPT_LANGUAGE, HEADER_API_KEY, HEADER_AUTH_TOKEN, HEADER_CONTENT_TYPE, HEADER_DATE, printHeaderDate}
+import api.Api.{HEADER_ACCEPT_LANGUAGE, HEADER_API_KEY, HEADER_AUTH_TOKEN, HEADER_CONTENT_TYPE}
 import api.ApiError
 import dao.BootstrapDAO
 import models.Suffix
-import org.joda.time.DateTime
 import org.specs2.matcher.{JsonMatchers, MatchResult}
 import play.api.Application
 import play.api.http.Writeable
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.Json
 import play.api.mvc.{AnyContentAsEmpty, Headers, Result}
 import play.api.test.{FakeRequest, PlaySpecification}
 
@@ -34,7 +32,6 @@ class ApiSpecification extends PlaySpecification with JsonMatchers {
   val basicHeaders = Headers(
     HEADER_CONTENT_TYPE -> "application/json",
     HEADER_ACCEPT_LANGUAGE -> "en",
-    HEADER_DATE -> printHeaderDate(new DateTime()), //Thu, 07 Mar 2019 18:16:07 GMT
     HEADER_API_KEY -> "AbCdEfGhIjK1")
 
   def basicHeadersWithToken(token: String): Headers = basicHeaders.add(HEADER_AUTH_TOKEN -> token)

@@ -21,12 +21,6 @@ class AuthApiV1Spec extends ApiSpecification {
     s"warn if $HEADER_API_KEY header is not present" in {
       mustBeError(ERROR_APIKEY_NOTFOUND, routeGET("/api/v1/test", basicHeaders.remove(HEADER_API_KEY)))
     }
-    s"warn if $HEADER_DATE header is not present" in new Scope {
-      mustBeError(ERROR_DATE_NOTFOUND, routeGET("/api/v1/test", basicHeaders.remove(HEADER_DATE)))
-    }
-    s"warn if $HEADER_DATE header is malformed" in new Scope {
-      mustBeError(ERROR_DATE_MALFORMED, routeGET("/api/v1/test", basicHeaders.replace(HEADER_DATE -> "malformed_date")))
-    }
     s"warn if API KEY is unknown" in new Scope {
       mustBeError(ERROR_APIKEY_UNKNOWN, routeGET("/api/v1/test", basicHeaders.replace(HEADER_API_KEY -> "unknown_apikey")))
     }
@@ -39,11 +33,6 @@ class AuthApiV1Spec extends ApiSpecification {
     "render correctly the test page" in new Scope {
       val result: Future[Result] = routeGET("/api/v1/test")
       status(result) must equalTo(OK)
-      val maybeDate: Option[String] = header(HEADER_DATE, result)
-      maybeDate must beSome
-      maybeDate.map { dateString =>
-        Try(Api.parseHeaderDate(dateString)) must beSuccessfulTry
-      }
       contentType(result) must beSome.which(_ == "application/json")
       contentAsString(result) must contain("The API is ready")
       header(HEADER_CONTENT_LANGUAGE, result) must beSome("en")

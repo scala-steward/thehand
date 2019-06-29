@@ -27,6 +27,7 @@ trait CommitEntryFileComponent extends CommitComponent with EntryFileComponent {
 
 class CommitEntryFileDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(implicit executionContext: ExecutionContext)
   extends CommitEntryFileComponent
+  with CommitComponent
   with HasDatabaseConfigProvider[JdbcProfile] {
 
   import profile.api._
@@ -59,7 +60,7 @@ class CommitEntryFileDAO @Inject() (protected val dbConfigProvider: DatabaseConf
 
       def insert(files: Seq[CommitEntryWriter]) = for {
         commitId <- commits.filter(_.revision === revisionNumber).map(_.id).result.headOption
-        _ <- DBIO.sequence(files.map(insertFilePath(_, commitId.getOrElse(-1)))) //.asTry
+        _ <- DBIO.sequence(files.map(insertFilePath(_, commitId.getOrElse(-1))))
       } yield files.size
 
       insert(entryFiles)
@@ -71,5 +72,10 @@ class CommitEntryFileDAO @Inject() (protected val dbConfigProvider: DatabaseConf
   def list(suffix: Suffix): Future[Seq[CommitEntryFile]] = db.run {
     lazy val commits = TableQuery[CommitEntryFileTable]((tag: Tag) => new CommitEntryFileTable(tag, suffix))
     commits.result
+  }
+
+  def info(suffix: Suffix, id: Long): Future[Seq[CommitEntryFile]] = db.run {
+    lazy val commits = TableQuery[CommitEntryFileTable]((tag: Tag) => new CommitEntryFileTable(tag, suffix))
+    commits.filter(_.id === id).result
   }
 }

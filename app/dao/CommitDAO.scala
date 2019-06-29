@@ -4,6 +4,7 @@ import java.sql.Timestamp
 
 import javax.inject.Inject
 import models._
+import org.joda.time.LocalDate
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.jdbc.JdbcProfile
 
@@ -35,12 +36,19 @@ class CommitDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
     commits.result
   }
 
-  def list(suffix: Suffix, revision: Option[Long]): Future[Seq[CommitEntry]] = db.run {
+  def info(suffix: Suffix, id: Long): Future[Seq[CommitEntry]] = db.run {
     val commits = TableQuery[CommitTable]((tag: Tag) => new CommitTable(tag, suffix))
-    revision match {
-      case Some(r) => commits.filter(_.revision === r).result
-      case None => commits.result
-    }
+    commits.filter(_.id === id).result
+  }
+
+  def infoRevision(suffix: Suffix, revision: Long): Future[Seq[CommitEntry]] = db.run {
+    val commits = TableQuery[CommitTable]((tag: Tag) => new CommitTable(tag, suffix))
+    commits.filter(_.revision === revision).result
+  }
+
+  def infoDate(suffix: Suffix, from: Timestamp, to: Timestamp): Future[Seq[CommitEntry]] = db.run {
+    val commits = TableQuery[CommitTable]((tag: Tag) => new CommitTable(tag, suffix))
+    commits.filter(_.timestamp >= from).filter(_.timestamp <= to).result
   }
 
   def insert(cs: Seq[(CommitEntry, String)], suffix: Suffix): Future[Seq[Int]] = db.run {

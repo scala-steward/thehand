@@ -50,6 +50,16 @@ class BootstrapDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProv
       case Failure(e) =>
         HandLogger.error("error in create tables " + e.getMessage)
     }
+
+    // HIRO DEBUG
+    val apiKeys: Seq[ApiKey] = Seq(
+      ApiKey(apiKey = "AbCdEfGhIjK1", name = "ios-app", active = true),
+      ApiKey(apiKey = "AbCdEfGhIjK2", name = "android-app", active = true))
+
+    exec(apiKey ++= apiKeys) onComplete {
+      case Success(_) => HandLogger.debug("correct create default tables")
+      case Failure(_) => HandLogger.debug("correct create default tables")
+    }
   }
 
   def createSchemas(suffix: Suffix): Unit = {

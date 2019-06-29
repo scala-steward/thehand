@@ -45,4 +45,9 @@ class EntryFileDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProv
     lazy val files = TableQuery[EntryFilesTable]((tag: Tag) => new EntryFilesTable(tag, suffix))
     files.result
   }
+
+  def info(suffix: Suffix, id: Long): Future[Seq[EntryFile]] = db.run {
+    lazy val files = TableQuery[EntryFilesTable]((tag: Tag) => new EntryFilesTable(tag, suffix))
+    files.filter(_.id === id).result
+  }
 }

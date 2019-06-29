@@ -57,10 +57,10 @@ class SvnConnector(repository: SVNRepository) extends ScmConnector[SVNLogEntry] 
     repository.getLatestRevision
   }
 
-  override def latestId: Long = getLatestRevision match {
-    case Success(rev) => rev
+  override def latestId: Option[Long] = getLatestRevision match {
+    case Success(rev) => Some(rev)
     case Failure(e) =>
       HandLogger.error("error while fetching the latest repository revision: " + e.getMessage)
-      -1
+      None
   }
 }

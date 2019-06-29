@@ -21,7 +21,7 @@ object ProcessTargetConnector {
   def apply(t: TaskConnector): ProcessTargetConnector = new ProcessTargetConnector(t)
 }
 
-class ProcessTargetConnector(t: TaskConnector) {
+class ProcessTargetConnector(t: TaskConnector) extends TaskProcessConnector {
   private def parseAssignableJson(json: JsValue): Option[Task] = {
     val typeTask = (json \ "EntityType" \ "Name").validateOpt[String].get
     val typeTaskId = (json \ "EntityType" \ "Id").validateOpt[Long].get

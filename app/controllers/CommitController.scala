@@ -9,9 +9,12 @@
 
 package controllers
 
+import java.sql.Timestamp
+import java.time.LocalTime
+
 import javax.inject._
 import dao._
-import models.Suffix
+import models.{QueryLocalDate, Suffix}
 import play.api.libs.json.Json
 import play.api.mvc._
 
@@ -22,9 +25,28 @@ class CommitController @Inject() (
   cc: MessagesControllerComponents)(implicit ec: ExecutionContext)
   extends MessagesAbstractController(cc) {
 
-  def getCommits(suffix: String, revision: Option[Long]): Action[AnyContent] = Action.async {
-    val s = Suffix(suffix)
-    dao.list(s, revision).map { a =>
+  def list(suffix: String): Action[AnyContent] = Action.async {
+    dao.list(Suffix(suffix)).map { a =>
+      Ok(Json.toJson(a))
+    }
+  }
+
+  def info(suffix: String, id: Long): Action[AnyContent] = Action.async {
+    dao.info(Suffix(suffix), id).map { a =>
+      Ok(Json.toJson(a))
+    }
+  }
+
+  def infoRevision(suffix: String, revision: Long): Action[AnyContent] = Action.async {
+    dao.infoRevision(Suffix(suffix), revision).map { a =>
+      Ok(Json.toJson(a))
+    }
+  }
+
+  def infoDate(suffix: String, from: QueryLocalDate, to: QueryLocalDate): Action[AnyContent] = Action.async {
+    val fromTime = Timestamp.valueOf(from.date.atTime(LocalTime.MIDNIGHT))
+    val toTime = Timestamp.valueOf(to.date.atTime(LocalTime.MIDNIGHT))
+    dao.infoDate(Suffix(suffix), fromTime, toTime).map { a =>
       Ok(Json.toJson(a))
     }
   }

@@ -33,7 +33,6 @@ class ApiController @Inject() (val dbc: DatabaseConfigProvider, l: Langs, mcc: M
   implicit def result2FutureResult(r: ApiResult): Future[ApiResult] = Future.successful(r)
 
   // Custom Actions
-
   def ApiAction(action: ApiRequest[Unit] => Future[ApiResult]): Action[Unit] =
     ApiActionWithParser(parse.empty)(action)
 
@@ -52,18 +51,14 @@ class ApiController @Inject() (val dbc: DatabaseConfigProvider, l: Langs, mcc: M
   def UserAwareApiActionWithBody(action: UserAwareApiRequest[JsValue] => Future[ApiResult]): Action[JsValue] =
     UserAwareApiActionWithParser(parse.json)(action)
 
-  // Creates an Action checking that the Request has all the common necessary headers with their correct values (X-Api-Key, Date)
+  // Creates an Action checking that the Request has all the common necessary headers with their correct values (X-Api-Key)
   private def ApiActionCommon[A](parser: BodyParser[A])(action: (ApiRequest[A], String, DateTime) => Future[ApiResult]) = Action.async(parser) { implicit request =>
     val apiRequest = ApiRequest(request)
     implicit val lang: Lang = request.messages.lang
 
     val futureApiResult: Future[ApiResult] = apiRequest.apiKeyOpt match {
       case None => errorApiKeyNotFound
-      case Some(apiKey) => apiRequest.dateOptTry match {
-        case None => errorDateNotFound
-        case Some(Failure(_)) => errorDateMalformed
-        case Some(Success(date)) => action(apiRequest, apiKey, date)
-      }
+      case Some(apiKey) => action(apiRequest, apiKey, DateTime.now())
     }
     futureApiResult.map {
       case error: ApiError => error.saveLog(apiRequest).toResult

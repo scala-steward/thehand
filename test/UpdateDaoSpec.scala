@@ -30,16 +30,16 @@ class UpdateDaoSpec(implicit ee: ExecutionEnv)  extends DaoSpec {
       counter must haveSize[Seq[CommitEntry]](3).await
     }
     "list commit entry table with a revision three must return one" in {
-      val counter = fixture.daoCommits.list(suffix, Some(3))
+      val counter = fixture.daoCommits.infoRevision(suffix, 3)
       counter must haveSize[Seq[CommitEntry]](1).await
     }
     "list commit entry table with a revision nine must return none" in {
-      val counter = fixture.daoCommits.list(suffix, Some(9))
+      val counter = fixture.daoCommits.infoRevision(suffix, 9)
       counter must haveSize[Seq[CommitEntry]](0).await
     }
-    "list commit entry table without revision id return all" in {
-      val counter = fixture.daoCommits.list(suffix, None)
-      counter must haveSize[Seq[CommitEntry]](3).await
+    "list commit entry table qith an id return one" in {
+      val counter = fixture.daoCommits.info(suffix, 1)
+      counter must haveSize[Seq[CommitEntry]](1).await
     }
     "list table files must have three files" in {
       val counter = fixture.daoFiles.list(suffix)

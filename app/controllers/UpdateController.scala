@@ -17,26 +17,20 @@ import play.api.db.slick.DatabaseConfigProvider
 import play.api.i18n.Langs
 import play.api.mvc._
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class UpdateController @Inject() (override val dbc: DatabaseConfigProvider, dao: UpdateDAO, l: Langs, mcc: MessagesControllerComponents)(implicit executionContext: ExecutionContext)
   extends ApiController(dbc, l, mcc) {
 
-  def unsafeUpdateAll(): Action[AnyContent] = Action {
-    dao.updateAll()
-    Ok("Updated All")
+  def updateAll(): Action[Unit] = ApiAction { implicit request =>
+    dao.updateAll().flatMap{ _ => accepted() }
   }
 
-  def updateAll(): Action[Unit] = SecuredApiAction { implicit request =>
-    dao.updateAll().flatMap { _ => noContent() }
+  def update(suffix: String): Action[Unit] = ApiAction { implicit request =>
+    dao.update(Suffix(suffix), None, None).flatMap { _ => accepted() }
   }
 
-  def update(suffix: String, from: Option[Long], to: Option[Long]): Action[Unit] = SecuredApiAction { implicit request =>
-    dao.update(Suffix(suffix), from, to).flatMap { _ => noContent() }
-  }
-
-  def updateCustomFields(suffix: String, field: String, from: Option[Long], to: Option[Long]): Action[AnyContent] = Action {
-    dao.updateCustomFields(Suffix(suffix), field, from, to)
-    Ok("Updating")
+  def updateCustomFields(suffix: String, field: String): Action[Unit] = ApiAction { implicit request =>
+    dao.updateCustomFields(Suffix(suffix), field, None, None).flatMap { _ => accepted() }
   }
 }

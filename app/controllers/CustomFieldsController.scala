@@ -22,9 +22,20 @@ class CustomFieldsController @Inject() (
                                  cc: MessagesControllerComponents)(implicit ec: ExecutionContext)
   extends MessagesAbstractController(cc) {
 
-  def getCustomFields(suffix: String): Action[AnyContent] = Action.async {
-    val s = Suffix(suffix)
-    dao.list(s).map { a =>
+  def list(suffix: String): Action[AnyContent] = Action.async {
+    dao.list(Suffix(suffix)).map { a =>
+      Ok(Json.toJson(a))
+    }
+  }
+
+  def listField(suffix: String, field: String): Action[AnyContent] = Action.async {
+    dao.listField(Suffix(suffix), field).map { a =>
+      Ok(Json.toJson(a))
+    }
+  }
+
+  def info(suffix: String, id: Long): Action[AnyContent] = Action.async {
+    dao.info(Suffix(suffix), id).map { a =>
       Ok(Json.toJson(a))
     }
   }

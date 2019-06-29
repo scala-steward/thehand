@@ -2,21 +2,20 @@ package dao
 
 import models._
 import play.api.db.slick.HasDatabaseConfigProvider
-import scm.{ SvnConnector, SvnConnectorFactory, SvnRepositoryData }
+import scm.{ScmRepositoryData, SvnConnector, SvnConnectorFactory, SvnExtractor}
 import slick.jdbc.JdbcProfile
-import tasks.{ TaskParser, TaskParserCharp }
+import tasks.{ProcessTargetConnector, TargetConnector, TaskConnector, TaskParser, TaskParserCharp}
 import javax.inject.Inject
+import org.tmatesoft.svn.core.SVNLogEntry
 import play.api.db.slick.DatabaseConfigProvider
-import tasks.{ TargetConnector, TaskConnector }
+import telemetrics.HandLogger
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 class UpdateDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider, conf: play.api.Configuration)(implicit executionContext: ExecutionContext)
   extends HasDatabaseConfigProvider[JdbcProfile] {
-  private implicit val target: TaskConnector = TargetConnector(
-    conf.get[String]("target.url"),
-    conf.get[String]("target.user"),
-    conf.get[String]("target.pass"))
+
 
   private def loadSvnRepository(confName: String) = {
     lazy val suffix = Suffix(conf.get[String](confName + ".database_suffix"))
@@ -36,7 +35,17 @@ class UpdateDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
     val b = new BootstrapDAO(dbConfigProvider)
     b.createSchemas(suffix)
 
-    repository.flatMap(r => Future.successful(new SvnRepositoryData(dbConfigProvider, r, suffix)))
+    val taskConnector: TaskConnector = TargetConnector(
+      conf.get[String]("target.url"),
+      conf.get[String]("target.user"),
+      conf.get[String]("target.pass"))
+
+    val extractor = new SvnExtractor(parser)
+    val taskProcessor = ProcessTargetConnector(taskConnector)
+
+    repository.flatMap { r =>
+      Future.successful(new ScmRepositoryData[SVNLogEntry](dbConfigProvider, r, extractor, taskProcessor, suffix))
+    }
   }
 
   private def updateRepositoryAuto(confName: String) = {
@@ -54,7 +63,7 @@ class UpdateDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
   }
 
   def updateAll(): Future[Seq[Int]] = {
-    val repSuffixes = conf.get[Seq[String]]("repos")
+    val repSuffixes = conf.getOptional[Seq[String]]("repos").getOrElse(Seq())
     val repositories = repSuffixes.map(updateRepositoryAuto)
     Future.sequence(repositories).map(_.flatten)
   }

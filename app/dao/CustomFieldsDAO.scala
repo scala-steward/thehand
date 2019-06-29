@@ -41,13 +41,18 @@ class CustomFieldsDAO @Inject() (protected val dbConfigProvider: DatabaseConfigP
     DBIO.sequence(ts.map(customQuery)).transactionally
   }
 
-  def countTasks(suffix: Suffix): Future[Int] = db.run {
-    val tasks = TableQuery[CustomFieldsTable]((tag: Tag) => new CustomFieldsTable(tag, suffix))
-    tasks.size.result
+  def list(suffix: Suffix): Future[Seq[CustomFields]] = db.run {
+    val custom = TableQuery[CustomFieldsTable]((tag: Tag) => new CustomFieldsTable(tag, suffix))
+    custom.result
   }
 
-  def list(suffix: Suffix): Future[Seq[CustomFields]] = db.run {
-    val tasks = TableQuery[CustomFieldsTable]((tag: Tag) => new CustomFieldsTable(tag, suffix))
-    tasks.result
+  def listField(suffix: Suffix, field: String): Future[Seq[CustomFields]] = db.run {
+    val custom = TableQuery[CustomFieldsTable]((tag: Tag) => new CustomFieldsTable(tag, suffix))
+    custom.filter(_.field === field).result
+  }
+
+  def info(suffix: Suffix, id: Long): Future[Seq[CustomFields]] = db.run {
+    val custom = TableQuery[CustomFieldsTable]((tag: Tag) => new CustomFieldsTable(tag, suffix))
+    custom.filter(_.id === id).result
   }
 }

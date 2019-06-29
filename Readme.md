@@ -103,6 +103,8 @@ target = {
 ### Run
 ```
 > sbt run -Dconfig.file=/... path .../application.conf
+> curl -v -X POST -H 'X-API-key:AbCdEfGhIjK1' http://ip:9000/boot
+> curl -v -X POST -H 'X-API-key:AbCdEfGhIjK1' http://ip:9000/api/v1/update
 ```
 
 #### Test

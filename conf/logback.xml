@@ -34,8 +34,12 @@
 <!--    <appender-ref ref="STDOUT" />-->
 <!--    </root>-->
 
-<!--    <root level="debug">-->
-<!--    <appender-ref ref="STDOUT" />-->
-<!--    &lt;!&ndash;<appender-ref ref="FILE" />&ndash;&gt;-->
-<!--    </root>-->
+    <root level="error">
+    <appender-ref ref="STDOUT" />
+    </root>
+
+    <root level="debug">
+    <appender-ref ref="STDOUT" />
+    <!--<appender-ref ref="FILE" />-->
+    </root>
 </configuration>

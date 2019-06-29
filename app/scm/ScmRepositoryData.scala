@@ -14,18 +14,19 @@ package scm
 import dao._
 import javax.inject.Inject
 import models.Suffix
-import org.tmatesoft.svn.core.SVNLogEntry
-import tasks.TaskParser
+import tasks.{TaskProcessConnector, ProcessTargetConnector, TaskConnector}
 
-import scala.concurrent.{ ExecutionContextExecutor, Future }
+import scala.concurrent.{ExecutionContextExecutor, Future}
 import play.api.db.slick.DatabaseConfigProvider
-import tasks.{ ProcessTargetConnector, TaskConnector }
 
-class SvnRepositoryData @Inject() (protected val dbConfigProvider: DatabaseConfigProvider, repository: ScmConnector[SVNLogEntry], suffix: Suffix)(implicit taskConnector: TaskConnector, parser: TaskParser) {
-
+class ScmRepositoryData[T] @Inject()
+(protected val dbConfigProvider: DatabaseConfigProvider,
+ repository: ScmConnector[T],
+ extractor: ScmExtractor[T],
+ taskProcessor: TaskProcessConnector,
+ suffix: Suffix)
+{
   implicit val context: ExecutionContextExecutor = scala.concurrent.ExecutionContext.fromExecutor(null)
-  lazy val tp = ProcessTargetConnector(taskConnector)
-
   lazy val daoTasks = new TaskDAO(dbConfigProvider)
   lazy val daoCustomFields = new CustomFieldsDAO(dbConfigProvider)
   lazy val daoCommits = new CommitDAO(dbConfigProvider)
@@ -34,14 +35,14 @@ class SvnRepositoryData @Inject() (protected val dbConfigProvider: DatabaseConfi
   lazy val daoCommitFiles = new CommitEntryFileDAO(dbConfigProvider)
   lazy val daoCommitTasks = new CommitTaskDAO(dbConfigProvider)
 
-  private def calculateRangeLimit(lastId: Long): (Long, Long) = {
+  private def calculateRangeLimit(lastId: Long, latestId: Long): (Long, Long) = {
     val lastIdDB: Long = if (lastId < 1) 1 else lastId
-    val lastIdSvn: Long = if (repository.latestId < 1) 1 else repository.latestId
-    if (lastIdDB != lastIdSvn) (lastIdDB, lastIdSvn) else (1, 1)
+    val lastIdScm: Long = if (latestId < 1) 1 else latestId
+    if (lastIdDB != lastIdScm) (lastIdDB, lastIdScm) else (1, 1)
   }
 
   def fixRange(range: (Long, Long)): (Long, Long) = {
-    lazy val last = repository.latestId
+    lazy val last = repository.latestId.getOrElse(-1.toLong)
     range match {
       case (from, to) if from < 1 && ((to < 1) || (to > last)) => (1, last)
       case (from, to) if from < 1 => (1, to)
@@ -57,39 +58,40 @@ class SvnRepositoryData @Inject() (protected val dbConfigProvider: DatabaseConfi
 
   def doStep(from: Long, to: Long, step: Long): Future[Seq[Int]] = {
     if (((to - from) / step) <= 0) {
-      updateInRange(from, to)
+      updateInRange(repository.log(from, to))
     } else {
-      updateInRange(from, from + step)
+      updateInRange(repository.log(from, from + step))
       doStep(from + step, to, step)
     }
   }
 
-  def updateAuto(): Future[Seq[Int]] = {
-    daoCommits
-      .actionLatestRevision(suffix)
-      .flatMap(lastId => updateRange(calculateRangeLimit(lastId.getOrElse(1))))
-  }
+  def updateAuto(): Future[Seq[Int]] =
+    repository.latestId match {
+      case Some(lastestId) => daoCommits
+        .actionLatestRevision(suffix)
+        .flatMap(lastId => updateRange(calculateRangeLimit(lastId.getOrElse(1), lastestId)))
+      case None => Future(Seq())
+    }
 
-  def updateInRange(startId: Long, endId: Long): Future[Seq[Int]] = {
-    lazy val extractor = new SvnExtractor(repository.log(startId, endId), parser)
+  def updateInRange(data: Seq[T]): Future[Seq[Int]] = {
     val insertAll: Future[Seq[Int]] =
       for {
-        _ <- daoTasks.insert(extractor.extractTasks.flatMap(tp.process), suffix)
-        _ <- daoCustomFields.insert(extractor.extractTasks.flatMap(tp.processCustomFields(_, "Request Type")), suffix)
-        _ <- daoAuthors.insert(extractor.extractAuthors, suffix)
-        _ <- daoCommits.insert(extractor.extractCommits, suffix)
-        _ <- daoFiles.insert(extractor.extractFiles, suffix)
-        _ <- daoCommitTasks.insert(extractor.extractCommitsTasks, suffix)
-        c <- daoCommitFiles.insert(extractor.extractCommitsFiles, suffix)
+        _ <- daoTasks.insert(extractor.extractTasks(data).flatMap(taskProcessor.process), suffix)
+        _ <- daoCustomFields.insert(extractor.extractTasks(data).flatMap(taskProcessor.processCustomFields(_, "Request Type")), suffix)
+        _ <- daoAuthors.insert(extractor.extractAuthors(data), suffix)
+        _ <- daoCommits.insert(extractor.extractCommits(data), suffix)
+        _ <- daoFiles.insert(extractor.extractFiles(data), suffix)
+        _ <- daoCommitTasks.insert(extractor.extractCommitsTasks(data), suffix)
+        c <- daoCommitFiles.insert(extractor.extractCommitsFiles(data), suffix)
       } yield c
     insertAll
   }
 
   def updateCustomFields(field: String, startId: Long, endId: Long): Future[Seq[Int]] = {
-    lazy val extractor = new SvnExtractor(repository.log(startId, endId), parser)
+    lazy val data = repository.log(startId, endId)
     val insertAll: Future[Seq[Int]] =
       for {
-        c <- daoCustomFields.insert(extractor.extractTasks.flatMap(tp.processCustomFields(_, field)), suffix)
+        c <- daoCustomFields.insert(extractor.extractTasks(data).flatMap(taskProcessor.processCustomFields(_, field)), suffix)
       } yield c
     insertAll
   }

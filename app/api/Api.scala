@@ -18,7 +18,7 @@ object Api {
   final val HEADER_CONTENT_TYPE = "Content-Type"
   final val HEADER_CONTENT_LANGUAGE = "Content-Language"
   final val HEADER_ACCEPT_LANGUAGE = "Accept-Language"
-  final val HEADER_DATE = "Date"
+  //final val HEADER_DATE = "Date"
   final val HEADER_LOCATION = "Location"
   final val HEADER_API_KEY = "X-API-Key"
   final val HEADER_AUTH_TOKEN = "X-AUTH-Token"
@@ -29,7 +29,7 @@ object Api {
   final val HEADER_PAGE_TOTAL = "X-Page-Total"
 
   def basicHeaders(implicit lang: Lang): Seq[(String, String)] = Seq(
-    HEADER_DATE -> printHeaderDate(new DateTime()),
+    //HEADER_DATE -> printHeaderDate(new DateTime()),
     HEADER_CONTENT_LANGUAGE -> lang.language)
 
   def locationHeader(uri: String): (String, String) = HEADER_LOCATION -> uri

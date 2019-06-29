@@ -45,4 +45,9 @@ class AuthorDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
 
     DBIO.sequence(as.map(authorQuery)).transactionally
   }
+
+  def info(suffix: Suffix, id: Long): Future[Option[Author]] = db.run {
+    val authors = TableQuery[AuthorsTable]((tag: Tag) => new AuthorsTable(tag, suffix))
+    authors.filter(_.id === id).result.headOption
+  }
 }

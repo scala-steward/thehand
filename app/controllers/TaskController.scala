@@ -22,9 +22,26 @@ class TaskController @Inject() (
   cc: MessagesControllerComponents)(implicit ec: ExecutionContext)
   extends MessagesAbstractController(cc) {
 
-  def getTask(suffix: String): Action[AnyContent] = Action.async {
-    val s = Suffix(suffix)
-    dao.list(s).map { a =>
+  def list(suffix: String): Action[AnyContent] = Action.async {
+    dao.list(Suffix(suffix)).map { a =>
+      Ok(Json.toJson(a))
+    }
+  }
+
+  def info(suffix: String, id: Long): Action[AnyContent] = Action.async {
+    dao.info(Suffix(suffix), id).map { a =>
+      Ok(Json.toJson(a))
+    }
+  }
+
+  def infoTaskId(suffix: String, taskId: Long): Action[AnyContent] = Action.async {
+    dao.infoTaskId(Suffix(suffix), taskId).map { a =>
+      Ok(Json.toJson(a))
+    }
+  }
+
+  def infoParentId(suffix: String, parentId: Long): Action[AnyContent] = Action.async {
+    dao.infoParentId(Suffix(suffix), parentId).map { a =>
       Ok(Json.toJson(a))
     }
   }

@@ -12,10 +12,12 @@ package controllers
 import java.io.File
 import java.sql.Timestamp
 import java.text.SimpleDateFormat
+import java.time.LocalTime
 
 import javax.inject._
 import dao._
-import models.Suffix
+import models.{QueryLocalDate, Suffix}
+import org.joda.time.LocalDate
 import play.api.libs.json.Json
 import play.api.mvc._
 import reportio.CvsIO
@@ -116,14 +118,6 @@ class ReportController @Inject() (
   }
 
   // Actions ###########################################################################
-
-  def getAuthors(suffix: String): Action[AnyContent] = Action.async {
-    val s = Suffix(suffix)
-    authors(s).map { a =>
-      Ok(Json.toJson(a))
-    }
-  }
-
   def getFilesBugs(suffix: String): Action[AnyContent] = Action.async {
     val s = Suffix(suffix)
     reportFilesBugsCounterToAction(s).map { a =>
@@ -138,35 +132,30 @@ class ReportController @Inject() (
     }
   }
 
-  private def parseTimestamp(fromTime: String, toTime: String) : Try[(Timestamp, Timestamp)] = Try {
-      val format = new SimpleDateFormat("yyyy-MM-dd")
-      (new Timestamp(format.parse(fromTime).getTime), new Timestamp(format.parse(toTime).getTime))
-    }
-
-
-  def getCommitByCustomField(suffix: String, customField: String, fromTime: String, toTime: String): Action[AnyContent] = Action.async {
-    parseTimestamp(fromTime, toTime) match {
-      case Success(times) =>
-        reportCommitByCustomField(Suffix(suffix), customField, times._1, times._2).map { a => Ok(Json.toJson(a.sortBy(i => -i._2))) }
-      case Failure(_) => Future(BadRequest("valid date format => yyyy-MM-dd"))
+  def listCommitCustomField(suffix: String, customField: String, from: QueryLocalDate, to: QueryLocalDate, format: Option[String]) = {
+    val fromTime = Timestamp.valueOf(from.date.atTime(LocalTime.MIDNIGHT))
+    val toTime = Timestamp.valueOf(to.date.atTime(LocalTime.MIDNIGHT))
+    format match {
+      case Some("csv") => listCommitsCustomFieldCsv(suffix, customField, fromTime, toTime)
+      case _ => listCommitsCustomField(suffix, customField, fromTime, toTime)
     }
   }
 
-  def getCommitByCustomFieldCsv(suffix: String, fieldValue: String, fromTime: String, toTime: String): Action[AnyContent] = Action.async {
-    parseTimestamp(fromTime, toTime) match {
-      case Success(times) =>
-        // hiro fix path and correct parametrize in other function
-        val localDirectory = new java.io.File(".").getCanonicalPath
-        val reportDirectory = s"${localDirectory}/report/"
-        val file = s"${suffix.toLowerCase}_commits_bugs_counter"
-        lazy val filename = s"${reportDirectory}${file}"
-        reportCommitByCustomField(Suffix(suffix), fieldValue, times._1, times._2).map { a =>
-          writer.write(filename, a.sortBy(i => i._2))
+  private def listCommitsCustomField(suffix: String, customField: String, from: Timestamp, to: Timestamp): Action[AnyContent] = Action.async {
+     reportCommitByCustomField(Suffix(suffix), customField, from, to).map { a => Ok(Json.toJson(a.sortBy(i => -i._2))) }
+  }
 
-          Ok.sendFile(new File(filename+".csv"), inline=true)
-            .withHeaders(CACHE_CONTROL->"max-age=3600",CONTENT_DISPOSITION->s"attachment; filename=${file}.csv", CONTENT_TYPE->"application/x-download");
-        }
-      case Failure(_) => Future(BadRequest("valid date format => yyyy-MM-dd"))
+  private def listCommitsCustomFieldCsv(suffix: String, fieldValue: String, from: Timestamp, to: Timestamp): Action[AnyContent] = Action.async {
+    // hiro fix path and correct parametrize in other function
+    val localDirectory = new java.io.File(".").getCanonicalPath
+    val reportDirectory = s"${localDirectory}/report/"
+    val file = s"${suffix.toLowerCase}_commits_bugs_counter"
+    lazy val filename = s"${reportDirectory}${file}"
+    reportCommitByCustomField(Suffix(suffix), fieldValue, from, to).map { a =>
+      writer.write(filename, a.sortBy(i => i._2))
+
+      Ok.sendFile(new File(filename+".csv"), inline=true)
+        .withHeaders(CACHE_CONTROL->"max-age=3600",CONTENT_DISPOSITION->s"attachment; filename=${file}.csv", CONTENT_TYPE->"application/x-download");
     }
   }
 }

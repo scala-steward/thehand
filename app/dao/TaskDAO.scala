@@ -38,7 +38,7 @@ class TaskDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)
     def taskQuery(task: Task) = {
       for {
         taskId <- tasks.filter(_.taskId === task.taskId).map(_.id).result.headOption
-        u <- updateInsert(task, taskId) //.asTry
+        u <- updateInsert(task, taskId)//.asTry
       } yield u
     }
 
@@ -48,5 +48,20 @@ class TaskDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)
   def list(suffix: Suffix): Future[Seq[Task]] = db.run {
     val tasks = TableQuery[TaskTable]((tag: Tag) => new TaskTable(tag, suffix))
     tasks.result
+  }
+
+  def info(suffix: Suffix, id: Long): Future[Seq[Task]] = db.run {
+    val tasks = TableQuery[TaskTable]((tag: Tag) => new TaskTable(tag, suffix))
+    tasks.filter(_.id === id).result
+  }
+
+  def infoTaskId(suffix: Suffix, taskId: Long): Future[Seq[Task]] = db.run {
+    val tasks = TableQuery[TaskTable]((tag: Tag) => new TaskTable(tag, suffix))
+    tasks.filter(_.taskId === taskId).result
+  }
+
+  def infoParentId(suffix: Suffix, parentId: Long): Future[Seq[Task]] = db.run {
+    val tasks = TableQuery[TaskTable]((tag: Tag) => new TaskTable(tag, suffix))
+    tasks.filter(_.parentId === parentId).result
   }
 }

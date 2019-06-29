@@ -13,17 +13,6 @@ securityDefinitions:
     in: header
     name: X-API-Key
     description: Requests should pass an X-API-Key header.
-  apiDate:
-    type: apiKey
-    in: header
-    name: Date
-    description: Date time in format Thu, 07 Mar 2019 18:16:07 GMT
-  apiAcceptLanguage:
-    type: apiKey
-    in: header
-    name: Accept-Language
-    description: Language abreviation en es pt (optional)
-    required: false
   apiToken:
     type: apiKey
     in: header
@@ -32,6 +21,4 @@ securityDefinitions:
     required: false
 security:
 - apiKey: []
-  apiDate: []
-- apiAcceptLanguage: []
 - apiToken: []

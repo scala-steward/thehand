@@ -9,14 +9,7 @@ import play.api.libs.json._
 trait ApiRequestHeader[R <: RequestHeader] {
   val request: R
   val apiKeyOpt: Option[String] = request.headers.get(HEADER_API_KEY)
-  val dateOptTry: Option[Try[DateTime]] =
-    request.headers.get(HEADER_DATE).map { dateStr =>
-      Try(parseHeaderDate(dateStr))
-    }
-  val dateOpt: Option[DateTime] = dateOptTry.filter(_.isSuccess).map(_.get)
   val tokenOpt: Option[String] = request.headers.get(HEADER_AUTH_TOKEN)
-
-  def dateOrNow: DateTime = dateOpt.getOrElse(new DateTime())
   def RremoteAddress: String = request.remoteAddress
   def method: String = request.method
   def Uuri: String = request.uri
