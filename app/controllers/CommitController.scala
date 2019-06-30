@@ -14,7 +14,7 @@ import java.time.LocalTime
 
 import javax.inject._
 import dao._
-import models.{QueryLocalDate, DatabeSuffix}
+import models.{QueryLocalDate, DatabaseSuffix}
 import play.api.libs.json.Json
 import play.api.mvc._
 
@@ -25,25 +25,25 @@ class CommitController @Inject() (
   cc: MessagesControllerComponents)(implicit ec: ExecutionContext)
   extends MessagesAbstractController(cc) {
 
-  def list(suffix: DatabeSuffix): Action[AnyContent] = Action.async {
+  def list(suffix: DatabaseSuffix): Action[AnyContent] = Action.async {
     dao.list(suffix).map { a =>
       Ok(Json.toJson(a))
     }
   }
 
-  def info(suffix: DatabeSuffix, id: Long): Action[AnyContent] = Action.async {
+  def info(suffix: DatabaseSuffix, id: Long): Action[AnyContent] = Action.async {
     dao.info(suffix, id).map { a =>
       Ok(Json.toJson(a))
     }
   }
 
-  def infoRevision(suffix: DatabeSuffix, revision: Long): Action[AnyContent] = Action.async {
+  def infoRevision(suffix: DatabaseSuffix, revision: Long): Action[AnyContent] = Action.async {
     dao.infoRevision(suffix, revision).map { a =>
       Ok(Json.toJson(a))
     }
   }
 
-  def infoDate(suffix: DatabeSuffix, from: QueryLocalDate, to: QueryLocalDate): Action[AnyContent] = Action.async {
+  def infoDate(suffix: DatabaseSuffix, from: QueryLocalDate, to: QueryLocalDate): Action[AnyContent] = Action.async {
     val fromTime = Timestamp.valueOf(from.date.atTime(LocalTime.MIDNIGHT))
     val toTime = Timestamp.valueOf(to.date.atTime(LocalTime.MIDNIGHT))
     dao.infoDate(suffix, fromTime, toTime).map { a =>

@@ -1,12 +1,12 @@
 import ApplicationFixture.fixture
-import models.DatabeSuffix
+import models.DatabaseSuffix
 import org.specs2.matcher.Scope
 import play.api.mvc.Result
 
 import scala.concurrent.Future
 
 class FilesApiV1Spec extends ApiSpecification {
-  fixture.populate(DatabeSuffix("FILES_"))
+  fixture.populate(DatabaseSuffix("FILES_"))
   "/api author" should {
     s"return a list of files" in new Scope {
       val result: Future[Result] = routeGET(

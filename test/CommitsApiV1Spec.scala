@@ -1,12 +1,12 @@
 import ApplicationFixture.fixture
-import models.DatabeSuffix
+import models.DatabaseSuffix
 import org.specs2.matcher.Scope
 import play.api.mvc.Result
 
 import scala.concurrent.Future
 
 class CommitsApiV1Spec extends ApiSpecification {
-  fixture.populate(DatabeSuffix("COMMITS_"))
+  fixture.populate(DatabaseSuffix("COMMITS_"))
   "/api commits" should {
     s"return a list of commits" in new Scope {
       val result: Future[Result] = routeGET(

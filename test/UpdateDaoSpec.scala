@@ -9,11 +9,11 @@
  *
  */
 
-import models.{Author, CommitEntry, CommitEntryFile, CommitTasks, EntryFile, DatabeSuffix, Task}
+import models.{Author, CommitEntry, CommitEntryFile, CommitTasks, EntryFile, DatabaseSuffix, Task}
 import org.specs2.concurrent.ExecutionEnv
 
 class UpdateDaoSpec(implicit ee: ExecutionEnv) extends ApiSpecification {
-  private val suffix = DatabeSuffix("mutable_")
+  private val suffix = DatabaseSuffix("mutable_")
   ApplicationFixture.initializeWithData(suffix)
   private val fixture = ApplicationFixture.fixture
 

@@ -12,7 +12,7 @@ import scala.concurrent.{ExecutionContext, Future}
 trait CommitComponent extends AuthorComponent { self: HasDatabaseConfigProvider[JdbcProfile] =>
   import profile.api._
 
-  class CommitTable(tag: Tag, suffix: DatabeSuffix) extends Table[CommitEntry](tag, suffix.suffix + "COMMITS") {
+  class CommitTable(tag: Tag, suffix: DatabaseSuffix) extends Table[CommitEntry](tag, suffix.suffix + "COMMITS") {
     def message: Rep[Option[String]] = column[Option[String]]("message")
     def timestamp: Rep[Option[Timestamp]] = column[Option[Timestamp]]("timestamp")
     def revision: Rep[Long] = column[Long]("revision", O.Unique)
@@ -30,27 +30,27 @@ class CommitDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
 
   import profile.api._
 
-  def list(suffix: DatabeSuffix): Future[Seq[CommitEntry]] = db.run {
+  def list(suffix: DatabaseSuffix): Future[Seq[CommitEntry]] = db.run {
     val commits = TableQuery[CommitTable]((tag: Tag) => new CommitTable(tag, suffix))
     commits.sortBy(_.id).result
   }
 
-  def info(suffix: DatabeSuffix, id: Long): Future[Seq[CommitEntry]] = db.run {
+  def info(suffix: DatabaseSuffix, id: Long): Future[Seq[CommitEntry]] = db.run {
     val commits = TableQuery[CommitTable]((tag: Tag) => new CommitTable(tag, suffix))
     commits.filter(_.id === id).result
   }
 
-  def infoRevision(suffix: DatabeSuffix, revision: Long): Future[Seq[CommitEntry]] = db.run {
+  def infoRevision(suffix: DatabaseSuffix, revision: Long): Future[Seq[CommitEntry]] = db.run {
     val commits = TableQuery[CommitTable]((tag: Tag) => new CommitTable(tag, suffix))
     commits.filter(_.revision === revision).result
   }
 
-  def infoDate(suffix: DatabeSuffix, from: Timestamp, to: Timestamp): Future[Seq[CommitEntry]] = db.run {
+  def infoDate(suffix: DatabaseSuffix, from: Timestamp, to: Timestamp): Future[Seq[CommitEntry]] = db.run {
     val commits = TableQuery[CommitTable]((tag: Tag) => new CommitTable(tag, suffix))
     commits.filter(_.timestamp >= from).filter(_.timestamp <= to).result
   }
 
-  def insert(cs: Seq[(CommitEntry, String)], suffix: DatabeSuffix): Future[Seq[Int]] = db.run {
+  def insert(cs: Seq[(CommitEntry, String)], suffix: DatabaseSuffix): Future[Seq[Int]] = db.run {
     val authors = TableQuery[AuthorsTable]((tag: Tag) => new AuthorsTable(tag, suffix))
     val commits = TableQuery[CommitTable]((tag: Tag) => new CommitTable(tag, suffix))
     def updateInsert(commit: CommitEntry, commitId: Option[Long], authorId: Option[Long]) = {
@@ -72,7 +72,7 @@ class CommitDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
     DBIO.sequence(cs.map(commitQuery)).transactionally
   }
 
-  def actionLatestRevision(suffix: DatabeSuffix): Future[Option[Long]] = {
+  def actionLatestRevision(suffix: DatabaseSuffix): Future[Option[Long]] = {
     val commits = TableQuery[CommitTable]((tag: Tag) => new CommitTable(tag, suffix))
     db.run(commits.map(_.revision).max.result)
   }

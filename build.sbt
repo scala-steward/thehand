@@ -32,8 +32,9 @@ lazy val root = (project in file(".")).settings(
     )
   )
 
+routesImport += "models.DatabaseSuffix"
+routesImport += "models.QueryMagic"
 routesImport += "models.QueryLocalDate"
-routesImport += "models.DatabeSuffix"
 
 swaggerDomainNameSpaces := Seq("io.github.0um.models")
 swaggerPrettyJson := true

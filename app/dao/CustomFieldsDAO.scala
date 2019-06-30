@@ -1,7 +1,7 @@
 package dao
 
 import javax.inject.Inject
-import models.{CustomFields, DatabeSuffix}
+import models.{CustomFields, DatabaseSuffix}
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.jdbc.JdbcProfile
 
@@ -10,7 +10,7 @@ import scala.concurrent.{ExecutionContext, Future}
 trait CustomFieldsComponent { self: HasDatabaseConfigProvider[JdbcProfile] =>
   import profile.api._
 
-  class CustomFieldsTable(tag: Tag, suffix: DatabeSuffix) extends Table[CustomFields](tag, suffix.suffix + "CUSTOM_FIELDS") {
+  class CustomFieldsTable(tag: Tag, suffix: DatabaseSuffix) extends Table[CustomFields](tag, suffix.suffix + "CUSTOM_FIELDS") {
     def field_value: Rep[Option[String]] = column[Option[String]]("field_value")
     def field: Rep[String] = column[String]("field")
     def taskId: Rep[Long] = column[Long]("task_id", O.Unique)
@@ -26,7 +26,7 @@ class CustomFieldsDAO @Inject() (protected val dbConfigProvider: DatabaseConfigP
 
   import profile.api._
 
-  def insert(ts: Seq[CustomFields], suffix: DatabeSuffix): Future[Seq[Int]] = db.run {
+  def insert(ts: Seq[CustomFields], suffix: DatabaseSuffix): Future[Seq[Int]] = db.run {
     val customs = TableQuery[CustomFieldsTable]((tag: Tag) => new CustomFieldsTable(tag, suffix))
     def updateInsert(cf: CustomFields, customId: Option[Long]) = {
       if (customId.isEmpty) customs += cf else customs.insertOrUpdate(cf.copy(id = customId.head))
@@ -41,17 +41,17 @@ class CustomFieldsDAO @Inject() (protected val dbConfigProvider: DatabaseConfigP
     DBIO.sequence(ts.map(customQuery)).transactionally
   }
 
-  def list(suffix: DatabeSuffix): Future[Seq[CustomFields]] = db.run {
+  def list(suffix: DatabaseSuffix): Future[Seq[CustomFields]] = db.run {
     val custom = TableQuery[CustomFieldsTable]((tag: Tag) => new CustomFieldsTable(tag, suffix))
     custom.sortBy(_.id).result
   }
 
-  def listField(suffix: DatabeSuffix, field: String): Future[Seq[CustomFields]] = db.run {
+  def listField(suffix: DatabaseSuffix, field: String): Future[Seq[CustomFields]] = db.run {
     val custom = TableQuery[CustomFieldsTable]((tag: Tag) => new CustomFieldsTable(tag, suffix))
     custom.filter(_.field === field).sortBy(_.id).result
   }
 
-  def info(suffix: DatabeSuffix, id: Long): Future[Seq[CustomFields]] = db.run {
+  def info(suffix: DatabaseSuffix, id: Long): Future[Seq[CustomFields]] = db.run {
     val custom = TableQuery[CustomFieldsTable]((tag: Tag) => new CustomFieldsTable(tag, suffix))
     custom.filter(_.id === id).result
   }

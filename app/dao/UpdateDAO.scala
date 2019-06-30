@@ -1,5 +1,6 @@
 package dao
 
+import conf.RepoConf
 import models._
 import play.api.db.slick.HasDatabaseConfigProvider
 import scm.{ScmRepositoryData, SvnConnector, SvnConnectorFactory, SvnExtractor}
@@ -8,26 +9,22 @@ import tasks.{ProcessTargetConnector, TargetConnector, TaskConnector, TaskParser
 import javax.inject.Inject
 import org.tmatesoft.svn.core.SVNLogEntry
 import play.api.db.slick.DatabaseConfigProvider
+import play.api.Configuration
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class UpdateDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider, conf: play.api.Configuration)(implicit executionContext: ExecutionContext)
+class UpdateDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider, conf: Configuration)(implicit executionContext: ExecutionContext)
   extends HasDatabaseConfigProvider[JdbcProfile] {
 
+  private def loadSvnRepository(repoConfName: String) = {
+    lazy val suffix = RepoConf.suffix(repoConfName)
+    lazy val taskConf = RepoConf.taskParser(repoConfName)
+    lazy val scmConf = RepoConf.scm(repoConfName)
 
-  private def loadSvnRepository(confName: String) = {
-    lazy val suffix = DatabeSuffix(conf.get[String](confName + ".database_suffix"))
-
-    implicit val parser: TaskParser = TaskParserCharp(
-      conf.get[String](confName + ".task_model.patternParser"),
-      conf.get[String](confName + ".task_model.patternSplit"),
-      conf.get[String](confName + ".task_model.separator"))
+    implicit val parser: TaskParser = TaskParserCharp(taskConf.pattern, taskConf.split, taskConf.separator)
 
     lazy val rep = new SvnConnectorFactory {}
-    lazy val repository: Future[SvnConnector] = rep.connect(
-      conf.get[String](confName + ".url"),
-      conf.get[String](confName + ".user"),
-      conf.get[String](confName + ".pass"))
+    lazy val repository: Future[SvnConnector] = rep.connect(scmConf.url, scmConf.user, scmConf.pass)
 
     // hiro wrong place
     val b = new BootDAO(dbConfigProvider)
@@ -56,7 +53,7 @@ class UpdateDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
     repository.flatMap(rep => rep.updateRange((from, to)))
   }
 
-  def update(suffix: DatabeSuffix, from: Option[Long], to: Option[Long]): Future[Seq[Int]] = {
+  def update(suffix: DatabaseSuffix, from: Option[Long], to: Option[Long]): Future[Seq[Int]] = {
     updateRepositoryRange(suffix.suffix, from.getOrElse(-1), to.getOrElse(-1))
   }
 
@@ -66,7 +63,7 @@ class UpdateDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
     Future.sequence(repositories).map(_.flatten)
   }
 
-  def updateCustomFields(suffix: DatabeSuffix, field: String, from: Option[Long], to: Option[Long]): Future[Seq[Int]] = {
+  def updateCustomFields(suffix: DatabaseSuffix, field: String, from: Option[Long], to: Option[Long]): Future[Seq[Int]] = {
     val repository = loadSvnRepository(suffix.suffix)
     repository.flatMap(rep => rep.updateCustomFields(field, from.getOrElse(-1), to.getOrElse(-1)))
   }

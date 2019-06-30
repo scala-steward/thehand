@@ -1,19 +1,20 @@
 package controllers
 
 import javax.inject._
-import dao._
-import models.DatabeSuffix
+import dao.BootDAO
+import models.{DatabaseSuffix, QueryMagic}
 import play.api.mvc._
 
 class BootController @Inject()(dao: BootDAO, cc: MessagesControllerComponents)
   extends MessagesAbstractController(cc) {
 
-  def createDefaultTables(): Action[AnyContent] = Action {
+  def createTables(magic: QueryMagic): Action[AnyContent] = Action {
     dao.createSchemas()
+    dao.createFirstApiKey()
     Accepted("boot")
   }
 
-  def createTables(suffix: DatabeSuffix): Action[AnyContent] = Action {
+  def createSuffixTables(suffix: DatabaseSuffix, magic: QueryMagic): Action[AnyContent] = Action {
     dao.createSchemas(suffix)
     Accepted(s"boot ${suffix.suffix}")
   }

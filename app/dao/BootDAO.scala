@@ -47,11 +47,9 @@ class BootDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)(
       case Failure(e) =>
         HandLogger.error("error in create tables " + e.getMessage)
     }
-
-    populateDummyApiKey()
   }
 
-  def createSchemas(suffix: DatabeSuffix): Unit = {
+  def createSchemas(suffix: DatabaseSuffix): Unit = {
     val commitTasks = TableQuery[CommitTasksTable]((tag: Tag) => new CommitTasksTable(tag, suffix))
     val tasks = TableQuery[TaskTable]((tag: Tag) => new TaskTable(tag, suffix))
     val files = TableQuery[EntryFilesTable]((tag: Tag) => new EntryFilesTable(tag, suffix))
@@ -74,16 +72,14 @@ class BootDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)(
       }
   }
 
-  // HIRO WIP
-  private def populateDummyApiKey() = {
+  def createFirstApiKey() : Unit = {
     val apiKey = TableQuery[ApiKeyTable]((tag: Tag) => new ApiKeyTable(tag))
     val apiKeys: Seq[ApiKey] = Seq(
-      ApiKey(apiKey = "AbCdEfGhIjK1", name = "ios-app", active = true),
-      ApiKey(apiKey = "AbCdEfGhIjK2", name = "android-app", active = true))
+      ApiKey(apiKey = "AbCdEfGhIjK1", name = "first-app", active = true))
 
     exec(apiKey ++= apiKeys) onComplete {
       case Success(_) => HandLogger.debug("correct create default tables")
-      case Failure(_) => HandLogger.debug("correct create default tables")
+      case Failure(e) => HandLogger.error("error in insert first api key " + e.getMessage)
     }
   }
 

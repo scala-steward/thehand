@@ -2,7 +2,7 @@ package dao
 
 import javax.inject.Inject
 
-import models.{ Task, DatabeSuffix }
+import models.{ Task, DatabaseSuffix }
 import play.api.db.slick.{ DatabaseConfigProvider, HasDatabaseConfigProvider }
 import slick.jdbc.JdbcProfile
 
@@ -11,7 +11,7 @@ import scala.concurrent.{ ExecutionContext, Future }
 trait TaskComponent { self: HasDatabaseConfigProvider[JdbcProfile] =>
   import profile.api._
 
-  class TaskTable(tag: Tag, suffix: DatabeSuffix) extends Table[Task](tag, suffix.suffix + "TASK") {
+  class TaskTable(tag: Tag, suffix: DatabaseSuffix) extends Table[Task](tag, suffix.suffix + "TASK") {
     def typeTask: Rep[Option[String]] = column[Option[String]]("type_task")
     def typeTaskId: Rep[Option[Long]] = column[Option[Long]]("type_task_id")
     def timeSpend: Rep[Option[Double]] = column[Option[Double]]("time_spend")
@@ -29,7 +29,7 @@ class TaskDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)
 
   import profile.api._
 
-  def insert(ts: Seq[Task], suffix: DatabeSuffix): Future[Seq[Int]] = db.run {
+  def insert(ts: Seq[Task], suffix: DatabaseSuffix): Future[Seq[Int]] = db.run {
     val tasks = TableQuery[TaskTable]((tag: Tag) => new TaskTable(tag, suffix))
     def updateInsert(task: Task, taskId: Option[Long]) = {
       if (taskId.isEmpty) tasks += task else tasks.insertOrUpdate(task.copy(id = taskId.head))
@@ -45,22 +45,22 @@ class TaskDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)
     DBIO.sequence(ts.map(taskQuery)).transactionally
   }
 
-  def list(suffix: DatabeSuffix): Future[Seq[Task]] = db.run {
+  def list(suffix: DatabaseSuffix): Future[Seq[Task]] = db.run {
     val tasks = TableQuery[TaskTable]((tag: Tag) => new TaskTable(tag, suffix))
     tasks.sortBy(_.id).result
   }
 
-  def info(suffix: DatabeSuffix, id: Long): Future[Seq[Task]] = db.run {
+  def info(suffix: DatabaseSuffix, id: Long): Future[Seq[Task]] = db.run {
     val tasks = TableQuery[TaskTable]((tag: Tag) => new TaskTable(tag, suffix))
     tasks.filter(_.id === id).result
   }
 
-  def infoTaskId(suffix: DatabeSuffix, taskId: Long): Future[Seq[Task]] = db.run {
+  def infoTaskId(suffix: DatabaseSuffix, taskId: Long): Future[Seq[Task]] = db.run {
     val tasks = TableQuery[TaskTable]((tag: Tag) => new TaskTable(tag, suffix))
     tasks.filter(_.taskId === taskId).result
   }
 
-  def infoParentId(suffix: DatabeSuffix, parentId: Long): Future[Seq[Task]] = db.run {
+  def infoParentId(suffix: DatabaseSuffix, parentId: Long): Future[Seq[Task]] = db.run {
     val tasks = TableQuery[TaskTable]((tag: Tag) => new TaskTable(tag, suffix))
     tasks.filter(_.parentId === parentId).result
   }
