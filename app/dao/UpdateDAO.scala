@@ -8,10 +8,8 @@ import tasks.{ProcessTargetConnector, TargetConnector, TaskConnector, TaskParser
 import javax.inject.Inject
 import org.tmatesoft.svn.core.SVNLogEntry
 import play.api.db.slick.DatabaseConfigProvider
-import telemetrics.HandLogger
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
 
 class UpdateDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider, conf: play.api.Configuration)(implicit executionContext: ExecutionContext)
   extends HasDatabaseConfigProvider[JdbcProfile] {
@@ -32,7 +30,7 @@ class UpdateDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
       conf.get[String](confName + ".pass"))
 
     // hiro wrong place
-    val b = new BootstrapDAO(dbConfigProvider)
+    val b = new Boot(dbConfigProvider)
     b.createSchemas(suffix)
 
     val taskConnector: TaskConnector = TargetConnector(

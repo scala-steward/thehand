@@ -1,11 +1,9 @@
 import org.specs2.matcher._
-import api._
 import api.Api._
 import api.ApiError._
 import play.api.mvc.Result
 
 import scala.concurrent.Future
-import scala.util.Try
 import play.api.libs.json.{JsNull, JsValue, Json}
 
 class AuthApiV1Spec extends ApiSpecification {

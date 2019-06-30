@@ -52,11 +52,11 @@ class CommitTaskDAO @Inject() (protected val dbConfigProvider: DatabaseConfigPro
 
   def list(suffix: Suffix): Future[Seq[CommitTasks]] = db run {
     val commitTasks = TableQuery[CommitTasksTable]((tag: Tag) => new CommitTasksTable(tag, suffix))
-    commitTasks.result
+    commitTasks.sortBy(_.id).result
   }
 
   def info(suffix: Suffix, id: Long): Future[Seq[CommitTasks]] = db run {
     val commitTasks = TableQuery[CommitTasksTable]((tag: Tag) => new CommitTasksTable(tag, suffix))
-    commitTasks.filter(_.id === id).result
+    commitTasks.filter(_.id === id).sortBy(_.id).result
   }
 }

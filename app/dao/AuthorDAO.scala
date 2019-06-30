@@ -27,7 +27,7 @@ class AuthorDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
 
   def list(suffix: Suffix): Future[Seq[Author]] = db.run {
     val authors = TableQuery[AuthorsTable]((tag: Tag) => new AuthorsTable(tag, suffix))
-    authors.result
+    authors.sortBy(_.id).result
   }
 
   def insert(as: Seq[Author], suffix: Suffix): Future[Seq[Int]] = db.run {

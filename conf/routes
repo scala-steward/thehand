@@ -35,8 +35,8 @@ GET     /api/v1/:suffix/commitfiles/:id     controllers.CommitEntryFileControlle
 
 # FILES
 GET     /api/v1/:suffix/files               controllers.EntryFileController.list(suffix: String)
-GET     /api/v1/:suffix/files/:id           controllers.EntryFileController.info(suffix: String, id: Long)
 GET     /api/v1/:suffix/files/bugs          controllers.ReportController.getFilesBugs(suffix: String)
+GET     /api/v1/:suffix/files/:id           controllers.EntryFileController.info(suffix: String, id: Long)
 
 # CUSTOM FIELDS
 GET     /api/v1/:suffix/customfields        controllers.CustomFieldsController.list(suffix: String)
@@ -76,11 +76,10 @@ POST     /api/v1/update                     controllers.UpdateController.updateA
 POST     /api/v1/update/:suffix             controllers.UpdateController.update(suffix: String)
 POST     /api/v1/:suffix/update/custom/:customField controllers.UpdateController.updateCustomFields(suffix: String, customField: String)
 
-# UNSAFE - COMMENT AFTER SETUP
-# CONTROL
 
-GET     /boot           controllers.BootstrapController.createDefaultTables
-GET     /boot/:suffix        controllers.BootstrapController.createTables(suffix: String)
+# CONTROL
+GET     /boot                               controllers.BootstrapController.createDefaultTables
+GET     /boot/:suffix                       controllers.BootstrapController.createTables(suffix: String)
 
 # Map static resources from the /public folder to the /assets URL path
 ### NoDocs ###

@@ -43,7 +43,7 @@ class EntryFileDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProv
 
   def list(suffix: Suffix): Future[Seq[EntryFile]] = db.run {
     lazy val files = TableQuery[EntryFilesTable]((tag: Tag) => new EntryFilesTable(tag, suffix))
-    files.result
+    files.sortBy(_.id).result
   }
 
   def info(suffix: Suffix, id: Long): Future[Seq[EntryFile]] = db.run {

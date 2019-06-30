@@ -43,12 +43,12 @@ class CustomFieldsDAO @Inject() (protected val dbConfigProvider: DatabaseConfigP
 
   def list(suffix: Suffix): Future[Seq[CustomFields]] = db.run {
     val custom = TableQuery[CustomFieldsTable]((tag: Tag) => new CustomFieldsTable(tag, suffix))
-    custom.result
+    custom.sortBy(_.id).result
   }
 
   def listField(suffix: Suffix, field: String): Future[Seq[CustomFields]] = db.run {
     val custom = TableQuery[CustomFieldsTable]((tag: Tag) => new CustomFieldsTable(tag, suffix))
-    custom.filter(_.field === field).result
+    custom.filter(_.field === field).sortBy(_.id).result
   }
 
   def info(suffix: Suffix, id: Long): Future[Seq[CustomFields]] = db.run {

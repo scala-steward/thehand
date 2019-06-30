@@ -1,33 +1,14 @@
 import api.Api.{HEADER_ACCEPT_LANGUAGE, HEADER_API_KEY, HEADER_AUTH_TOKEN, HEADER_CONTENT_TYPE}
 import api.ApiError
-import dao.BootstrapDAO
-import models.Suffix
 import org.specs2.matcher.{JsonMatchers, MatchResult}
-import play.api.Application
 import play.api.http.Writeable
-import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.{AnyContentAsEmpty, Headers, Result}
 import play.api.test.{FakeRequest, PlaySpecification}
 
 import scala.concurrent.Future
 
 class ApiSpecification extends PlaySpecification with JsonMatchers {
-
-  lazy val app: Application = new GuiceApplicationBuilder().
-    configure(
-      "slick.dbs.mydb.driver" -> "slick.driver.H2Driver$",
-      "slick.dbs.mydb.db.driver" -> "org.h2.Driver",
-      "slick.dbs.mydb.db.url" -> "jdbc:h2:mem:blah;",
-      "slick.dbs.mydb.db.user" -> "test",
-      "slick.dbs.mydb.db.password" -> "").build
-
-  val suffix = Suffix("suffix_")
-
-  val daoBootstrap: BootstrapDAO = Application.instanceCache[BootstrapDAO].apply(app)
-  daoBootstrap.createSchemas()
-
-  val fixture: DatabaseFixture = Application.instanceCache[DatabaseFixture].apply(app)
-  fixture.populate()
+  ApplicationFixture.initializeWithData()
 
   val basicHeaders = Headers(
     HEADER_CONTENT_TYPE -> "application/json",
@@ -67,7 +48,7 @@ class ApiSpecification extends PlaySpecification with JsonMatchers {
     routeDELETE(uri, headers)
 
   def getRoute[A](method: String, uri: String, body: A, headers: Headers)(implicit w: Writeable[A]): Future[Result] =
-    route(app, FakeRequest(method, uri, headers, body)).get
+    route(ApplicationFixture.app, FakeRequest(method, uri, headers, body)).get
 
   def mustBeError(code: Int, result: Future[Result]): MatchResult[String] = {
     status(result) must equalTo(ApiError.statusFromCode(code))

@@ -3,20 +3,17 @@ import java.time.format.DateTimeFormatter
 
 import dao._
 import javax.inject.Inject
-import models.{ApiKey, Phase, Term, User}
+import models.{ApiKey, Phase, Suffix, Term, User}
+import play.api.Application
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.jdbc.JdbcProfile
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.duration._
+import scala.concurrent.{Await, ExecutionContext, Future}
 
-class DatabaseFixture @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(implicit executionContext: ExecutionContext)
-  extends AuthorComponent
-  with CommitComponent
-  with CommitEntryFileComponent
-  with CommitTaskComponent
-  with TaskComponent
-  with PersonComponent
-  with ApiKeyComponent
+class DatabaseFixture @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)
+                                (implicit executionContext: ExecutionContext,app: Application)
+  extends ApiKeyComponent
   with ApiTokenComponent
   with ApiLogComponent
   with PhaseComponent
@@ -54,16 +51,37 @@ class DatabaseFixture @Inject() (protected val dbConfigProvider: DatabaseConfigP
     Term(3L, 0, "Fix the lamp", parseDateTime("2015-08-16T21:22:00"), None, done = false, 6L),
     Term(3L, 1, "Buy coffee", parseDateTime("2015-09-05T08:12:00"), None, done = false, 7L))
 
-  def populate(): Future[Unit] = {
+  def populate(): Unit = {
     val apiKey = TableQuery[ApiKeyTable]((tag: Tag) => new ApiKeyTable(tag))
     val phase = TableQuery[PhaseTable]((tag: Tag) => new PhaseTable(tag))
     val term = TableQuery[TermTable]((tag: Tag) => new TermTable(tag))
     val user = TableQuery[UserTable]((tag: Tag) => new UserTable(tag))
 
-    db.run((apiKey ++= apiKeys).asTry andThen
+    Await.result(db.run((apiKey ++= apiKeys).asTry andThen
       (user ++= users).asTry andThen
       (phase ++= phases).asTry andFinally
-      (term ++= terms).asTry).map(_ => ())
+      (term ++= terms).asTry).map(_ => ()), 2 seconds)
+  }
+
+  val daoTasks: TaskDAO = Application.instanceCache[TaskDAO].apply(app)
+  val daoAuthors: AuthorDAO = Application.instanceCache[AuthorDAO].apply(app)
+  val daoCommits: CommitDAO = Application.instanceCache[CommitDAO].apply(app)
+  val daoFiles: EntryFileDAO = Application.instanceCache[EntryFileDAO].apply(app)
+  val daoCommitFiles: CommitEntryFileDAO = Application.instanceCache[CommitEntryFileDAO].apply(app)
+  val daoCommitTasks: CommitTaskDAO = Application.instanceCache[CommitTaskDAO].apply(app)
+
+  def populate(suffix: Suffix) = {
+    val daoBootstrap: Boot = Application.instanceCache[Boot].apply(app)
+    daoBootstrap.createSchemas(suffix)
+    val insertAll = for {
+      _ <- daoTasks.insert(ExtractorFixture.extractTasks, suffix)
+      _ <- daoAuthors.insert(ExtractorFixture.extractAuthors, suffix)
+      _ <- daoCommits.insert(ExtractorFixture.extractCommits, suffix)
+      _ <- daoFiles.insert(ExtractorFixture.extractFiles, suffix)
+      _ <- daoCommitTasks.insert(ExtractorFixture.extractCommitsTasks, suffix)
+      c <- daoCommitFiles.insert(ExtractorFixture.extractCommitsFiles, suffix)
+    } yield c
+    Await.result(insertAll, 2 seconds)
   }
 
 }

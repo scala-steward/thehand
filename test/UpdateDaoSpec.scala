@@ -12,9 +12,10 @@
 import models.{Author, CommitEntry, CommitEntryFile, CommitTasks, EntryFile, Suffix, Task}
 import org.specs2.concurrent.ExecutionEnv
 
-class UpdateDaoSpec(implicit ee: ExecutionEnv)  extends DaoSpec {
-  val suffix = Suffix("UpdateDaoSpec_")
-  fixture.populate(suffix)
+class UpdateDaoSpec(implicit ee: ExecutionEnv) extends ApiSpecification {
+  private val suffix = Suffix("mutable_")
+  ApplicationFixture.initializeWithData(suffix)
+  private val fixture = ApplicationFixture.fixture
 
   "After populate suffix db with fixture data" should {
     "list task tablle must have five tasks" in {

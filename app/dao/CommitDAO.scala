@@ -33,7 +33,7 @@ class CommitDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
 
   def list(suffix: Suffix): Future[Seq[CommitEntry]] = db.run {
     val commits = TableQuery[CommitTable]((tag: Tag) => new CommitTable(tag, suffix))
-    commits.result
+    commits.sortBy(_.id).result
   }
 
   def info(suffix: Suffix, id: Long): Future[Seq[CommitEntry]] = db.run {

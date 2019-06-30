@@ -12,7 +12,7 @@ import scala.concurrent.{ Await, ExecutionContext, Future }
 import scala.util.{ Failure, Success }
 
 @Singleton
-class BootstrapDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(implicit executionContext: ExecutionContext)
+class Boot @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)(implicit executionContext: ExecutionContext)
   extends AuthorComponent
   with CommitComponent
   with CommitEntryFileComponent
@@ -51,15 +51,7 @@ class BootstrapDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProv
         HandLogger.error("error in create tables " + e.getMessage)
     }
 
-    // HIRO DEBUG
-    val apiKeys: Seq[ApiKey] = Seq(
-      ApiKey(apiKey = "AbCdEfGhIjK1", name = "ios-app", active = true),
-      ApiKey(apiKey = "AbCdEfGhIjK2", name = "android-app", active = true))
-
-    exec(apiKey ++= apiKeys) onComplete {
-      case Success(_) => HandLogger.debug("correct create default tables")
-      case Failure(_) => HandLogger.debug("correct create default tables")
-    }
+    populateDummyApiKey()
   }
 
   def createSchemas(suffix: Suffix): Unit = {
@@ -83,6 +75,19 @@ class BootstrapDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProv
         case Failure(e) =>
           HandLogger.error("error in create tables " + e.getMessage)
       }
+  }
+
+  // HIRO WIP
+  private def populateDummyApiKey() = {
+    val apiKey = TableQuery[ApiKeyTable]((tag: Tag) => new ApiKeyTable(tag))
+    val apiKeys: Seq[ApiKey] = Seq(
+      ApiKey(apiKey = "AbCdEfGhIjK1", name = "ios-app", active = true),
+      ApiKey(apiKey = "AbCdEfGhIjK2", name = "android-app", active = true))
+
+    exec(apiKey ++= apiKeys) onComplete {
+      case Success(_) => HandLogger.debug("correct create default tables")
+      case Failure(_) => HandLogger.debug("correct create default tables")
+    }
   }
 
   private def exec[T](program: DBIO[T]): Future[T] =
