@@ -3,7 +3,6 @@ package api
 import Api._
 import play.api.mvc._
 import org.joda.time.DateTime
-import scala.util.Try
 import play.api.libs.json._
 
 trait ApiRequestHeader[R <: RequestHeader] {

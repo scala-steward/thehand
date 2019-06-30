@@ -1,12 +1,12 @@
 import ApplicationFixture.fixture
-import models.Suffix
+import models.DatabeSuffix
 import org.specs2.matcher.Scope
 import play.api.mvc.Result
 
 import scala.concurrent.Future
 
 class AuthorsApiV1Spec extends ApiSpecification {
-  fixture.populate(Suffix("AUTHOR_"))
+  fixture.populate(DatabeSuffix("AUTHOR_"))
   "/api author" should {
     s"return a list of authors" in new Scope {
       val result: Future[Result] = routeGET(

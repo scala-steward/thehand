@@ -11,7 +11,7 @@ package controllers
 
 import javax.inject._
 import dao._
-import models.Suffix
+import models.DatabeSuffix
 import play.api.libs.json.Json
 import play.api.mvc._
 
@@ -22,14 +22,14 @@ class EntryFileController @Inject() (
   cc: MessagesControllerComponents)(implicit ec: ExecutionContext)
   extends MessagesAbstractController(cc) {
 
-  def list(suffix: String): Action[AnyContent] = Action.async {
-    dao.list(Suffix(suffix)).map { a =>
+  def list(suffix: DatabeSuffix): Action[AnyContent] = Action.async {
+    dao.list(suffix).map { a =>
       Ok(Json.toJson(a))
     }
   }
 
-  def info(suffix: String, id: Long): Action[AnyContent] = Action.async {
-    dao.info(Suffix(suffix), id).map { a =>
+  def info(suffix: DatabeSuffix, id: Long): Action[AnyContent] = Action.async {
+    dao.info(suffix, id).map { a =>
       Ok(Json.toJson(a))
     }
   }

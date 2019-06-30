@@ -2,7 +2,7 @@ import network.HttpBasicAuth
 import org.specs2.matcher.Matchers
 import org.specs2.mutable.Specification
 
-class HttpBasicAuthSpec extends Specification with Matchers {
+class HttpBasicAuthControllerSpec extends Specification with Matchers {
 
   s2"Encode credential return in 64encode $e1"
   val e1 = HttpBasicAuth

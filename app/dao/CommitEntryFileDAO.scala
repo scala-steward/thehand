@@ -11,7 +11,7 @@ import scala.concurrent.{ ExecutionContext, Future }
 trait CommitEntryFileComponent extends CommitComponent with EntryFileComponent { self: HasDatabaseConfigProvider[JdbcProfile] =>
   import profile.api._
 
-  class CommitEntryFileTable(tag: Tag, suffix: Suffix) extends Table[CommitEntryFile](tag, suffix.suffix + "commitfiles") {
+  class CommitEntryFileTable(tag: Tag, suffix: DatabeSuffix) extends Table[CommitEntryFile](tag, suffix.suffix + "COMMITFILES") {
     def typeModification: Rep[Option[Int]] = column[Option[Int]]("typeModification")
     def copyPathId: Rep[Option[Long]] = column[Option[Long]]("copyPath_id")
     def copyRevisionId: Rep[Option[Long]] = column[Option[Long]]("copyRevision")
@@ -32,7 +32,7 @@ class CommitEntryFileDAO @Inject() (protected val dbConfigProvider: DatabaseConf
 
   import profile.api._
 
-  def insert(es: Seq[(Seq[CommitEntryWriter], Long)], suffix: Suffix): Future[Seq[Int]] = db.run {
+  def insert(es: Seq[(Seq[CommitEntryWriter], Long)], suffix: DatabeSuffix): Future[Seq[Int]] = db.run {
     val files = TableQuery[EntryFilesTable]((tag: Tag) => new EntryFilesTable(tag, suffix))
     val commitsFiles = TableQuery[CommitEntryFileTable]((tag: Tag) => new CommitEntryFileTable(tag, suffix))
     val commits = TableQuery[CommitTable]((tag: Tag) => new CommitTable(tag, suffix))
@@ -69,12 +69,12 @@ class CommitEntryFileDAO @Inject() (protected val dbConfigProvider: DatabaseConf
     DBIO.sequence(es.map(fileQuery)).transactionally
   }
 
-  def list(suffix: Suffix): Future[Seq[CommitEntryFile]] = db.run {
+  def list(suffix: DatabeSuffix): Future[Seq[CommitEntryFile]] = db.run {
     lazy val commits = TableQuery[CommitEntryFileTable]((tag: Tag) => new CommitEntryFileTable(tag, suffix))
     commits.result
   }
 
-  def info(suffix: Suffix, id: Long): Future[Seq[CommitEntryFile]] = db.run {
+  def info(suffix: DatabeSuffix, id: Long): Future[Seq[CommitEntryFile]] = db.run {
     lazy val commits = TableQuery[CommitEntryFileTable]((tag: Tag) => new CommitEntryFileTable(tag, suffix))
     commits.filter(_.id === id).result
   }

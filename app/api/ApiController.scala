@@ -11,12 +11,8 @@ import play.api.mvc._
 import scala.concurrent.{ ExecutionContext, Future }
 import play.api.i18n.{ Lang, Langs, Messages }
 
-import scala.util.{ Failure, Success }
 import play.api.libs.json._
 
-/*
-* Controller for the API
-*/
 class ApiController @Inject() (val dbc: DatabaseConfigProvider, l: Langs, mcc: MessagesControllerComponents)(implicit executionContext: ExecutionContext)
   extends MessagesAbstractController(mcc) {
 
@@ -24,11 +20,9 @@ class ApiController @Inject() (val dbc: DatabaseConfigProvider, l: Langs, mcc: M
   val apiTokenDao = new ApiTokenDAO(dbc)
   val apiLogDao = new ApiLogDAO(dbc)
 
-  //val messagesApi: MessagesApi
   implicit val m: Messages = mcc.messagesApi.preferred(l.availables)
 
   // Implicit transformation utilities
-
   implicit def objectToJson[T](o: T)(implicit tjs: Writes[T]): JsValue = Json.toJson(o)
   implicit def result2FutureResult(r: ApiResult): Future[ApiResult] = Future.successful(r)
 

@@ -6,7 +6,7 @@ import play.api.mvc.Result
 import scala.concurrent.Future
 import play.api.libs.json.{JsNull, JsValue, Json}
 
-class AuthApiV1Spec extends ApiSpecification {
+class AuthControllerApiV1Spec extends ApiSpecification {
 
   private def signIn: Option[String] = {
     val result = routePOST("/api/v1/signin", Json.obj("email" -> "user1@mail.com", "password" -> "123456"))

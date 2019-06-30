@@ -33,6 +33,7 @@ lazy val root = (project in file(".")).settings(
   )
 
 routesImport += "models.QueryLocalDate"
+routesImport += "models.DatabeSuffix"
 
 swaggerDomainNameSpaces := Seq("io.github.0um.models")
 swaggerPrettyJson := true
@@ -82,8 +83,8 @@ scalacOptions ++= Seq(                 // for scala 2.12
   "-Ywarn-nullary-unit",               // Warn when nullary methods return Unit.
   "-Ywarn-unused:locals",              // Warn if a local definition is unused.
   "-Ywarn-infer-any",                  // Warn when a type argument is inferred to be `Any`.
+  "-Ywarn-unused:imports",             // Warn if an import selector is not referenced.
 // error
-//  "-Ywarn-unused:imports"              // Warn if an import selector is not referenced.
-//  "-Ywarn-unused:implicits",           // Warn if an implicit parameter is unused.
-//  "-Ywarn-unused:params",              // Warn if a value parameter is unused.
+  // "-Ywarn-unused:implicits",          // Warn if an implicit parameter is unused.
+  //"-Ywarn-unused:params",              // Warn if a value parameter is unused.
 )

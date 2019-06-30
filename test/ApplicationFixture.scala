@@ -1,5 +1,5 @@
-import dao.Boot
-import models.Suffix
+import dao.BootDAO
+import models.DatabeSuffix
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 
@@ -12,7 +12,7 @@ object ApplicationFixture {
       "slick.dbs.mydb.db.user" -> "test",
       "slick.dbs.mydb.db.password" -> "").build
 
-  private val daoBootstrap: Boot = Application.instanceCache[Boot].apply(app)
+  private val daoBootstrap: BootDAO = Application.instanceCache[BootDAO].apply(app)
   lazy val fixture: DatabaseFixture = Application.instanceCache[DatabaseFixture].apply(app)
 
   def initializeWithData() = {
@@ -20,7 +20,7 @@ object ApplicationFixture {
     fixture.populate()
   }
 
-  def initializeWithData(suffix: Suffix) = {
+  def initializeWithData(suffix: DatabeSuffix) = {
     daoBootstrap.createSchemas(suffix)
     fixture.populate(suffix)
   }

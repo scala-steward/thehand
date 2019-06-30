@@ -11,13 +11,11 @@ package controllers
 
 import java.io.File
 import java.sql.Timestamp
-import java.text.SimpleDateFormat
 import java.time.LocalTime
 
 import javax.inject._
 import dao._
-import models.{QueryLocalDate, Suffix}
-import org.joda.time.LocalDate
+import models.{QueryLocalDate, DatabeSuffix}
 import play.api.libs.json.Json
 import play.api.mvc._
 import reportio.CvsIO
@@ -25,7 +23,7 @@ import telemetrics.HandLogger
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, ExecutionContext, Future}
-import scala.util.{Failure, Success, Try}
+import scala.util.{Failure, Success}
 
 class ReportController @Inject() (
   dao: ReportDAO,
@@ -34,23 +32,23 @@ class ReportController @Inject() (
 
   implicit val writer: CvsIO.type = CvsIO
 
-  private def authors(suffix: Suffix): Future[Seq[String]] = {
+  private def authors(suffix: DatabeSuffix): Future[Seq[String]] = {
     dao.authorsNames(suffix)
   }
 
-  private def reportFilesBugCounter(suffix: Suffix): Future[Seq[(String, Int)]] = {
+  private def reportFilesBugCounter(suffix: DatabeSuffix): Future[Seq[(String, Int)]] = {
     dao.filesBugsCounter(suffix)
   }
 
-  private def reportAuthorCommitsCounter(authorName: String, suffix: Suffix): Future[Seq[(String, Int)]] = {
+  private def reportAuthorCommitsCounter(authorName: String, suffix: DatabeSuffix): Future[Seq[(String, Int)]] = {
     dao.fileAuthorCommitsCounter(authorName, suffix)
   }
 
-  private def reportAuthorBugsCommitsCounter(authorName: String, suffix: Suffix): Future[Seq[(String, Int)]] = {
+  private def reportAuthorBugsCommitsCounter(authorName: String, suffix: DatabeSuffix): Future[Seq[(String, Int)]] = {
     dao.fileAuthorCommitsBugsCounter(authorName, suffix)
   }
 
-  private def reportCommitByCustomField(suffix: Suffix, fieldValue: String, initialTime: Timestamp, finalTime: Timestamp): Future[Seq[(String, Int)]] = {
+  private def reportCommitByCustomField(suffix: DatabeSuffix, fieldValue: String, initialTime: Timestamp, finalTime: Timestamp): Future[Seq[(String, Int)]] = {
     dao.countCommitByCustomField(suffix, fieldValue, initialTime, finalTime)
   }
 
@@ -63,7 +61,7 @@ class ReportController @Inject() (
     resultEither
   }
 
-  def reportFilesBugsCounter(suffix: Suffix): Unit = {
+  def reportFilesBugsCounter(suffix: DatabeSuffix): Unit = {
     lazy val filename = s"./reports/report_bugs_${suffix.suffix.toLowerCase}_counter"
     reportFilesBugCounter(suffix) onComplete {
       case scala.util.Success(value) =>
@@ -73,7 +71,7 @@ class ReportController @Inject() (
     }
   }
 
-  private def authorReport(authorName: String, suffix: Suffix): Unit = {
+  private def authorReport(authorName: String, suffix: DatabeSuffix): Unit = {
     lazy val filename = s"./reports/author_${authorName.toLowerCase()}_${suffix.suffix.toLowerCase}_commits_counter"
     exec[Seq[(String, Int)]](reportAuthorCommitsCounter(authorName, suffix)) match {
       case Right(values) =>
@@ -83,14 +81,14 @@ class ReportController @Inject() (
     }
   }
 
-  def authorsReports(suffix: Suffix): Unit = {
+  def authorsReports(suffix: DatabeSuffix): Unit = {
     exec[Seq[String]](authors(suffix)) match {
       case Right(values) => values.foreach(authorReport(_, suffix))
       case Left(e) => HandLogger.error("error" + e.getMessage)
     }
   }
 
-  private def authorBugsReport(authorName: String, suffix: Suffix): Unit = {
+  private def authorBugsReport(authorName: String, suffix: DatabeSuffix): Unit = {
     lazy val filename = s"./reports/author_${authorName.toLowerCase()}_${suffix.suffix.toLowerCase}_commits_bugs_counter"
     exec[Seq[(String, Int)]](reportAuthorBugsCommitsCounter(authorName, suffix)) match {
       case Right(values) =>
@@ -100,7 +98,7 @@ class ReportController @Inject() (
     }
   }
 
-  def authorsBugsReports(suffix: Suffix): Unit = {
+  def authorsBugsReports(suffix: DatabeSuffix): Unit = {
     exec[Seq[String]](authors(suffix)) match {
       case Right(values) => values.foreach(authorBugsReport(_, suffix))
       case Left(e) => HandLogger.error("error" + e.getMessage)
@@ -109,30 +107,28 @@ class ReportController @Inject() (
 
   // ActionsFunctions ##################################################################
 
-  private def reportFilesBugsCounterToAction(suffix: Suffix) = {
+  private def reportFilesBugsCounterToAction(suffix: DatabeSuffix) = {
     reportFilesBugCounter(suffix)
   }
 
-  private def authorBugsReportToAction(authorName: String, suffix: Suffix) = {
+  private def authorBugsReportToAction(authorName: String, suffix: DatabeSuffix) = {
     reportAuthorBugsCommitsCounter(authorName, suffix)
   }
 
   // Actions ###########################################################################
-  def getFilesBugs(suffix: String): Action[AnyContent] = Action.async {
-    val s = Suffix(suffix)
-    reportFilesBugsCounterToAction(s).map { a =>
+  def getFilesBugs(suffix: DatabeSuffix): Action[AnyContent] = Action.async {
+    reportFilesBugsCounterToAction(suffix).map { a =>
       Ok(Json.toJson(a))
     }
   }
 
-  def getAuthorBugs(author: String, suffix: String): Action[AnyContent] = Action.async {
-    val s = Suffix(suffix)
-    authorBugsReportToAction(author, s).map { a =>
+  def getAuthorBugs(author: String, suffix: DatabeSuffix): Action[AnyContent] = Action.async {
+    authorBugsReportToAction(author, suffix).map { a =>
       Ok(Json.toJson(a))
     }
   }
 
-  def listCommitCustomField(suffix: String, customField: String, from: QueryLocalDate, to: QueryLocalDate, format: Option[String]) = {
+  def listCommitCustomField(suffix: DatabeSuffix, customField: String, from: QueryLocalDate, to: QueryLocalDate, format: Option[String]) = {
     val fromTime = Timestamp.valueOf(from.date.atTime(LocalTime.MIDNIGHT))
     val toTime = Timestamp.valueOf(to.date.atTime(LocalTime.MIDNIGHT))
     format match {
@@ -141,17 +137,17 @@ class ReportController @Inject() (
     }
   }
 
-  private def listCommitsCustomField(suffix: String, customField: String, from: Timestamp, to: Timestamp): Action[AnyContent] = Action.async {
-     reportCommitByCustomField(Suffix(suffix), customField, from, to).map { a => Ok(Json.toJson(a.sortBy(i => -i._2))) }
+  private def listCommitsCustomField(suffix: DatabeSuffix, customField: String, from: Timestamp, to: Timestamp): Action[AnyContent] = Action.async {
+     reportCommitByCustomField(suffix, customField, from, to).map { a => Ok(Json.toJson(a.sortBy(i => -i._2))) }
   }
 
-  private def listCommitsCustomFieldCsv(suffix: String, fieldValue: String, from: Timestamp, to: Timestamp): Action[AnyContent] = Action.async {
+  private def listCommitsCustomFieldCsv(suffix: DatabeSuffix, fieldValue: String, from: Timestamp, to: Timestamp): Action[AnyContent] = Action.async {
     // hiro fix path and correct parametrize in other function
     val localDirectory = new java.io.File(".").getCanonicalPath
     val reportDirectory = s"${localDirectory}/report/"
-    val file = s"${suffix.toLowerCase}_commits_bugs_counter"
+    val file = s"${suffix.suffix.toLowerCase}_commits_bugs_counter"
     lazy val filename = s"${reportDirectory}${file}"
-    reportCommitByCustomField(Suffix(suffix), fieldValue, from, to).map { a =>
+    reportCommitByCustomField(suffix, fieldValue, from, to).map { a =>
       writer.write(filename, a.sortBy(i => i._2))
 
       Ok.sendFile(new File(filename+".csv"), inline=true)

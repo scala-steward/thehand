@@ -11,7 +11,7 @@ import scala.concurrent.{ ExecutionContext, Future }
 trait CommitTaskComponent extends CommitComponent { self: HasDatabaseConfigProvider[JdbcProfile] =>
   import profile.api._
 
-  class CommitTasksTable(tag: Tag, suffix: Suffix) extends Table[CommitTasks](tag, suffix.suffix + "committasks") {
+  class CommitTasksTable(tag: Tag, suffix: DatabeSuffix) extends Table[CommitTasks](tag, suffix.suffix + "COMMITTASKS") {
     def taskId: Rep[Long] = column[Long]("task_id")
     def commitId: Rep[Long] = column[Long]("commit_id")
     def id: Rep[Long] = column[Long]("id", O.PrimaryKey, O.AutoInc)
@@ -27,7 +27,7 @@ class CommitTaskDAO @Inject() (protected val dbConfigProvider: DatabaseConfigPro
 
   import profile.api._
 
-  def insert(entries: Seq[CommitTasks], suffix: Suffix): Future[Seq[Int]] = db.run {
+  def insert(entries: Seq[CommitTasks], suffix: DatabeSuffix): Future[Seq[Int]] = db.run {
     val commits = TableQuery[CommitTable]((tag: Tag) => new CommitTable(tag, suffix))
     val commitTasks = TableQuery[CommitTasksTable]((tag: Tag) => new CommitTasksTable(tag, suffix))
     def updateInsert(ct: CommitTasks, id: Option[Long], commitId: Option[Long]) = {
@@ -44,18 +44,18 @@ class CommitTaskDAO @Inject() (protected val dbConfigProvider: DatabaseConfigPro
     def tryInsert(commitTask: CommitTasks) = for {
       commitId <- swapRevisionByTableId(commitTask.commitId)
       id <- commitTasks.filter(_.id === commitTask.id).map(_.id).result.headOption
-      u <- updateInsert(commitTask, id, commitId) //.asTry
+      u <- updateInsert(commitTask, id, commitId)
     } yield u
 
     DBIO.sequence(entries.map(tryInsert)).transactionally
   }
 
-  def list(suffix: Suffix): Future[Seq[CommitTasks]] = db run {
+  def list(suffix: DatabeSuffix): Future[Seq[CommitTasks]] = db run {
     val commitTasks = TableQuery[CommitTasksTable]((tag: Tag) => new CommitTasksTable(tag, suffix))
     commitTasks.sortBy(_.id).result
   }
 
-  def info(suffix: Suffix, id: Long): Future[Seq[CommitTasks]] = db run {
+  def info(suffix: DatabeSuffix, id: Long): Future[Seq[CommitTasks]] = db run {
     val commitTasks = TableQuery[CommitTasksTable]((tag: Tag) => new CommitTasksTable(tag, suffix))
     commitTasks.filter(_.id === id).sortBy(_.id).result
   }

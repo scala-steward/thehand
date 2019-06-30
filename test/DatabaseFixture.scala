@@ -3,13 +3,13 @@ import java.time.format.DateTimeFormatter
 
 import dao._
 import javax.inject.Inject
-import models.{ApiKey, Phase, Suffix, Term, User}
+import models.{ApiKey, Phase, DatabeSuffix, Term, User}
 import play.api.Application
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.jdbc.JdbcProfile
 
 import scala.concurrent.duration._
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.{Await, ExecutionContext}
 
 class DatabaseFixture @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)
                                 (implicit executionContext: ExecutionContext,app: Application)
@@ -70,8 +70,8 @@ class DatabaseFixture @Inject() (protected val dbConfigProvider: DatabaseConfigP
   val daoCommitFiles: CommitEntryFileDAO = Application.instanceCache[CommitEntryFileDAO].apply(app)
   val daoCommitTasks: CommitTaskDAO = Application.instanceCache[CommitTaskDAO].apply(app)
 
-  def populate(suffix: Suffix) = {
-    val daoBootstrap: Boot = Application.instanceCache[Boot].apply(app)
+  def populate(suffix: DatabeSuffix) = {
+    val daoBootstrap: BootDAO = Application.instanceCache[BootDAO].apply(app)
     daoBootstrap.createSchemas(suffix)
     val insertAll = for {
       _ <- daoTasks.insert(ExtractorFixture.extractTasks, suffix)

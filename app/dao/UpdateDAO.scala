@@ -16,7 +16,7 @@ class UpdateDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
 
 
   private def loadSvnRepository(confName: String) = {
-    lazy val suffix = Suffix(conf.get[String](confName + ".database_suffix"))
+    lazy val suffix = DatabeSuffix(conf.get[String](confName + ".database_suffix"))
 
     implicit val parser: TaskParser = TaskParserCharp(
       conf.get[String](confName + ".task_model.patternParser"),
@@ -30,7 +30,7 @@ class UpdateDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
       conf.get[String](confName + ".pass"))
 
     // hiro wrong place
-    val b = new Boot(dbConfigProvider)
+    val b = new BootDAO(dbConfigProvider)
     b.createSchemas(suffix)
 
     val taskConnector: TaskConnector = TargetConnector(
@@ -56,7 +56,7 @@ class UpdateDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
     repository.flatMap(rep => rep.updateRange((from, to)))
   }
 
-  def update(suffix: Suffix, from: Option[Long], to: Option[Long]): Future[Seq[Int]] = {
+  def update(suffix: DatabeSuffix, from: Option[Long], to: Option[Long]): Future[Seq[Int]] = {
     updateRepositoryRange(suffix.suffix, from.getOrElse(-1), to.getOrElse(-1))
   }
 
@@ -66,7 +66,7 @@ class UpdateDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
     Future.sequence(repositories).map(_.flatten)
   }
 
-  def updateCustomFields(suffix: Suffix, field: String, from: Option[Long], to: Option[Long]): Future[Seq[Int]] = {
+  def updateCustomFields(suffix: DatabeSuffix, field: String, from: Option[Long], to: Option[Long]): Future[Seq[Int]] = {
     val repository = loadSvnRepository(suffix.suffix)
     repository.flatMap(rep => rep.updateCustomFields(field, from.getOrElse(-1), to.getOrElse(-1)))
   }

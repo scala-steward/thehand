@@ -12,12 +12,12 @@ package controllers
 import api.ApiController
 import javax.inject._
 import dao._
-import models.Suffix
+import models.DatabeSuffix
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.i18n.Langs
 import play.api.mvc._
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 class UpdateController @Inject() (override val dbc: DatabaseConfigProvider, dao: UpdateDAO, l: Langs, mcc: MessagesControllerComponents)(implicit executionContext: ExecutionContext)
   extends ApiController(dbc, l, mcc) {
@@ -26,11 +26,11 @@ class UpdateController @Inject() (override val dbc: DatabaseConfigProvider, dao:
     dao.updateAll().flatMap{ _ => accepted() }
   }
 
-  def update(suffix: String): Action[Unit] = ApiAction { implicit request =>
-    dao.update(Suffix(suffix), None, None).flatMap { _ => accepted() }
+  def update(suffix: DatabeSuffix): Action[Unit] = ApiAction { implicit request =>
+    dao.update(suffix, None, None).flatMap { _ => accepted() }
   }
 
-  def updateCustomFields(suffix: String, field: String): Action[Unit] = ApiAction { implicit request =>
-    dao.updateCustomFields(Suffix(suffix), field, None, None).flatMap { _ => accepted() }
+  def updateCustomFields(suffix: DatabeSuffix, field: String): Action[Unit] = ApiAction { implicit request =>
+    dao.updateCustomFields(suffix, field, None, None).flatMap { _ => accepted() }
   }
 }

@@ -1,12 +1,12 @@
 import ApplicationFixture.fixture
-import models.Suffix
+import models.DatabeSuffix
 import org.specs2.matcher.Scope
 import play.api.mvc.Result
 
 import scala.concurrent.Future
 
 class TaskApiV1Spec extends ApiSpecification {
-  fixture.populate(Suffix("TASK_"))
+  fixture.populate(DatabeSuffix("TASK_"))
   "/api task" should {
     s"return a list of tasks" in new Scope {
       val result: Future[Result] = routeGET(

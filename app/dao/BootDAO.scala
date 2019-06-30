@@ -12,13 +12,11 @@ import scala.concurrent.{ Await, ExecutionContext, Future }
 import scala.util.{ Failure, Success }
 
 @Singleton
-class Boot @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)(implicit executionContext: ExecutionContext)
+class BootDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)(implicit executionContext: ExecutionContext)
   extends AuthorComponent
   with CommitComponent
   with CommitEntryFileComponent
   with CommitTaskComponent
-  with TaskComponent
-  with PersonComponent
   with ApiKeyComponent
   with ApiTokenComponent
   with ApiLogComponent
@@ -26,6 +24,7 @@ class Boot @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)(imp
   with TermComponent
   with UserComponent
   with CustomFieldsComponent
+  with TaskComponent
   with HasDatabaseConfigProvider[JdbcProfile] {
 
   import profile.api._
@@ -36,7 +35,6 @@ class Boot @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)(imp
     val apiKey = TableQuery[ApiKeyTable]((tag: Tag) => new ApiKeyTable(tag))
     val phase = TableQuery[PhaseTable]((tag: Tag) => new PhaseTable(tag))
     val term = TableQuery[TermTable]((tag: Tag) => new TermTable(tag))
-    val person = TableQuery[PeopleTable]((tag: Tag) => new PeopleTable(tag))
     val user = TableQuery[UserTable]((tag: Tag) => new UserTable(tag))
 
     exec(apiLog.schema.create.asTry andThen
@@ -44,7 +42,6 @@ class Boot @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)(imp
       apiKey.schema.create.asTry andThen
       phase.schema.create.asTry andThen
       term.schema.create.asTry andThen
-      person.schema.create.asTry andThen
       user.schema.create.asTry) onComplete {
       case Success(_) => HandLogger.debug("correct create default tables")
       case Failure(e) =>
@@ -54,7 +51,7 @@ class Boot @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)(imp
     populateDummyApiKey()
   }
 
-  def createSchemas(suffix: Suffix): Unit = {
+  def createSchemas(suffix: DatabeSuffix): Unit = {
     val commitTasks = TableQuery[CommitTasksTable]((tag: Tag) => new CommitTasksTable(tag, suffix))
     val tasks = TableQuery[TaskTable]((tag: Tag) => new TaskTable(tag, suffix))
     val files = TableQuery[EntryFilesTable]((tag: Tag) => new EntryFilesTable(tag, suffix))

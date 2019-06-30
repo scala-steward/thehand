@@ -13,8 +13,8 @@ package scm
 
 import dao._
 import javax.inject.Inject
-import models.Suffix
-import tasks.{TaskProcessConnector, ProcessTargetConnector, TaskConnector}
+import models.DatabeSuffix
+import tasks.TaskProcessConnector
 
 import scala.concurrent.{ExecutionContextExecutor, Future}
 import play.api.db.slick.DatabaseConfigProvider
@@ -24,7 +24,7 @@ class ScmRepositoryData[T] @Inject()
  repository: ScmConnector[T],
  extractor: ScmExtractor[T],
  taskProcessor: TaskProcessConnector,
- suffix: Suffix)
+ suffix: DatabeSuffix)
 {
   implicit val context: ExecutionContextExecutor = scala.concurrent.ExecutionContext.fromExecutor(null)
   lazy val daoTasks = new TaskDAO(dbConfigProvider)

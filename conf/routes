@@ -3,54 +3,54 @@
 # ~~~~
 
 # AUTHENTICATION
-POST    /api/v1/signin						controllers.Auth.signIn
-POST	/api/v1/signout						controllers.Auth.signOut
-POST	/api/v1/signup						controllers.Auth.signUp
+POST    /api/v1/signin						controllers.AuthController.signIn
+POST	/api/v1/signout						controllers.AuthController.signOut
+POST	/api/v1/signup						controllers.AuthController.signUp
 
 # AUTHORS
-GET     /api/v1/:suffix/authors             controllers.AuthorController.list(suffix: String)
-GET     /api/v1/:suffix/authors/:id         controllers.AuthorController.info(suffix: String, id: Long)
-GET     /api/v1/:suffix/authors/bugs/:author  controllers.ReportController.getAuthorBugs(author: String, suffix: String)
+GET     /api/v1/:suffix/authors             controllers.AuthorController.list(suffix: DatabeSuffix)
+GET     /api/v1/:suffix/authors/:id         controllers.AuthorController.info(suffix: DatabeSuffix, id: Long)
+GET     /api/v1/:suffix/authors/bugs/:author  controllers.ReportController.getAuthorBugs(author: String, suffix: DatabeSuffix)
 
 #COMMITS
-GET     /api/v1/:suffix/commits             controllers.CommitController.list(suffix: String)
-GET     /api/v1/:suffix/commits/:id         controllers.CommitController.info(suffix: String, id: Long)
-GET     /api/v1/:suffix/commits/:revision   controllers.CommitController.infoRevision(suffix: String, revision: Long)
-GET     /api/v1/:suffix/commits/:from/to/:to   controllers.CommitController.infoDate(suffix: String, from: QueryLocalDate, to: QueryLocalDate)
-GET     /api/v1/:suffix/commits/custom/:customField/:fromTime/to/:toTime controllers.ReportController.listCommitCustomField(suffix: String, customField: String, fromTime: QueryLocalDate, toTime: QueryLocalDate, format: Option[String])
+GET     /api/v1/:suffix/commits             controllers.CommitController.list(suffix: DatabeSuffix)
+GET     /api/v1/:suffix/commits/:id         controllers.CommitController.info(suffix: DatabeSuffix, id: Long)
+GET     /api/v1/:suffix/commits/revision/:revision   controllers.CommitController.infoRevision(suffix: DatabeSuffix, revision: Long)
+GET     /api/v1/:suffix/commits/:from/to/:to   controllers.CommitController.infoDate(suffix: DatabeSuffix, from: QueryLocalDate, to: QueryLocalDate)
+GET     /api/v1/:suffix/commits/custom/:customField/:fromTime/to/:toTime controllers.ReportController.listCommitCustomField(suffix: DatabeSuffix, customField: String, fromTime: QueryLocalDate, toTime: QueryLocalDate, format: Option[String])
 
 #TASK
-GET     /api/v1/:suffix/tasks               controllers.TaskController.list(suffix: String)
-GET     /api/v1/:suffix/tasks/:id           controllers.TaskController.info(suffix: String, id: Long)
-GET     /api/v1/:suffix/tasks/task/:taskId  controllers.TaskController.infoTaskId(suffix: String, taskId: Long)
-GET     /api/v1/:suffix/tasks/nested/:parentId  controllers.TaskController.infoParentId(suffix: String, parentId: Long)
+GET     /api/v1/:suffix/tasks               controllers.TaskController.list(suffix: DatabeSuffix)
+GET     /api/v1/:suffix/tasks/:id           controllers.TaskController.info(suffix: DatabeSuffix, id: Long)
+GET     /api/v1/:suffix/tasks/task/:taskId  controllers.TaskController.infoTaskId(suffix: DatabeSuffix, taskId: Long)
+GET     /api/v1/:suffix/tasks/nested/:parentId  controllers.TaskController.infoParentId(suffix: DatabeSuffix, parentId: Long)
 
 # COMMIT TASKS
-GET     /api/v1/:suffix/committasks         controllers.CommitTaskController.list(suffix: String)
-GET     /api/v1/:suffix/committasks/:id     controllers.CommitTaskController.info(suffix: String, id: Long)
+GET     /api/v1/:suffix/committasks         controllers.CommitTaskController.list(suffix: DatabeSuffix)
+GET     /api/v1/:suffix/committasks/:id     controllers.CommitTaskController.info(suffix: DatabeSuffix, id: Long)
 
 # COMMIT ENTRY FILES
-GET     /api/v1/:suffix/commitfiles         controllers.CommitEntryFileController.list(suffix: String)
-GET     /api/v1/:suffix/commitfiles/:id     controllers.CommitEntryFileController.info(suffix: String, id: Long)
+GET     /api/v1/:suffix/commitfiles         controllers.CommitEntryFileController.list(suffix: DatabeSuffix)
+GET     /api/v1/:suffix/commitfiles/:id     controllers.CommitEntryFileController.info(suffix: DatabeSuffix, id: Long)
 
 # FILES
-GET     /api/v1/:suffix/files               controllers.EntryFileController.list(suffix: String)
-GET     /api/v1/:suffix/files/bugs          controllers.ReportController.getFilesBugs(suffix: String)
-GET     /api/v1/:suffix/files/:id           controllers.EntryFileController.info(suffix: String, id: Long)
+GET     /api/v1/:suffix/files               controllers.EntryFileController.list(suffix: DatabeSuffix)
+GET     /api/v1/:suffix/files/bugs          controllers.ReportController.getFilesBugs(suffix: DatabeSuffix)
+GET     /api/v1/:suffix/files/:id           controllers.EntryFileController.info(suffix: DatabeSuffix, id: Long)
 
 # CUSTOM FIELDS
-GET     /api/v1/:suffix/customfields        controllers.CustomFieldsController.list(suffix: String)
-GET     /api/v1/:suffix/customfields/:id    controllers.CustomFieldsController.info(suffix: String, id: Long)
-GET     /api/v1/:suffix/customfields/field/:field    controllers.CustomFieldsController.listField(suffix: String, field: String)
+GET     /api/v1/:suffix/customfields        controllers.CustomFieldsController.list(suffix: DatabeSuffix)
+GET     /api/v1/:suffix/customfields/:id    controllers.CustomFieldsController.info(suffix: DatabeSuffix, id: Long)
+GET     /api/v1/:suffix/customfields/field/:field    controllers.CustomFieldsController.listField(suffix: DatabeSuffix, field: String)
 
 # USERNAMES
-GET		/api/v1/usernames					controllers.Users.usernames
+GET		/api/v1/usernames					controllers.UsersController.usernames
 
 # ACCOUNT
-GET		/api/v1/account						controllers.Account.info
-PUT		/api/v1/account						controllers.Account.update
-PUT		/api/v1/account/password	    	controllers.Account.updatePassword
-DELETE  /api/v1/account						controllers.Account.delete
+GET		/api/v1/account						controllers.AccountController.info
+PUT		/api/v1/account						controllers.AccountController.update
+PUT		/api/v1/account/password	    	controllers.AccountController.updatePassword
+DELETE  /api/v1/account						controllers.AccountController.delete
 
 # PHASES
 GET		/api/v1/phases						controllers.PhasesController.list(sort: Option[String], page: Int ?= 1, size: Int ?= 10)
@@ -73,28 +73,25 @@ DELETE	/api/v1/terms/:id					controllers.TermController.delete(id: Long)
 
 # GENERAL
 POST     /api/v1/update                     controllers.UpdateController.updateAll
-POST     /api/v1/update/:suffix             controllers.UpdateController.update(suffix: String)
-POST     /api/v1/:suffix/update/custom/:customField controllers.UpdateController.updateCustomFields(suffix: String, customField: String)
+POST     /api/v1/update/:suffix             controllers.UpdateController.update(suffix: DatabeSuffix)
+POST     /api/v1/:suffix/update/custom/:customField controllers.UpdateController.updateCustomFields(suffix: DatabeSuffix, customField: String)
 
 
 # CONTROL
-GET     /boot                               controllers.BootstrapController.createDefaultTables
-GET     /boot/:suffix                       controllers.BootstrapController.createTables(suffix: String)
+POST    /boot                               controllers.BootController.createDefaultTables
+POST    /boot/:suffix                       controllers.BootController.createTables(suffix: DatabeSuffix)
 
 # Map static resources from the /public folder to the /assets URL path
 ### NoDocs ###
 GET     /assets/*file                       controllers.Assets.versioned(path="/public", file: Asset)
 
 ### NoDocs ###
-GET     /docs/swagger-ui/*file        controllers.Assets.at(path:String="/public/lib/swagger-ui", file:String)
+GET     /docs/swagger-ui/*file              controllers.Assets.at(path:String="/public/lib/swagger-ui", file: String)
 
 ### NoDocs ###
-GET     /assets/*file                 controllers.Assets.versioned(path="/public", file: Asset)
-
-### NoDocs ###
-GET     /test                               controllers.PersonController.test
+GET     /assets/*file                       controllers.Assets.versioned(path="/public", file: Asset)
 
 # UNIT TEST PAGE
 GET		/api/v1/test						controllers.Application.test
 
-#GET     /     controllers.Default.notFound
+#GET     /                                   controllers.Default.notFound
