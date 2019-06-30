@@ -9,9 +9,25 @@
  *
  */
 
+import java.sql.Timestamp
+import java.text.SimpleDateFormat
+
 import models._
 
+import scala.util.{Failure, Success, Try}
+
 object ExtractorFixture {
+
+  private def parseTimestamp(s: String): Option[Timestamp] = {
+    val format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+    Try {
+      Some(new Timestamp(format.parse(s).getTime()))
+    } match {
+      case Success(value) => value
+      case Failure(_) => None
+    }
+  }
+
   val extractTasks = Seq(
     Task(Some("Task"), Some(5L), Some(20), None, 1),
     Task(Some("Task"), Some(5L), Some(20), None, 2),
@@ -22,11 +38,11 @@ object ExtractorFixture {
   val extractAuthors =
     Seq(Author("john"), Author("philips"), Author("thomas"))
 
-  private val commitOne = CommitEntry(Some("Task #1"), None, 1, 0, 1)
-  private val commitTwo = CommitEntry(Some("Task #2"), None, 2, 0, 2)
-  private val commitThree = CommitEntry(Some("Bug #3"), None, 2, 0, 3)
-  private val commitFour = CommitEntry(Some("Bug #4"), None, 2, 0, 4)
-  private val commitFive = CommitEntry(Some("Bug #5"), None, 3, 0, 5)
+  private val commitOne = CommitEntry(Some("Task #1"), parseTimestamp("2015-09-06 10:11:00"), 1, 0, 1)
+  private val commitTwo = CommitEntry(Some("Task #2"), parseTimestamp("2015-10-06 10:11:00"), 2, 0, 2)
+  private val commitThree = CommitEntry(Some("Bug #3"), parseTimestamp("2015-11-0 T10:11:00"), 2, 0, 3)
+  private val commitFour = CommitEntry(Some("Bug #4"), parseTimestamp("2015-12-05 10:11:00"), 2, 0, 4)
+  private val commitFive = CommitEntry(Some("Bug #5"), parseTimestamp("2016-01-06 10:11:00"), 3, 0, 5)
 
   val extractCommits =
     Seq((commitOne, "john"), (commitTwo, "philips"), (commitThree, "philips"),

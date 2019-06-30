@@ -71,7 +71,7 @@ class ReportController @Inject() (
     }
   }
 
-  private def authorReport(authorName: String, suffix: DatabaseSuffix): Unit = {
+  def authorFilesReport(authorName: String, suffix: DatabaseSuffix): Unit = {
     lazy val filename = s"./reports/author_${authorName.toLowerCase()}_${suffix.suffix.toLowerCase}_commits_counter"
     exec[Seq[(String, Int)]](reportAuthorCommitsCounter(authorName, suffix)) match {
       case Right(values) =>
@@ -83,7 +83,7 @@ class ReportController @Inject() (
 
   def authorsReports(suffix: DatabaseSuffix): Unit = {
     exec[Seq[String]](authors(suffix)) match {
-      case Right(values) => values.foreach(authorReport(_, suffix))
+      case Right(values) => values.foreach(authorFilesReport(_, suffix))
       case Left(e) => HandLogger.error("error" + e.getMessage)
     }
   }

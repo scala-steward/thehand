@@ -10,7 +10,7 @@ POST	/api/v1/signup						controllers.AuthController.signUp
 # AUTHORS
 GET     /api/v1/:suffix/authors             controllers.AuthorController.list(suffix: DatabaseSuffix)
 GET     /api/v1/:suffix/authors/:id         controllers.AuthorController.info(suffix: DatabaseSuffix, id: Long)
-GET     /api/v1/:suffix/authors/bugs/:author  controllers.ReportController.getAuthorBugs(author: String, suffix: DatabaseSuffix)
+GET     /api/v1/:suffix/authors/bugs/:author   controllers.ReportController.getAuthorBugs(author: String, suffix: DatabaseSuffix)
 
 #COMMITS
 GET     /api/v1/:suffix/commits             controllers.CommitController.list(suffix: DatabaseSuffix)

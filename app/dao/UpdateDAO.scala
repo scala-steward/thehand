@@ -1,20 +1,16 @@
 package dao
 
-import conf.RepoConf
+import conf.{RepoConf, TargetConf}
 import models._
-import play.api.db.slick.HasDatabaseConfigProvider
 import scm.{ScmRepositoryData, SvnConnector, SvnConnectorFactory, SvnExtractor}
-import slick.jdbc.JdbcProfile
 import tasks.{ProcessTargetConnector, TargetConnector, TaskConnector, TaskParser, TaskParserCharp}
 import javax.inject.Inject
 import org.tmatesoft.svn.core.SVNLogEntry
 import play.api.db.slick.DatabaseConfigProvider
-import play.api.Configuration
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class UpdateDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider, conf: Configuration)(implicit executionContext: ExecutionContext)
-  extends HasDatabaseConfigProvider[JdbcProfile] {
+class UpdateDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(implicit executionContext: ExecutionContext) {
 
   private def loadSvnRepository(repoConfName: String) = {
     lazy val suffix = RepoConf.suffix(repoConfName)
@@ -25,15 +21,7 @@ class UpdateDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
 
     lazy val rep = new SvnConnectorFactory {}
     lazy val repository: Future[SvnConnector] = rep.connect(scmConf.url, scmConf.user, scmConf.pass)
-
-    // hiro wrong place
-    val b = new BootDAO(dbConfigProvider)
-    b.createSchemas(suffix)
-
-    val taskConnector: TaskConnector = TargetConnector(
-      conf.get[String]("target.url"),
-      conf.get[String]("target.user"),
-      conf.get[String]("target.pass"))
+    val taskConnector: TaskConnector = TargetConnector(TargetConf.auth.url, TargetConf.auth.user, TargetConf.auth.pass)
 
     val extractor = new SvnExtractor(parser)
     val taskProcessor = ProcessTargetConnector(taskConnector)
@@ -58,8 +46,7 @@ class UpdateDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
   }
 
   def updateAll(): Future[Seq[Int]] = {
-    val repSuffixes = conf.getOptional[Seq[String]]("repos").getOrElse(Seq())
-    val repositories = repSuffixes.map(updateRepositoryAuto)
+    val repositories = RepoConf.repos.map(updateRepositoryAuto)
     Future.sequence(repositories).map(_.flatten)
   }
 

@@ -19,6 +19,16 @@ class BootApiV1Spec extends ApiSpecification {
         "/boot/BOOT_/YOUR_MAGIC_SECRET", Json.obj())
       status(result) must equalTo(ACCEPTED)
     }
+    s"return not found if call with magic a boot command" in new Scope {
+      val result: Future[Result] = routePOST(
+        "/boot/", Json.obj())
+      status(result) must equalTo(NOT_FOUND)
+    }
+    s"return not found if call with magic a boot command with table suffix" in new Scope {
+      val result: Future[Result] = routePOST(
+        "/boot/BOOT_/", Json.obj())
+      status(result) must equalTo(NOT_FOUND)
+    }
   }
 
 }

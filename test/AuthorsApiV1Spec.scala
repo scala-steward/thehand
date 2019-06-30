@@ -42,8 +42,21 @@ class AuthorsApiV1Spec extends ApiSpecification {
             }""").ignoreSpace
     }
 
-    // HIRO check this below !!!
     s"return a file path and a counter for all tasks of type bug for the author" in new Scope {
+      val result: Future[Result] = routeGET(
+        "/api/v1/AUTHOR_/authors/bugs/thomas")
+      status(result) must equalTo(OK)
+      contentType(result) must beSome.which(_ == "application/json")
+      val s = contentAsString(result)
+      s must beEqualTo(
+        s"""[
+             [
+               "/zip",
+               1
+             ]
+           ]""").ignoreSpace
+    }
+    s"return a files paths for the author" in new Scope {
       val result: Future[Result] = routeGET(
         "/api/v1/AUTHOR_/authors/bugs/thomas")
       status(result) must equalTo(OK)
