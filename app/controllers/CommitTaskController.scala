@@ -9,28 +9,26 @@
 
 package controllers
 
+import api.ApiController
 import javax.inject._
 import dao._
 import models.DatabaseSuffix
-import play.api.libs.json.Json
+import play.api.db.slick.DatabaseConfigProvider
+import play.api.i18n.Langs
 import play.api.mvc._
 
 import scala.concurrent.ExecutionContext
 
-class CommitTaskController @Inject() (
-  dao: CommitTaskDAO,
-  cc: MessagesControllerComponents)(implicit ec: ExecutionContext)
-  extends MessagesAbstractController(cc) {
+class CommitTaskController @Inject()
+(override val dbc: DatabaseConfigProvider, dao: CommitTaskDAO, l: Langs, mcc: MessagesControllerComponents)
+(implicit ec: ExecutionContext)
+  extends ApiController(dbc, l, mcc)  {
 
-  def list(suffix: DatabaseSuffix): Action[AnyContent] = Action.async {
-    dao.list(suffix).map { a =>
-      Ok(Json.toJson(a))
-    }
+  def list(suffix: DatabaseSuffix): Action[Unit] = ApiAction { implicit request =>
+    maybeSeq(dao.list(suffix))
   }
 
-  def info(suffix: DatabaseSuffix, id: Long): Action[AnyContent] = Action.async {
-    dao.info(suffix, id).map { a =>
-      Ok(Json.toJson(a))
-    }
+  def info(suffix: DatabaseSuffix, id: Long): Action[Unit] = ApiAction { implicit request =>
+    maybeSeq(dao.info(suffix, id))
   }
 }

@@ -123,7 +123,7 @@ class ReportDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
       .map {
         case (path, group) =>
           (path, group.length)
-      }
+      }.sortBy(_._2)
     countCommits.result.transactionally
   }
 }

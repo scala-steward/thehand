@@ -17,7 +17,8 @@ GET     /api/v1/:suffix/commits             controllers.CommitController.list(su
 GET     /api/v1/:suffix/commits/:id         controllers.CommitController.info(suffix: DatabaseSuffix, id: Long)
 GET     /api/v1/:suffix/commits/revision/:revision   controllers.CommitController.infoRevision(suffix: DatabaseSuffix, revision: Long)
 GET     /api/v1/:suffix/commits/:from/to/:to   controllers.CommitController.infoDate(suffix: DatabaseSuffix, from: QueryLocalDate, to: QueryLocalDate)
-GET     /api/v1/:suffix/commits/custom/:customField/:fromTime/to/:toTime controllers.ReportController.listCommitCustomField(suffix: DatabaseSuffix, customField: String, fromTime: QueryLocalDate, toTime: QueryLocalDate, format: Option[String])
+GET     /api/v1/:suffix/commits/custom/:customField/:fromTime/to/:toTime/csv controllers.ReportController.listCommitsCustomFieldCsv(suffix: DatabaseSuffix, customField: String, fromTime: QueryLocalDate, toTime: QueryLocalDate)
+GET     /api/v1/:suffix/commits/custom/:customField/:fromTime/to/:toTime controllers.ReportController.listCommitCustomField(suffix: DatabaseSuffix, customField: String, fromTime: QueryLocalDate, toTime: QueryLocalDate)
 
 #TASK
 GET     /api/v1/:suffix/tasks               controllers.TaskController.list(suffix: DatabaseSuffix)

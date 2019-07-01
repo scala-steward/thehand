@@ -9,34 +9,30 @@
 
 package controllers
 
+import api.ApiController
 import javax.inject._
 import dao._
 import models.DatabaseSuffix
-import play.api.libs.json.Json
+import play.api.db.slick.DatabaseConfigProvider
+import play.api.i18n.Langs
 import play.api.mvc._
 
 import scala.concurrent.ExecutionContext
 
-class CustomFieldsController @Inject() (
-                                 dao: CustomFieldsDAO,
-                                 cc: MessagesControllerComponents)(implicit ec: ExecutionContext)
-  extends MessagesAbstractController(cc) {
+class CustomFieldsController @Inject()
+(override val dbc: DatabaseConfigProvider, dao: CustomFieldsDAO, l: Langs, mcc: MessagesControllerComponents)
+(implicit ec: ExecutionContext)
+  extends ApiController(dbc, l, mcc)  {
 
-  def list(suffix: DatabaseSuffix): Action[AnyContent] = Action.async {
-    dao.list(suffix).map { a =>
-      Ok(Json.toJson(a))
-    }
+  def list(suffix: DatabaseSuffix): Action[Unit] = ApiAction { implicit request =>
+    maybeSeq(dao.list(suffix))
   }
 
-  def listField(suffix: DatabaseSuffix, field: String): Action[AnyContent] = Action.async {
-    dao.listField(suffix, field).map { a =>
-      Ok(Json.toJson(a))
-    }
+  def listField(suffix: DatabaseSuffix, field: String): Action[Unit] = ApiAction { implicit request =>
+    maybeSeq(dao.listField(suffix, field))
   }
 
-  def info(suffix: DatabaseSuffix, id: Long): Action[AnyContent] = Action.async {
-    dao.info(suffix, id).map { a =>
-      Ok(Json.toJson(a))
-    }
+  def info(suffix: DatabaseSuffix, id: Long): Action[Unit] = ApiAction { implicit request =>
+    maybeSeq(dao.info(suffix, id))
   }
 }

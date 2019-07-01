@@ -15,7 +15,9 @@ import play.api.i18n.Langs
 
 import scala.concurrent.ExecutionContext
 
-class AccountController @Inject()(override val dbc: DatabaseConfigProvider, l: Langs, mcc: MessagesControllerComponents)(implicit executionContext: ExecutionContext)
+class AccountController @Inject()
+(override val dbc: DatabaseConfigProvider, l: Langs, mcc: MessagesControllerComponents)
+(implicit executionContext: ExecutionContext)
   extends ApiController(dbc, l, mcc) {
 
   val userDao = new UserDAO(dbc)

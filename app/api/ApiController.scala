@@ -51,8 +51,8 @@ class ApiController @Inject() (val dbc: DatabaseConfigProvider, l: Langs, mcc: M
     implicit val lang: Lang = request.messages.lang
 
     val futureApiResult: Future[ApiResult] = apiRequest.apiKeyOpt match {
-      case None => errorApiKeyNotFound
       case Some(apiKey) => action(apiRequest, apiKey, DateTime.now())
+      case None => errorApiKeyNotFound
     }
     futureApiResult.map {
       case error: ApiError => error.saveLog(apiRequest).toResult
@@ -103,16 +103,34 @@ class ApiController @Inject() (val dbc: DatabaseConfigProvider, l: Langs, mcc: M
   }
 
   // Auxiliar methods to create ApiResults from writable JSON objects
-
   def ok[A](obj: A, headers: (String, String)*)(implicit w: Writes[A]): Future[ApiResult] = Future.successful(ApiResponse.ok(obj, headers: _*))
   def ok[A](futObj: Future[A], headers: (String, String)*)(implicit w: Writes[A]): Future[ApiResult] = futObj.map(obj => ApiResponse.ok(obj, headers: _*))
 
-  private def itemOrError[A](opt: Option[A], headers: (String, String)*)(implicit w: Writes[A], req: RequestHeader): ApiResult = opt match {
-    case Some(i) => ApiResponse.ok(i, headers: _*)
-    case None => ApiError.errorItemNotFound
-  }
-  def maybeItem[A](opt: Option[A], headers: (String, String)*)(implicit w: Writes[A], req: RequestHeader): Future[ApiResult] = Future.successful(itemOrError(opt, headers: _*))
-  def maybeItem[A](futOpt: Future[Option[A]], headers: (String, String)*)(implicit w: Writes[A], req: RequestHeader): Future[ApiResult] = futOpt.map(opt => itemOrError(opt, headers: _*))
+  private def itemOrError[A](opt: Option[A], headers: (String, String)*)
+                            (implicit w: Writes[A], req: RequestHeader): ApiResult =
+    opt match {
+      case Some(i) => ApiResponse.ok(i, headers: _*)
+      case None => ApiError.errorItemNotFound
+    }
+
+  private def listOrError[A](opt: Seq[A], headers: (String, String)*)
+                            (implicit w: Writes[A], req: RequestHeader): ApiResult =
+    opt match {
+      case Seq() => ApiError.errorItemNotFound
+      case s => ApiResponse.ok(s, headers: _*)
+    }
+
+  def maybeItem[A](opt: Option[A], headers: (String, String)*)
+                  (implicit w: Writes[A], req: RequestHeader): Future[ApiResult] =
+    Future.successful(itemOrError(opt, headers: _*))
+
+  def maybeItem[A](futOpt: Future[Option[A]], headers: (String, String)*)
+                  (implicit w: Writes[A], req: RequestHeader): Future[ApiResult] =
+    futOpt.map(opt => itemOrError(opt, headers: _*))
+
+  def maybeSeq[A](futOpt: Future[Seq[A]], headers: (String, String)*)
+                  (implicit w: Writes[A], req: RequestHeader): Future[ApiResult] =
+    futOpt.map(opt => listOrError(opt, headers: _*))
 
   def page[A](p: Page[A], headers: (String, String)*)(implicit w: Writes[A]): Future[ApiResult] = Future.successful(ApiResponse.ok(p.items, p, headers: _*))
   def page[A](futP: Future[Page[A]], headers: (String, String)*)(implicit w: Writes[A]): Future[ApiResult] = futP.map(p => ApiResponse.ok(p.items, p, headers: _*))

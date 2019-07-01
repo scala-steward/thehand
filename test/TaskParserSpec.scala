@@ -11,14 +11,14 @@
 
 import org.specs2.mutable.Specification
 import org.specs2.matcher.Matchers
-import tasks.TaskParserCharp
+import tasks.TaskParserOctothorpe
 
 class TaskParserSpec extends Specification with Matchers {
   val patternParser = "(#\\d)\\d+"
   val patternSplit = "#"
   val separator = ""
 
-  val defaultParser = TaskParserCharp(patternParser, patternSplit, separator)
+  val defaultParser = TaskParserOctothorpe(patternParser, patternSplit, separator)
 
   s2"Convert message #123 Commit Message should return id 123 $e1"
   def e1 =  defaultParser.convert(Some("#123 Commit Message")) must beEqualTo[Seq[Int]](Seq(123))

@@ -15,7 +15,7 @@ class UsersController @Inject()(override val dbc: DatabaseConfigProvider, l: Lan
 
   val userDao = new UserDAO(dbc)
 
-  def usernames: Action[Unit] = ApiAction { implicit request =>
+  def usernames(): Action[Unit] = ApiAction { implicit request =>
     userDao.list.flatMap { list =>
       ok(list.map(u => Json.obj("id" -> u.id, "name" -> u.name)))
     }

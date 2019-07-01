@@ -18,7 +18,8 @@ import play.api.db.slick.DatabaseConfigProvider
 import scala.language.postfixOps
 import play.api.i18n.Langs
 
-class AuthController @Inject()(override val dbc: DatabaseConfigProvider, l: Langs, mcc: MessagesControllerComponents, system: ActorSystem)
+class AuthController @Inject()
+(override val dbc: DatabaseConfigProvider, l: Langs, mcc: MessagesControllerComponents, system: ActorSystem)
   extends ApiController(dbc, l, mcc) {
 
   val userDao = new UserDAO(dbc)

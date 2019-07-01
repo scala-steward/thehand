@@ -67,9 +67,9 @@ class ScmRepositoryData[T] @Inject()
 
   def updateAuto(): Future[Seq[Int]] =
     repository.latestId match {
-      case Some(lastestId) => daoCommits
+      case Some(last) => daoCommits
         .actionLatestRevision(suffix)
-        .flatMap(lastId => updateRange(calculateRangeLimit(lastId.getOrElse(1), lastestId)))
+        .flatMap(lastId => updateRange(calculateRangeLimit(lastId.getOrElse(1), last)))
       case None => Future(Seq())
     }
 

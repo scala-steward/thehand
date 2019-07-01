@@ -3,7 +3,7 @@ package dao
 import conf.{RepoConf, TargetConf}
 import models._
 import scm.{ScmRepositoryData, SvnConnector, SvnConnectorFactory, SvnExtractor}
-import tasks.{ProcessTargetConnector, TargetConnector, TaskConnector, TaskParser, TaskParserCharp}
+import tasks.{ProcessTargetConnector, TargetConnector, TaskConnector, TaskParser, TaskParserOctothorpe}
 import javax.inject.Inject
 import org.tmatesoft.svn.core.SVNLogEntry
 import play.api.db.slick.DatabaseConfigProvider
@@ -17,7 +17,7 @@ class UpdateDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
     lazy val taskConf = RepoConf.taskParser(repoConfName)
     lazy val scmConf = RepoConf.scm(repoConfName)
 
-    implicit val parser: TaskParser = TaskParserCharp(taskConf.pattern, taskConf.split, taskConf.separator)
+    implicit val parser: TaskParser = TaskParserOctothorpe(taskConf.pattern, taskConf.split, taskConf.separator)
 
     lazy val rep = new SvnConnectorFactory {}
     lazy val repository: Future[SvnConnector] = rep.connect(scmConf.url, scmConf.user, scmConf.pass)

@@ -1,15 +1,17 @@
 package dao
 
+import conf.BootConf
+
 import scala.concurrent.duration._
 import scala.language.postfixOps
-import javax.inject.{ Inject, Singleton }
+import javax.inject.{Inject, Singleton}
 import models._
-import play.api.db.slick.{ DatabaseConfigProvider, HasDatabaseConfigProvider }
+import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.jdbc.JdbcProfile
 import telemetrics.HandLogger
 
-import scala.concurrent.{ Await, ExecutionContext, Future }
-import scala.util.{ Failure, Success }
+import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 @Singleton
 class BootDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)(implicit executionContext: ExecutionContext)
@@ -75,7 +77,7 @@ class BootDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)(
   def createFirstApiKey() : Unit = {
     val apiKey = TableQuery[ApiKeyTable]((tag: Tag) => new ApiKeyTable(tag))
     val apiKeys: Seq[ApiKey] = Seq(
-      ApiKey(apiKey = "AbCdEfGhIjK1", name = "first-app", active = true))
+      ApiKey(apiKey = BootConf.first_api_key, name = "first-app", active = true))
 
     exec(apiKey ++= apiKeys) onComplete {
       case Success(_) => HandLogger.debug("correct create default tables")

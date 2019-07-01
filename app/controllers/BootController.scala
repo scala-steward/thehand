@@ -5,7 +5,8 @@ import dao.BootDAO
 import models.{DatabaseSuffix, QueryMagic}
 import play.api.mvc._
 
-class BootController @Inject()(dao: BootDAO, cc: MessagesControllerComponents)
+class BootController @Inject()
+(dao: BootDAO, cc: MessagesControllerComponents)
   extends MessagesAbstractController(cc) {
 
   def createTables(magic: QueryMagic): Action[AnyContent] = Action {

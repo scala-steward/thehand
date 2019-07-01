@@ -13,7 +13,8 @@ import play.api.db.slick.DatabaseConfigProvider
 import play.api.i18n.Langs
 import play.api.libs.json.JsValue
 
-class PhasesController @Inject() (override val dbc: DatabaseConfigProvider, l: Langs, mcc: MessagesControllerComponents)
+class PhasesController @Inject()
+(override val dbc: DatabaseConfigProvider, l: Langs, mcc: MessagesControllerComponents)
   extends ApiController(dbc, l, mcc) {
 
   val phaseDao = new PhaseDAO(dbc)

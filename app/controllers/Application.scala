@@ -8,7 +8,9 @@ import play.api.i18n.Langs
 
 import scala.concurrent.ExecutionContext
 
-class Application @Inject() (override val dbc: DatabaseConfigProvider, l: Langs, mcc: MessagesControllerComponents)(implicit executionContext: ExecutionContext)
+class Application @Inject()
+(override val dbc: DatabaseConfigProvider, l: Langs, mcc: MessagesControllerComponents)
+(implicit executionContext: ExecutionContext)
   extends ApiController(dbc, l, mcc) {
 
   def test: Action[Unit] = ApiAction { implicit request =>
