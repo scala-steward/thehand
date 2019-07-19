@@ -67,16 +67,6 @@ class AuthControllerApiV1Spec extends ApiSpecification {
         Json.obj("email" -> "user1@mail.com", "password" -> "123456", "user" -> "dummy_user"))
       status(result) must equalTo(ERROR_BADREQUEST)
     }
-    "paginate correctly" in new Scope {
-      signIn.map { token =>
-        val result = routeSecuredGET(token)("/api/v1/phases")
-        status(result) must equalTo(OK)
-        header(HEADER_PAGE, result) must beSome
-        header(HEADER_PAGE_FROM, result) must beSome
-        header(HEADER_PAGE_SIZE, result) must beSome
-        header(HEADER_PAGE_TOTAL, result) must beSome
-      }
-    }
     "not respond to unauthorized requests once signed out" in new Scope {
       signIn.map { token =>
         val result = routeSecuredPOST(token)("/api/v1/signout", JsNull)

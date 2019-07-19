@@ -5,7 +5,7 @@ lazy val root = (project in file(".")).settings(
     inThisBuild(List(
       organization := "io.github.0um",
       scalaVersion := "2.12.8",
-      version      := "0.1.2-SNAPSHOT"
+      version      := "0.1.3-SNAPSHOT"
     )),
     name := "thehand",
     libraryDependencies ++= Seq(
@@ -25,7 +25,6 @@ lazy val root = (project in file(".")).settings(
       "com.typesafe.play" % "play-json_2.12" % "2.7.4",
       "com.typesafe.play" %% "play-slick" % "4.0.0",
       "com.typesafe.play" %% "play-json-joda" % "2.7.4",
-      "org.eclipse.jgit" % "org.eclipse.jgit" % "5.2.1.201812262042-r",
       specs2 % Test,
       "org.specs2" %% "specs2-matcher-extra" % "4.4.1" % Test,
       "org.webjars" % "swagger-ui" % "2.2.10-1"

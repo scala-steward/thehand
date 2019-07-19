@@ -1,3 +1,0 @@
-class TermsApiV1Spec {
-
-}

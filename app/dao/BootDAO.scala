@@ -22,8 +22,6 @@ class BootDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)(
   with ApiKeyComponent
   with ApiTokenComponent
   with ApiLogComponent
-  with PhaseComponent
-  with TermComponent
   with UserComponent
   with CustomFieldsComponent
   with TaskComponent
@@ -35,15 +33,11 @@ class BootDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)(
     val apiLog = TableQuery[ApiLogTable]((tag: Tag) => new ApiLogTable(tag))
     val apiToken = TableQuery[ApiTokenTable]((tag: Tag) => new ApiTokenTable(tag))
     val apiKey = TableQuery[ApiKeyTable]((tag: Tag) => new ApiKeyTable(tag))
-    val phase = TableQuery[PhaseTable]((tag: Tag) => new PhaseTable(tag))
-    val term = TableQuery[TermTable]((tag: Tag) => new TermTable(tag))
     val user = TableQuery[UserTable]((tag: Tag) => new UserTable(tag))
 
     exec(apiLog.schema.create.asTry andThen
       apiToken.schema.create.asTry andThen
       apiKey.schema.create.asTry andThen
-      phase.schema.create.asTry andThen
-      term.schema.create.asTry andThen
       user.schema.create.asTry) onComplete {
       case Success(_) => HandLogger.debug("correct create default tables")
       case Failure(e) =>
