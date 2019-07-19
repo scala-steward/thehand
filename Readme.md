@@ -76,14 +76,14 @@ There are two operating modes for scm scanning
 
 ###### Auto Mode
 Search in the records what the last version already saved, and in scm which the last version sent. Using this data to load the records.
-```
+```conf
 mode = "auto"
 ```
 
 ###### Manual Mode
 Use the user-defined revision number to set the log load.
 Currently does not update existing records. Not having an "insertOrUpdate" behavior.
-```
+```conf
 mode = "off"
 start_revision = 1
 end_revision = 1000
@@ -92,7 +92,7 @@ end_revision = 1000
 ##### Target Configuration
 For agile flow data aggregation using [TargetProcess] (targetprocess.com)
 Currently thehand does not have support for other means of authentication.
-```
+```conf
 target = {
   user = "YOUR USER"
   pass = "YOUR PASS"
@@ -101,13 +101,13 @@ target = {
 ```
  
 ### Run
-```
+```bash
 > sbt run -Dconfig.file=/... path .../application.conf
-> curl -v -X POST -H 'X-API-key:AbCdEfGhIjK1' http://ip:9000/boot
+> curl -v -X POST http://ip:9000/YOUR_MAGIC_SECRET/boot/
 > curl -v -X POST -H 'X-API-key:AbCdEfGhIjK1' http://ip:9000/api/v1/update
 ```
 
 #### Test
-```
+```bash
 > sbt test
 ```
