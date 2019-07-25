@@ -16,7 +16,7 @@ lazy val root = (project in file(".")).settings(
       "com.h2database" % "h2" % "1.4.198",
       "ch.qos.logback" % "logback-classic" % "1.2.3",
       "com.github.tototoshi" %% "slick-joda-mapper" % "2.4.1",
-      "joda-time" % "joda-time" % "2.10.2",
+      "joda-time" % "joda-time" % "2.10.3",
       "org.joda" % "joda-convert" % "2.2.1",
       "com.github.tototoshi" %% "scala-csv" % "1.3.5",
       "com.typesafe" % "config" % "1.3.4",
