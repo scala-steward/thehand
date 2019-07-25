@@ -12,7 +12,7 @@ lazy val root = (project in file(".")).settings(
       guice,
       "org.tmatesoft.svnkit" % "svnkit" % "1.9.3",
       "commons-codec" % "commons-codec" % "1.12",
-      "org.postgresql" % "postgresql" % "42.2.5",
+      "org.postgresql" % "postgresql" % "42.2.6",
       "com.h2database" % "h2" % "1.4.198",
       "ch.qos.logback" % "logback-classic" % "1.2.3",
       "com.github.tototoshi" %% "slick-joda-mapper" % "2.4.1",
