@@ -5,29 +5,29 @@ lazy val root = (project in file(".")).settings(
     inThisBuild(List(
       organization := "io.github.0um",
       scalaVersion := "2.12.8",
-      version      := "0.1.3-SNAPSHOT"
+      version      := "0.1.4"
     )),
     name := "thehand",
     libraryDependencies ++= Seq(
       guice,
-      "org.tmatesoft.svnkit" % "svnkit" % "1.9.3",
-      "commons-codec" % "commons-codec" % "1.12",
-      "org.postgresql" % "postgresql" % "42.2.5",
-      "com.h2database" % "h2" % "1.4.198",
+      "org.tmatesoft.svnkit" % "svnkit" % "1.10.1",
+      "commons-codec" % "commons-codec" % "1.13",
+      "org.postgresql" % "postgresql" % "42.2.6",
+      "com.h2database" % "h2" % "1.4.199",
       "ch.qos.logback" % "logback-classic" % "1.2.3",
       "com.github.tototoshi" %% "slick-joda-mapper" % "2.4.1",
-      "joda-time" % "joda-time" % "2.10.2",
+      "joda-time" % "joda-time" % "2.10.3",
       "org.joda" % "joda-convert" % "2.2.1",
-      "com.github.tototoshi" %% "scala-csv" % "1.3.5",
+      "com.github.tototoshi" %% "scala-csv" % "1.3.6",
       "com.typesafe" % "config" % "1.3.4",
       "com.typesafe.scala-logging" % "scala-logging_2.12" % "3.9.2",
       "com.typesafe.slick" %% "slick" % "3.3.2",
       "com.typesafe.play" % "play-json_2.12" % "2.7.4",
-      "com.typesafe.play" %% "play-slick" % "4.0.0",
+      "com.typesafe.play" %% "play-slick" % "4.0.2",
       "com.typesafe.play" %% "play-json-joda" % "2.7.4",
       specs2 % Test,
-      "org.specs2" %% "specs2-matcher-extra" % "4.4.1" % Test,
-      "org.webjars" % "swagger-ui" % "2.2.10-1"
+      "org.specs2" %% "specs2-matcher-extra" % "4.6.0" % Test,
+      "org.webjars" % "swagger-ui" % "2.2.10"
     )
   )
 
