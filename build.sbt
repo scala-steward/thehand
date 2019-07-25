@@ -10,7 +10,7 @@ lazy val root = (project in file(".")).settings(
     name := "thehand",
     libraryDependencies ++= Seq(
       guice,
-      "org.tmatesoft.svnkit" % "svnkit" % "1.9.3",
+      "org.tmatesoft.svnkit" % "svnkit" % "1.10.1",
       "commons-codec" % "commons-codec" % "1.12",
       "org.postgresql" % "postgresql" % "42.2.5",
       "com.h2database" % "h2" % "1.4.198",
