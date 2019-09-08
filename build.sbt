@@ -27,7 +27,7 @@ lazy val root = (project in file(".")).settings(
       "com.typesafe.play" %% "play-json-joda" % "2.7.4",
       specs2 % Test,
       "org.specs2" %% "specs2-matcher-extra" % "4.7.0" % Test,
-      "org.webjars" % "swagger-ui" % "3.23.5"
+      "org.webjars" % "swagger-ui" % "3.23.8"
     )
   )
 
