@@ -25,6 +25,7 @@ class BootDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)(
   with UserComponent
   with CustomFieldsComponent
   with TaskComponent
+  with LocFileComponent
   with HasDatabaseConfigProvider[JdbcProfile] {
 
   import profile.api._
@@ -53,6 +54,7 @@ class BootDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)(
     val commits = TableQuery[CommitTable]((tag: Tag) => new CommitTable(tag, suffix))
     val commitsFiles = TableQuery[CommitEntryFileTable]((tag: Tag) => new CommitEntryFileTable(tag, suffix))
     val customFields = TableQuery[CustomFieldsTable]((tag: Tag) => new CustomFieldsTable(tag, suffix))
+    val locs = TableQuery[LocFilesTable]((tag: Tag) => new LocFilesTable(tag, suffix))
 
     exec(
       tasks.schema.create.asTry andThen
@@ -61,7 +63,8 @@ class BootDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)(
         files.schema.create.asTry andThen
         commitsFiles.schema.create.asTry andThen
         commitTasks.schema.create.asTry andThen
-        customFields.schema.create.asTry) onComplete {
+        customFields.schema.create.asTry andThen
+        locs.schema.create.asTry) onComplete {
         case Success(_) => HandLogger.debug("correct create tables")
         case Failure(e) =>
           HandLogger.error("error in create tables " + e.getMessage)

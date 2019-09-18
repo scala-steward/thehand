@@ -2,16 +2,18 @@ package api
 
 import api.ApiError._
 import api.Api.Sorting._
-import dao.{ ApiKeyDAO, ApiLogDAO, ApiTokenDAO }
+import dao.{ApiKeyDAO, ApiLogDAO, ApiTokenDAO}
 import javax.inject.Inject
 import org.joda.time.DateTime
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.mvc._
 
-import scala.concurrent.{ ExecutionContext, Future }
-import play.api.i18n.{ Lang, Langs, Messages }
-
+import scala.concurrent.{ExecutionContext, Future}
+import play.api.i18n.{Lang, Langs, Messages}
 import play.api.libs.json._
+import telemetrics.HandLogger
+
+import scala.xml.NodeSeq
 
 class ApiController @Inject() (val dbc: DatabaseConfigProvider, l: Langs, mcc: MessagesControllerComponents)(implicit executionContext: ExecutionContext)
   extends MessagesAbstractController(mcc) {
@@ -46,8 +48,11 @@ class ApiController @Inject() (val dbc: DatabaseConfigProvider, l: Langs, mcc: M
     UserAwareApiActionWithParser(parse.json)(action)
 
   // Creates an Action checking that the Request has all the common necessary headers with their correct values (X-Api-Key)
-  private def ApiActionCommon[A](parser: BodyParser[A])(action: (ApiRequest[A], String, DateTime) => Future[ApiResult]) = Action.async(parser) { implicit request =>
+  private def ApiActionCommon[A](parser: BodyParser[A])(action: (ApiRequest[A], String, DateTime) => Future[ApiResult]) =
+    Action.async(parser) { implicit request =>
+    HandLogger.debug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
     val apiRequest = ApiRequest(request)
+    HandLogger.debug(apiRequest.request.body.toString)
     implicit val lang: Lang = request.messages.lang
 
     val futureApiResult: Future[ApiResult] = apiRequest.apiKeyOpt match {
@@ -60,15 +65,54 @@ class ApiController @Inject() (val dbc: DatabaseConfigProvider, l: Langs, mcc: M
     }
   }
 
-  // Basic Api Action
-  private def ApiActionWithParser[A](parser: BodyParser[A])(action: ApiRequest[A] => Future[ApiResult]) =
-    ApiActionCommon(parser) { (apiRequest, apiKey, _) =>
+  def ApiActionWithXmlBody(action: ApiRequest[NodeSeq] => Future[ApiResult]): Action[NodeSeq] = {
+    ApiActionWithParser2(parse.xml(1000*1024))(action)
+  }
+
+  private def ApiActionWithParser2(parser: BodyParser[NodeSeq])(action: ApiRequest[NodeSeq] => Future[ApiResult]) = {
+    ApiActionCommon2(parser) { (apiRequest, apiKey, _) =>
       apiKeyDao.isActive(apiKey).flatMap {
         case None => errorApiKeyUnknown
         case Some(false) => errorApiKeyDisabled
         case Some(true) => action(apiRequest)
       }
     }
+  }
+
+  private def ApiActionCommon2[A](parser: BodyParser[A])(action: (ApiRequest[A], String, DateTime) => Future[ApiResult])  = {
+    Action.async(parser) { implicit request =>
+      val apiRequest = ApiRequest(request)
+      HandLogger.debug(apiRequest.request.body.toString)
+      implicit val lang: Lang = request.messages.lang
+
+      val futureApiResult: Future[ApiResult] = apiRequest.apiKeyOpt match {
+        case Some(apiKey) => action(apiRequest, apiKey, DateTime.now())
+        case None => errorApiKeyNotFound
+      }
+      futureApiResult.map {
+        case error: ApiError => error.saveLog(apiRequest).toResult
+        case response: ApiResponse => response.toResult
+      }
+    }
+  }
+
+  // Basic Api Action
+  private def ApiActionWithParser[A](parser: BodyParser[A])(action: ApiRequest[A] => Future[ApiResult]) = {
+    HandLogger.debug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    ApiActionCommon2(parser) { (apiRequest, apiKey, _) =>
+      apiKeyDao.isActive(apiKey).flatMap {
+        case None => errorApiKeyUnknown
+        case Some(false) => {
+          HandLogger.debug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" + apiRequest)
+          errorApiKeyDisabled
+        }
+        case Some(true) => {
+          HandLogger.debug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" + apiRequest)
+          action(apiRequest)
+        }
+      }
+    }
+  }
   // Secured Api Action that requires authentication. It checks the Request has the correct X-Auth-Token header
   private def SecuredApiActionWithParser[A](parser: BodyParser[A])(action: SecuredApiRequest[A] => Future[ApiResult]) = {
     ApiActionCommon(parser) { (apiRequest, apiKey, date) =>

@@ -58,9 +58,12 @@ POST     /api/v1/update                     controllers.UpdateController.updateA
 POST     /api/v1/update/:suffix             controllers.UpdateController.update(suffix: DatabaseSuffix)
 POST     /api/v1/:suffix/update/custom/:customField controllers.UpdateController.updateCustomFields(suffix: DatabaseSuffix, customField: String)
 
+# LOC
+POST     /api/v1/:suffix/loc                controllers.LocController.update(suffix: DatabaseSuffix)
 
 ### NoDocs ###
 POST    /boot/:magic                        controllers.BootController.createTables(magic: QueryMagic)
+
 ### NoDocs ###
 POST    /boot/:suffix/:magic                controllers.BootController.createSuffixTables(suffix: DatabaseSuffix, magic: QueryMagic)
 
