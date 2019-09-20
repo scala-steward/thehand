@@ -19,6 +19,8 @@ GET     /api/v1/:suffix/commits/revision/:revision   controllers.CommitControlle
 GET     /api/v1/:suffix/commits/:from/to/:to   controllers.CommitController.infoDate(suffix: DatabaseSuffix, from: QueryLocalDate, to: QueryLocalDate)
 GET     /api/v1/:suffix/commits/custom/:customField/:fromTime/to/:toTime/csv controllers.ReportController.listCommitsCustomFieldCsv(suffix: DatabaseSuffix, customField: String, fromTime: QueryLocalDate, toTime: QueryLocalDate)
 GET     /api/v1/:suffix/commits/custom/:customField/:fromTime/to/:toTime controllers.ReportController.listCommitCustomField(suffix: DatabaseSuffix, customField: String, fromTime: QueryLocalDate, toTime: QueryLocalDate)
+GET     /api/v1/:suffix/commits/custom/loc/:customField/:fromTime/to/:toTime/csv controllers.ReportController.listCommitsLocCustomFieldCsv(suffix: DatabaseSuffix, customField: String, fromTime: QueryLocalDate, toTime: QueryLocalDate)
+GET     /api/v1/:suffix/commits/custom/loc/:customField/:fromTime/to/:toTime controllers.ReportController.listCommitLocCustomField(suffix: DatabaseSuffix, customField: String, fromTime: QueryLocalDate, toTime: QueryLocalDate)
 
 #TASK
 GET     /api/v1/:suffix/tasks               controllers.TaskController.list(suffix: DatabaseSuffix)
@@ -58,14 +60,14 @@ POST     /api/v1/update                     controllers.UpdateController.updateA
 POST     /api/v1/update/:suffix             controllers.UpdateController.update(suffix: DatabaseSuffix)
 POST     /api/v1/:suffix/update/custom/:customField controllers.UpdateController.updateCustomFields(suffix: DatabaseSuffix, customField: String)
 
-# LOC
-POST     /api/v1/:suffix/loc                controllers.LocController.update(suffix: DatabaseSuffix)
-
 ### NoDocs ###
 POST    /boot/:magic                        controllers.BootController.createTables(magic: QueryMagic)
 
 ### NoDocs ###
 POST    /boot/:suffix/:magic                controllers.BootController.createSuffixTables(suffix: DatabaseSuffix, magic: QueryMagic)
+
+# LOC
+POST     /api/v1/:suffix/loc                controllers.LocController.update(suffix: DatabaseSuffix)
 
 # Map static resources from the /public folder to the /assets URL path
 ### NoDocs ###

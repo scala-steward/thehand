@@ -9,6 +9,6 @@ final case class CustomFields(
                        id: Long = 0L)
 
 object CustomFields {
-  implicit val customFiledsFormat: OFormat[CustomFields] = Json.format[CustomFields]
+  implicit val customFieldsFormat: OFormat[CustomFields] = Json.format[CustomFields]
 }
 

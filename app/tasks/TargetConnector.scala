@@ -72,7 +72,7 @@ class TargetConnector(url: String, user: String, password: String) extends TaskC
     jsonData(url + "/EntityStates/" + id, "")
   }
 
-  def assignables(id: Long, options: String = "[Id,Project,EntityType,Effort,TimeSpent]"): String = {
+  def assignable(id: Long, options: String = "[Id,Project,EntityType,Effort,TimeSpent]"): String = {
     jsonData(url + "/Assignables/" + id.toString, "&include=" + options)
   }
 

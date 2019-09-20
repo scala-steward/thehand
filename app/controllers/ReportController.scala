@@ -43,22 +43,49 @@ class ReportController @Inject()
     maybeSeq(dao.countCommitByCustomField(suffix, customField, fromTime, toTime))
   }
 
+  def listCommitLocCustomField(suffix: DatabaseSuffix, customField: String, from: QueryLocalDate, to: QueryLocalDate): Action[Unit] = ApiAction { implicit request =>
+    val fromTime = Timestamp.valueOf(from.date.atTime(LocalTime.MIDNIGHT))
+    val toTime = Timestamp.valueOf(to.date.atTime(LocalTime.MIDNIGHT))
+    maybeSeq(dao.countCommitLocByCustomField(suffix, customField, fromTime, toTime))
+  }
+
   // UNSAFE SECTION
   def listCommitsCustomFieldCsv(suffix: DatabaseSuffix, fieldValue: String, from: QueryLocalDate, to: QueryLocalDate): Action[AnyContent] = Action.async {
     // hiro fix path and correct parametrize in other function
-    val fromTime = Timestamp.valueOf(from.date.atTime(LocalTime.MIDNIGHT))
-    val toTime = Timestamp.valueOf(to.date.atTime(LocalTime.MIDNIGHT))
+    lazy val fromTime = Timestamp.valueOf(from.date.atTime(LocalTime.MIDNIGHT))
+    lazy val toTime = Timestamp.valueOf(to.date.atTime(LocalTime.MIDNIGHT))
 
-    val localDirectory = new java.io.File(".").getCanonicalPath
-    val reportDirectory = s"${localDirectory}/report/"
-    val file = s"${suffix.suffix.toLowerCase}_commits_bugs_counter"
-    lazy val filename = s"${reportDirectory}${file}"
+    lazy val localDirectory = new java.io.File(".").getCanonicalPath
+    lazy val reportDirectory = s"$localDirectory/report/"
+    lazy val file = s"${suffix.suffix.toLowerCase}_commits_bugs_counter"
+    lazy val filename = s"$reportDirectory$file"
 
     val writer: CvsIO.type = CvsIO
-    dao.countCommitByCustomField(suffix, fieldValue, fromTime, toTime).map { a =>
+    dao.countCommitByCustomField(suffix, fieldValue, fromTime, toTime)
+      .map {
+      a =>
       writer.write(filename, a.sortBy(i => i._2))
       Ok.sendFile(new File(filename+".csv"), inline=true)
-        .withHeaders(CACHE_CONTROL->"max-age=3600",CONTENT_DISPOSITION->s"attachment; filename=${file}.csv", CONTENT_TYPE->"application/x-download");
+        .withHeaders(CACHE_CONTROL->"max-age=3600",CONTENT_DISPOSITION->s"attachment; filename=$file.csv", CONTENT_TYPE->"application/x-download");
+    }
+  }
+
+  def listCommitsLocCustomFieldCsv(suffix: DatabaseSuffix, fieldValue: String, from: QueryLocalDate, to: QueryLocalDate): Action[AnyContent] = Action.async {
+    // hiro fix path and correct parametrize in other function
+    lazy val fromTime = Timestamp.valueOf(from.date.atTime(LocalTime.MIDNIGHT))
+    lazy val toTime = Timestamp.valueOf(to.date.atTime(LocalTime.MIDNIGHT))
+
+    lazy val localDirectory = new java.io.File(".").getCanonicalPath
+    lazy val reportDirectory = s"$localDirectory/report/"
+    lazy val file = s"${suffix.suffix.toLowerCase}_commits_bugs_counter"
+    lazy val filename = s"$reportDirectory$file"
+
+    lazy val writer: CvsIO.type = CvsIO
+    dao.countCommitLocByCustomField(suffix, fieldValue, fromTime, toTime)
+      .map(_.map { case ((a, b), c) => (a, b, c) }).map { a =>
+      writer.writeSLI(filename, a.sortBy(i => i._3))
+      Ok.sendFile(new File(filename+".csv"), inline=true)
+        .withHeaders(CACHE_CONTROL->"max-age=3600",CONTENT_DISPOSITION->s"attachment; filename=$file.csv", CONTENT_TYPE->"application/x-download");
     }
   }
 }

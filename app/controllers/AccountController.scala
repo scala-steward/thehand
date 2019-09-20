@@ -2,7 +2,7 @@ package controllers
 
 import api.ApiController
 import api.ApiError._
-import api.JsonCombinators._
+import api.JsonCombinator._
 import models.User
 import play.api.mvc._
 import dao.UserDAO
@@ -34,7 +34,7 @@ class AccountController @Inject()
     }
   }
 
-  implicit val pwdsReads: Reads[(String, String)] =
+  implicit val passwordsReads: Reads[(String, String)] =
     (__ \ "old").read[String](Reads.minLength[String](1)) and
       (__ \ "new").read[String](Reads.minLength[String](6)) tupled
 

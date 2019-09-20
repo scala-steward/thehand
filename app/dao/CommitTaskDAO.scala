@@ -11,7 +11,7 @@ import scala.concurrent.{ ExecutionContext, Future }
 trait CommitTaskComponent extends CommitComponent { self: HasDatabaseConfigProvider[JdbcProfile] =>
   import profile.api._
 
-  class CommitTasksTable(tag: Tag, suffix: DatabaseSuffix) extends Table[CommitTasks](tag, suffix.suffix + "COMMITTASKS") {
+  class CommitTasksTable(tag: Tag, suffix: DatabaseSuffix) extends Table[CommitTasks](tag, suffix.suffix + "COMMIT_TASKS") {
     def taskId: Rep[Long] = column[Long]("task_id")
     def commitId: Rep[Long] = column[Long]("commit_id")
     def id: Rep[Long] = column[Long]("id", O.PrimaryKey, O.AutoInc)

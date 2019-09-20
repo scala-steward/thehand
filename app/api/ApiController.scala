@@ -91,7 +91,7 @@ class ApiController @Inject() (val dbc: DatabaseConfigProvider, l: Langs, mcc: M
       }
     }
   }
-  // User Aware Api Action that requires authentication. It checks the Request has the correct X-Auth-Token heaader
+  // User Aware Api Action that requires authentication. It checks the Request has the correct X-Auth-Token header
   private def UserAwareApiActionWithParser[A](parser: BodyParser[A])(action: UserAwareApiRequest[A] => Future[ApiResult]) = ApiActionCommon(parser) { (apiRequest, apiKey, date) =>
     apiRequest.tokenOpt match {
       case None => apiKeyDao.isActive(apiKey).flatMap {
@@ -109,7 +109,7 @@ class ApiController @Inject() (val dbc: DatabaseConfigProvider, l: Langs, mcc: M
     }
   }
 
-  // Auxiliar methods to create ApiResults from writable JSON objects
+  // Auxiliary methods to create ApiResults from writable JSON objects
   def ok[A](obj: A, headers: (String, String)*)(implicit w: Writes[A]): Future[ApiResult] = Future.successful(ApiResponse.ok(obj, headers: _*))
   def ok[A](futObj: Future[A], headers: (String, String)*)(implicit w: Writes[A]): Future[ApiResult] = futObj.map(obj => ApiResponse.ok(obj, headers: _*))
 

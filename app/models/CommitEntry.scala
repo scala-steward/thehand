@@ -24,7 +24,7 @@ case class CommitEntry(
 object CommitEntry {
   implicit object timestampFormat extends Format[Timestamp] {
     val format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SS'Z'")
-    def reads(json: JsValue) = {
+    def reads(json: JsValue): JsSuccess[Timestamp] = {
       val str = json.as[String]
       JsSuccess(new Timestamp(format.parse(str).getTime))
     }

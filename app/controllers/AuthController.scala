@@ -1,7 +1,7 @@
 package controllers
 
 import api.ApiError._
-import api.JsonCombinators._
+import api.JsonCombinator._
 import models.User
 import play.api.mvc._
 import play.api.libs.json._

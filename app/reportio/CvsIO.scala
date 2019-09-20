@@ -11,5 +11,11 @@ object CvsIO extends ReportIO {
     lines.reverse.map(t => List(t._2, t._1)).foreach(writer.writeRow(_))
     writer.close()
   }
+  def writeSLI(filename: String, lines: Seq[(String, Long, Int)]): Unit = {
+    lazy val f = new File(filename + ".csv")
+    val writer = CSVWriter.open(f)
+    lines.reverse.map(t => List(t._2, t._3, t._1)).foreach(writer.writeRow(_))
+    writer.close()
+  }
 }
 

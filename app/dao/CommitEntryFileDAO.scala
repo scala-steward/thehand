@@ -11,7 +11,7 @@ import scala.concurrent.{ ExecutionContext, Future }
 trait CommitEntryFileComponent extends CommitComponent with EntryFileComponent { self: HasDatabaseConfigProvider[JdbcProfile] =>
   import profile.api._
 
-  class CommitEntryFileTable(tag: Tag, suffix: DatabaseSuffix) extends Table[CommitEntryFile](tag, suffix.suffix + "COMMITFILES") {
+  class CommitEntryFileTable(tag: Tag, suffix: DatabaseSuffix) extends Table[CommitEntryFile](tag, suffix.suffix + "COMMIT_FILES") {
     def typeModification: Rep[Option[Int]] = column[Option[Int]]("typeModification")
     def copyPathId: Rep[Option[Long]] = column[Option[Long]]("copyPath_id")
     def copyRevisionId: Rep[Option[Long]] = column[Option[Long]]("copyRevision")

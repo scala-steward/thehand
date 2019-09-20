@@ -10,7 +10,7 @@ object QueryMagic {
     if (!suffix.trim.isEmpty && suffix.equals(BootConf.magic)) true else false
   }
 
-  implicit def pathBinder(implicit intBinder: PathBindable[String]) = new PathBindable[QueryMagic] {
+  implicit def pathBinder(implicit intBinder: PathBindable[String]): PathBindable[QueryMagic] = new PathBindable[QueryMagic] {
     override def bind(key: String, value: String): Either[String, QueryMagic] = {
       val data = intBinder.bind(key, value)
       data match {

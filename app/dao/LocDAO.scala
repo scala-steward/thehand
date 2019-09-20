@@ -5,7 +5,8 @@ import javax.inject.Inject
 import models.{DatabaseSuffix, LocFile}
 import slick.jdbc.JdbcProfile
 
-import scala.concurrent.{ExecutionContext}
+import scala.collection.immutable
+import scala.concurrent.{ExecutionContext, Future}
 import scala.xml.NodeSeq
 
 trait LocFileComponent { self: HasDatabaseConfigProvider[JdbcProfile] =>
@@ -29,29 +30,30 @@ class LocDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(
 
   case class FileCount(path : String, lines: Long)
 
-  private def parser(xml: NodeSeq) = {
-    val files_xml = xml \\ "sourcemonitor_metrics" \\ "project" \\ "checkpoints" \\ "files" \\ "file"
-    files_xml.map(file => FileCount("/trunk/" + file.attribute("file_name").get.toString().replace("\\", "/"), (file \\ "metrics" \\ "metric").head.text.toLong)) //HIRO remover o trunk
-  }
+  private def fileCount(file: NodeSeq): Long = (file \\ "metrics" \\ "metric").head.text.toLong
 
-  def update(suffix: DatabaseSuffix, xml: NodeSeq) = db.run {
+  private def parser(xml: NodeSeq) =
+    (xml \\ "sourcemonitor_metrics" \\ "project" \\ "checkpoints" \\ "files" \\ "file")
+      .map(file => FileCount(file.attribute("file_name").get.toString().replace("\\", "/"), fileCount(file)))
+
+  def update(suffix: DatabaseSuffix, xml: NodeSeq): Future[immutable.Seq[Int]] = db.run {
     lazy val files = TableQuery[EntryFilesTable]((tag: Tag) => new EntryFilesTable(tag, suffix))
-    lazy val locs = TableQuery[LocFilesTable]((tag: Tag) => new LocFilesTable(tag, suffix))
+    lazy val filesLocs = TableQuery[LocFilesTable]((tag: Tag) => new LocFilesTable(tag, suffix))
 
     def updateInsert(fileRef: Option[Long], id: Option[Long], count: Long) = {
       if (fileRef.isEmpty) {
-        locs.size.result
+        filesLocs.size.result
       }
       else {
-        if (id.isEmpty) locs += LocFile(fileRef.get, count)
-        else locs.insertOrUpdate(LocFile(fileRef.get, count, id.get))
+        if (id.isEmpty) filesLocs += LocFile(fileRef.get, count)
+        else filesLocs.insertOrUpdate(LocFile(fileRef.get, count, id.get))
       }
     }
 
     def fileQuery(file: FileCount) = {
       for {
         f <- files.filter(_.path === file.path).map(_.id).result.headOption
-        l <- locs.filter(_.fileRef === f).map(_.id).result.headOption
+        l <- filesLocs.filter(_.fileRef === f).map(_.id).result.headOption
         u <- updateInsert(f, l, file.lines)
       } yield u
     }

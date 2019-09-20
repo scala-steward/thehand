@@ -10,7 +10,7 @@ case class QueryLocalDate(date: LocalDate)
 object QueryLocalDate {
   private val dateFormatter: DateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE
 
-  implicit def pathBinder(implicit intBinder: PathBindable[Int]) = new PathBindable[QueryLocalDate] {
+  implicit def pathBinder(implicit intBinder: PathBindable[Int]): PathBindable[QueryLocalDate] = new PathBindable[QueryLocalDate] {
     override def bind(key: String, value: String): Either[String, QueryLocalDate] = {
         try {
           Right(QueryLocalDate(LocalDate.parse(value, dateFormatter)))

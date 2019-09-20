@@ -54,7 +54,7 @@ class BootDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)(
     val commits = TableQuery[CommitTable]((tag: Tag) => new CommitTable(tag, suffix))
     val commitsFiles = TableQuery[CommitEntryFileTable]((tag: Tag) => new CommitEntryFileTable(tag, suffix))
     val customFields = TableQuery[CustomFieldsTable]((tag: Tag) => new CustomFieldsTable(tag, suffix))
-    val locs = TableQuery[LocFilesTable]((tag: Tag) => new LocFilesTable(tag, suffix))
+    val filesLoc = TableQuery[LocFilesTable]((tag: Tag) => new LocFilesTable(tag, suffix))
 
     exec(
       tasks.schema.create.asTry andThen
@@ -64,7 +64,7 @@ class BootDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)(
         commitsFiles.schema.create.asTry andThen
         commitTasks.schema.create.asTry andThen
         customFields.schema.create.asTry andThen
-        locs.schema.create.asTry) onComplete {
+        filesLoc.schema.create.asTry) onComplete {
         case Success(_) => HandLogger.debug("correct create tables")
         case Failure(e) =>
           HandLogger.error("error in create tables " + e.getMessage)

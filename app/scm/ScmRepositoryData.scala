@@ -80,7 +80,7 @@ class ScmRepositoryData[T] @Inject()
         _ <- daoCustomFields.insert(extractor.extractTasks(data).flatMap(taskProcessor.processCustomFields(_, "Request Type")), suffix)
         _ <- daoAuthors.insert(extractor.extractAuthors(data), suffix)
         _ <- daoCommits.insert(extractor.extractCommits(data), suffix)
-        _ <- daoFiles.insert(extractor.extractFiles(data), suffix)
+        _ <- daoFiles.insert(extractor.extractFiles(data, "/trunk/"), suffix)
         _ <- daoCommitTasks.insert(extractor.extractCommitsTasks(data), suffix)
         c <- daoCommitFiles.insert(extractor.extractCommitsFiles(data), suffix)
       } yield c

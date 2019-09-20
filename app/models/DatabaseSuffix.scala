@@ -6,7 +6,7 @@ import play.api.mvc.PathBindable
 case class DatabaseSuffix(suffix: String)
 
 object DatabaseSuffix {
-  implicit def pathBinder(implicit intBinder: PathBindable[String]) = new PathBindable[DatabaseSuffix] {
+  implicit def pathBinder(implicit intBinder: PathBindable[String]): PathBindable[DatabaseSuffix] = new PathBindable[DatabaseSuffix] {
     override def bind(key: String, value: String): Either[String, DatabaseSuffix] = {
       val data = intBinder.bind(key, value)
       data match {

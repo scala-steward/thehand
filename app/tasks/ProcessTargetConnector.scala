@@ -56,7 +56,7 @@ class ProcessTargetConnector(t: TaskConnector) extends TaskProcessConnector {
 
   def process(id: Long): Option[Task] = {
     Try {
-      Json.parse(t.assignables(id))
+      Json.parse(t.assignable(id))
     } match {
       case Success(s) => parseAssignableJson(s)
       case Failure(e) =>
