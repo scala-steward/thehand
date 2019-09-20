@@ -40,7 +40,6 @@ class SvnExtractor(parser: TaskParser) extends ScmExtractor[SVNLogEntry] {
     data.flatMap(_.getChangedPaths.asScala.values.toSeq)
       .map(_.getPath.replace(branchName, ""))
       .distinct
-      .filter(!_.isEmpty)
       .map(EntryFile(_))
   }
 
