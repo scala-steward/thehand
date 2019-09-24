@@ -34,7 +34,7 @@ class LocDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(
 
   private def parser(xml: NodeSeq) =
     (xml \\ "sourcemonitor_metrics" \\ "project" \\ "checkpoints" \\ "files" \\ "file")
-      .map(file => FileCount(file.attribute("file_name").get.toString().replace("\\", "/"), fileCount(file)))
+      .map(file => FileCount("/trunk/" + file.attribute("file_name").get.toString().replace("\\", "/"), fileCount(file)))
 
   def update(suffix: DatabaseSuffix, xml: NodeSeq): Future[immutable.Seq[Int]] = db.run {
     lazy val files = TableQuery[EntryFilesTable]((tag: Tag) => new EntryFilesTable(tag, suffix))

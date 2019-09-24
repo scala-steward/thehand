@@ -26,8 +26,8 @@ class UpdateDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
     val extractor = new SvnExtractor(parser)
     val taskProcessor = ProcessTargetConnector(taskConnector)
 
-    repository.flatMap { r =>
-      Future.successful(new ScmRepositoryData[SVNLogEntry](dbConfigProvider, r, extractor, taskProcessor, suffix))
+    repository.flatMap { repo =>
+      Future.successful(new ScmRepositoryData[SVNLogEntry](dbConfigProvider, repo, extractor, taskProcessor, suffix))
     }
   }
 

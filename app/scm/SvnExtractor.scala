@@ -36,9 +36,9 @@ class SvnExtractor(parser: TaskParser) extends ScmExtractor[SVNLogEntry] {
       (CommitEntry(Some(s.getMessage), Some(new Timestamp(s.getDate.getTime)), s.getRevision, 0), s.getAuthor))
   }
 
-  def extractFiles(data: Seq[SVNLogEntry], branchName: String): Seq[EntryFile] = {
+  def extractFiles(data: Seq[SVNLogEntry]): Seq[EntryFile] = {
     data.flatMap(_.getChangedPaths.asScala.values.toSeq)
-      .map(_.getPath.replace(branchName, ""))
+      .map(_.getPath)
       .distinct
       .map(EntryFile(_))
   }

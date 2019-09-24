@@ -16,6 +16,7 @@ final case class Parser(
   pattern: String,
   split: String,
   separator: String,
+  branch: String,
   id: Long = 0L)
 
 object Parser {
