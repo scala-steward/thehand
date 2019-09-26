@@ -1,11 +1,11 @@
-# The Hand - WIP
+# TheHand
 
 [![codecov](https://codecov.io/gh/0um/thehand/branch/doc/graph/badge.svg)](https://codecov.io/gh/0um/thehand)
 [![Build Status](https://travis-ci.org/0um/thehand.svg?branch=master)](https://travis-ci.org/0um/thehand)
 
 ## Requirements
 - Postgresql [download](https://www.postgresql.org/download/)
-- Java SDK 8 ou Superior [download](https://www.oracle.com/technetwork/java/javase/downloads/index.html)
+- Java SDK 8 or Superior [download](https://www.oracle.com/technetwork/java/javase/downloads/index.html)
 - Sbt [download](https://www.scala-sbt.org/download.html)
 
 ### Setup DB
@@ -13,7 +13,7 @@ Create a user and database
 [link for example](https://www.postgresql.org/docs/8.0/static/sql-createuser.html)
 
 ### Config
-You can find an example in /src/main/resources/application.conf
+You can find an example in /conf/application.conf
 
 #### Test config for running in memory
 ```
