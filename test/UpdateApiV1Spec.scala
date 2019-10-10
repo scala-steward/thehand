@@ -9,7 +9,7 @@ class UpdateApiV1Spec extends ApiSpecification {
   "/api update" should {
     s"return accepted a update command" in new Scope {
       val result: Future[Result] = routePOST(
-        "/api/v1/update",Json.obj())
+        "/api/v1/updateall",Json.obj())
       status(result) must equalTo(ACCEPTED)
     }
     s"return accepted a update demo table command" in new Scope {
