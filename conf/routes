@@ -56,7 +56,7 @@ PUT		/api/v1/account/password	    	controllers.AccountController.updatePassword
 DELETE  /api/v1/account						controllers.AccountController.delete
 
 # GENERAL
-POST     /api/v1/update                     controllers.UpdateController.updateAll
+POST     /api/v1/updateall                  controllers.UpdateController.updateAll
 POST     /api/v1/update/:suffix             controllers.UpdateController.update(suffix: DatabaseSuffix)
 POST     /api/v1/:suffix/update/custom/:customField controllers.UpdateController.updateCustomFields(suffix: DatabaseSuffix, customField: String)
 

@@ -7,7 +7,7 @@ case class QueryMagic(suffix: String)
 
 object QueryMagic {
   private def allow(suffix: String) = {
-    if (!suffix.trim.isEmpty && suffix.equals(BootConf.magic)) true else false
+    !suffix.trim.isEmpty && suffix.equals(BootConf.magic)
   }
 
   implicit def pathBinder(implicit intBinder: PathBindable[String]): PathBindable[QueryMagic] = new PathBindable[QueryMagic] {

@@ -36,16 +36,15 @@ class ProcessTargetConnector(t: TaskConnector) extends TaskProcessConnector {
     name.isDefined && name.get == field
   }
 
+  private def getRequestType(request: Option[Seq[JsValue]], field: String) = {
+    val requestType = request.get.filter(filterRequestType(_, field))
+      .map(js => (js \ "Value").validateOpt[String].get)
+    if (requestType.nonEmpty) requestType.head else None
+  }
+
   private def parseRequestType(json: JsValue, field: String) : Option[String] = {
-    val request = (json \ "CustomFields").validateOpt[Seq[JsValue]].get
-    if (request.isDefined) {
-      val requestType = request.get.filter(filterRequestType(_, field))
-        .map(js => (js \ "Value").validateOpt[String].get)
-      if (requestType.nonEmpty) {
-        return requestType.head
-      }
-    }
-    None
+    def request = (json \ "CustomFields").validateOpt[Seq[JsValue]].get
+    if (request.isDefined) getRequestType(request, field) else None
   }
 
   private def parseCustomFieldJson(json: JsValue, field: String): Option[CustomFields] =  {

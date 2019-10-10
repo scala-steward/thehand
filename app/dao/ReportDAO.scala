@@ -36,7 +36,7 @@ class ReportDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
       fi <- files if fi.id === cf.pathId
     } yield fi
     val countBugs = bugs
-      .groupBy(_.path)
+      .groupBy(result => result.path)
       .map {
         case (path, group) =>
           (path, group.length)
@@ -57,7 +57,7 @@ class ReportDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
       fi <- files if fi.id === cf.pathId
     } yield fi
     val countCommits = commitsCounts
-      .groupBy(_.path)
+      .groupBy(result => result.path)
       .map {
         case (path, group) =>
           (path, group.length)
@@ -82,7 +82,7 @@ class ReportDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
       fi <- files if fi.id === cf.pathId
     } yield fi
     val countCommits = cmts
-      .groupBy(_.path)
+      .groupBy(result => result.path)
       .map {
         case (path, group) =>
           (path, group.length)
@@ -121,11 +121,11 @@ class ReportDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
       fi <- files if fi.id === cf.pathId
     } yield fi
     val countCommits = countCommitTask(fieldValue, initialTime, finalTime)
-      .groupBy(_.path)
+      .groupBy(result => result.path)
       .map {
         case (path, group) =>
           (path, group.length)
-      }.sortBy(_._2)
+      }.sortBy(groupedResult => groupedResult._2)
     countCommits.result.transactionally
   }
 
@@ -152,7 +152,7 @@ class ReportDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
     val countCommits = countCommitTask(fieldValue, initialTime, finalTime)
       .groupBy(i => i)
       .map(f => (f._1, f._2.length))
-      .sortBy(_._2)
+      .sortBy(groupedResult => groupedResult._2)
 
     countCommits.result.transactionally
   }

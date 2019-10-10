@@ -2,8 +2,8 @@ package dao
 
 import conf.{RepoConf, TargetConf}
 import models._
-import scm.{ScmRepositoryData, SvnConnector, SvnConnectorFactory, SvnExtractor}
-import tasks.{ProcessTargetConnector, TargetConnector, TaskConnector, TaskParser, TaskParserOctothorpe}
+import scm._
+import tasks._
 import javax.inject.Inject
 import org.tmatesoft.svn.core.SVNLogEntry
 import play.api.db.slick.DatabaseConfigProvider

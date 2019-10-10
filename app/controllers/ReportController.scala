@@ -38,22 +38,22 @@ class ReportController @Inject()
   }
 
   def listCommitCustomField(suffix: DatabaseSuffix, customField: String, from: QueryLocalDate, to: QueryLocalDate): Action[Unit] = ApiAction { implicit request =>
-    val fromTime = Timestamp.valueOf(from.date.atTime(LocalTime.MIDNIGHT))
-    val toTime = Timestamp.valueOf(to.date.atTime(LocalTime.MIDNIGHT))
+    val fromTime = Timestamp.valueOf(from.date.atTime(LocalTime.MIN))
+    val toTime = Timestamp.valueOf(to.date.atTime(LocalTime.MAX).minusMinutes(1))
     maybeSeq(dao.countCommitByCustomField(suffix, customField, fromTime, toTime))
   }
 
   def listCommitLocCustomField(suffix: DatabaseSuffix, customField: String, from: QueryLocalDate, to: QueryLocalDate): Action[Unit] = ApiAction { implicit request =>
-    val fromTime = Timestamp.valueOf(from.date.atTime(LocalTime.MIDNIGHT))
-    val toTime = Timestamp.valueOf(to.date.atTime(LocalTime.MIDNIGHT))
+    val fromTime = Timestamp.valueOf(from.date.atTime(LocalTime.MIN))
+    val toTime = Timestamp.valueOf(to.date.atTime(LocalTime.MAX).minusMinutes(1))
     maybeSeq(dao.countCommitLocByCustomField(suffix, customField, fromTime, toTime))
   }
 
   // UNSAFE SECTION
   def listCommitsCustomFieldCsv(suffix: DatabaseSuffix, fieldValue: String, from: QueryLocalDate, to: QueryLocalDate): Action[AnyContent] = Action.async {
     // hiro fix path and correct parametrize in other function
-    lazy val fromTime = Timestamp.valueOf(from.date.atTime(LocalTime.MIDNIGHT))
-    lazy val toTime = Timestamp.valueOf(to.date.atTime(LocalTime.MIDNIGHT))
+    lazy val fromTime = Timestamp.valueOf(from.date.atTime(LocalTime.MIN))
+    lazy val toTime = Timestamp.valueOf(to.date.atTime(LocalTime.MAX))
 
     lazy val localDirectory = new java.io.File(".").getCanonicalPath
     lazy val reportDirectory = s"$localDirectory/report/"
@@ -72,8 +72,8 @@ class ReportController @Inject()
 
   def listCommitsLocCustomFieldCsv(suffix: DatabaseSuffix, fieldValue: String, from: QueryLocalDate, to: QueryLocalDate): Action[AnyContent] = Action.async {
     // hiro fix path and correct parametrize in other function
-    lazy val fromTime = Timestamp.valueOf(from.date.atTime(LocalTime.MIDNIGHT))
-    lazy val toTime = Timestamp.valueOf(to.date.atTime(LocalTime.MIDNIGHT))
+    lazy val fromTime = Timestamp.valueOf(from.date.atTime(LocalTime.MIN))
+    lazy val toTime = Timestamp.valueOf(to.date.atTime(LocalTime.MAX))
 
     lazy val localDirectory = new java.io.File(".").getCanonicalPath
     lazy val reportDirectory = s"$localDirectory/report/"
