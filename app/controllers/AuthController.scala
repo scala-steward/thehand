@@ -15,7 +15,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import javax.inject.Inject
 import play.api.db.slick.DatabaseConfigProvider
 
-import scala.language.postfixOps
+//import scala.language.postfixOps
 import play.api.i18n.Langs
 
 class AuthController @Inject()
@@ -69,7 +69,7 @@ class AuthController @Inject()
               // You will have to catch the link and confirm the email and activate the user.
               // But meanwhile...
               system.scheduler.scheduleOnce(30 seconds) {
-                userDao.confirmEmail(user_.id).onComplete(_ -> Unit)
+                userDao.confirmEmail(user_.id).onComplete(_ -> ())
               }
 
               ok(user_.name)

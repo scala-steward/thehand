@@ -18,7 +18,7 @@ import org.tmatesoft.svn.core.internal.io.svn.SVNRepositoryFactoryImpl
 import org.tmatesoft.svn.core.io.SVNRepository
 import telemetrics.HandLogger
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.util.{ Failure, Success, Try }
 
 object SvnConnector {

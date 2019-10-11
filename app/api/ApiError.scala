@@ -2,6 +2,7 @@ package api
 
 import play.api.libs.json._
 import play.api.i18n.Messages
+//import scala.collection.immutable
 
 /*
 * Error representation for an ApiRequest.
@@ -79,7 +80,7 @@ object ApiError {
   def errorHeaderNotFound(header: String)(implicit m: Messages) = apply(ERROR_HEADER_MISSED, Messages("api.error.header.notfound", header))
   def errorHeaderMalformed(header: String)(implicit m: Messages) = apply(ERROR_HEADER_MALFORMED, Messages("api.error.header.malformed", header))
   def errorBodyMissed(implicit m: Messages) = apply(ERROR_BODY_MISSED, Messages("api.error.body.missed"))
-  def errorBodyMalformed(errors: Seq[(JsPath, Seq[JsonValidationError])])(implicit m: Messages) =
+  def errorBodyMalformed(errors: collection.Seq[(JsPath, collection.Seq[JsonValidationError])])(implicit m: Messages) =
     apply(ERROR_BODY_MALFORMED, Messages("api.error.body.malformed"), JsObject(errors.map { e =>
       e._1.toJsonString -> JsArray(e._2.map { ve =>
         JsString(Messages(ve.message, ve.args: _*))

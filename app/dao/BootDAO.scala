@@ -3,7 +3,7 @@ package dao
 import conf.BootConf
 
 import scala.concurrent.duration._
-import scala.language.postfixOps
+//import scala.language.postfixOps
 import javax.inject.{Inject, Singleton}
 import models._
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}

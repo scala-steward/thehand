@@ -17,7 +17,7 @@ import org.tmatesoft.svn.core.{SVNLogEntry, SVNLogEntryPath}
 import tasks.TaskParser
 import models._
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class SvnExtractor(parser: TaskParser) extends ScmExtractor[SVNLogEntry] {
   def extractTasks(data: Seq[SVNLogEntry]): Seq[Long] = {
