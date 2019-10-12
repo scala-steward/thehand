@@ -19,7 +19,7 @@ lazy val root = (project in file(".")).settings(
       "joda-time" % "joda-time" % "2.10.4",
       "org.joda" % "joda-convert" % "2.2.1",
       "com.github.tototoshi" %% "scala-csv" % "1.3.6",
-      "com.typesafe" % "config" % "1.3.4",
+      "com.typesafe" % "config" % "1.4.0",
       "com.typesafe.scala-logging" % "scala-logging_2.13" % "3.9.2",
       "com.typesafe.slick" %% "slick" % "3.3.2",
       "com.typesafe.play" % "play-json_2.13" % "2.7.4",
