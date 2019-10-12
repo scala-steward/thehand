@@ -33,15 +33,17 @@ class AuthController @Inject()
       case (email, pwd) =>
         userDao.findByEmail(email).flatMap {
           case None => errorUserNotFound
-          case Some(user) =>
-            if (user.password != pwd) errorUserNotFound
-            else if (!user.emailConfirmed) errorUserEmailUnconfirmed
-            else if (!user.active) errorUserInactive
-            else apiTokenDao.create(request.apiKeyOpt.get, user.id).flatMap { token =>
-              ok(Json.obj(
-                "token" -> token,
-                "minutes" -> 10))
+          case Some(user) => user match {
+            case user if (user.password != pwd) => errorUserNotFound
+            case user if (! user.emailConfirmed) => errorUserEmailUnconfirmed
+            case user if (! user.active) => errorUserInactive
+            case _ => apiTokenDao.create (request.apiKeyOpt.get, user.id).flatMap {
+              token =>
+              ok (Json.obj (
+              "token" -> token,
+              "minutes" -> 10) )
             }
+          }
         }
     }
   }

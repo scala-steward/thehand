@@ -28,13 +28,16 @@ class LocDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(
 
   import profile.api._
 
-  case class FileCount(path : String, lines: Long)
+  class FileCount(val path: String, val lines: Long)
+  object FileCount {
+    def apply(path: String, lines: Long): FileCount = new FileCount(path.replace("\\", "/"), lines)
+  }
 
   private def fileCount(file: NodeSeq): Long = (file \\ "metrics" \\ "metric").head.text.toLong
 
-  private def parser(xml: NodeSeq) =
+  private def parser(xml: NodeSeq) : Seq[FileCount] =
     (xml \\ "sourcemonitor_metrics" \\ "project" \\ "checkpoints" \\ "files" \\ "file")
-      .map(file => FileCount("/trunk/" + file.attribute("file_name").get.toString().replace("\\", "/"), fileCount(file)))
+      .map(file => FileCount("/trunk/" + file.attribute("file_name"), fileCount(file)))
 
   def update(suffix: DatabaseSuffix, xml: NodeSeq): Future[immutable.Seq[Int]] = db.run {
     lazy val files = TableQuery[EntryFilesTable]((tag: Tag) => new EntryFilesTable(tag, suffix))

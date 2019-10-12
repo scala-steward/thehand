@@ -39,7 +39,6 @@ class UserDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)
     users.filter(_.email === email).result.headOption
   }
 
-  // Future[(Long, User)]
   def insert(email: String, password: String, name: String): Future[Option[User]] = db.run {
     (users += User(email, password, name, emailConfirmed = false, active = false)) andThen
       users.filter(_.email === email).result.headOption

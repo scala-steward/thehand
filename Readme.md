@@ -14,8 +14,8 @@ Create a user and database
 ### Config
 You can find an example in /conf/application.conf
 
-#### Test config for running in memory
-```
+Test config for running in memory
+```conf
 testConfig = {
   connectionPool      = disabled
   url                 = "jdbc:h2:mem:testdb"
@@ -24,8 +24,8 @@ testConfig = {
 }
 ```
 
-#### Setup DB
-```
+Production config
+```conf
 dbconfig = {
   connectionPool = disabled
   url = "jdbc:postgresql:DATABASENAME?user=USERDBNAME&password=PASSDB"
