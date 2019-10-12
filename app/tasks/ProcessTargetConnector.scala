@@ -23,33 +23,35 @@ object ProcessTargetConnector {
 
 class ProcessTargetConnector(t: TaskConnector) extends TaskProcessConnector {
   private def parseTaskJson(json: JsValue): Option[Task] = {
-    val typeTask = (json \ "EntityType" \ "Name").validateOpt[String].get
-    val typeTaskId = (json \ "EntityType" \ "Id").validateOpt[Long].get
-    val timeSpend = (json \ "TimeSpent").validateOpt[Double].get
-    val parentId = (json \ "Project" \ "Id").validateOpt[Long].get
-    val userStoryId = (json \ "UserStory" \ "Id").validateOpt[Long].get
-    val id = (json \ "Id").validateOpt[Long].get
+    val typeTask = (json \ "EntityType" \ "Name").validateOpt[String].getOrElse(None)
+    val typeTaskId = (json \ "EntityType" \ "Id").validateOpt[Long].getOrElse(None)
+    val timeSpend = (json \ "TimeSpent").validateOpt[Double].getOrElse(None)
+    val parentId = (json \ "Project" \ "Id").validateOpt[Long].getOrElse(None)
+    val userStoryId = (json \ "UserStory" \ "Id").validateOpt[Long].getOrElse(None)
+    val id = (json \ "Id").validateOpt[Long].getOrElse(None)
     if (id.isDefined) Some(Task(typeTask, typeTaskId, userStoryId, timeSpend, parentId, id.get)) else None
   }
 
   private def filterRequestType(json: JsValue, field: String) : Boolean = {
-    val name = (json \ "Name").validateOpt[String].get
+    val name = (json \ "Name").validateOpt[String].getOrElse(None)
     name.isDefined && name.get == field
   }
 
-  private def getRequestType(request: Option[Seq[JsValue]], field: String) = {
-    val requestType = request.get.filter(filterRequestType(_, field))
-      .map(js => (js \ "Value").validateOpt[String].get)
-    if (requestType.nonEmpty) requestType.head else None
+  private def getRequestType(request: Option[Seq[JsValue]], field: String) = request match {
+    case Some(r) =>
+      val requestType = r.filter(filterRequestType(_, field))
+      .map(js => (js \ "Value").validateOpt[String].getOrElse(None))
+      if (requestType.nonEmpty) requestType.head else None
+    case None => None
   }
 
   private def parseRequestType(json: JsValue, field: String) : Option[String] = {
-    def request = (json \ "CustomFields").validateOpt[Seq[JsValue]].get
+    val request = (json \ "CustomFields").validateOpt[Seq[JsValue]].getOrElse(None)
     if (request.isDefined) getRequestType(request, field) else None
   }
 
   private def parseCustomFieldJson(json: JsValue, field: String): Option[CustomFields] =  {
-    val id = (json \ "Id").validateOpt[Long].get
+    val id = (json \ "Id").validateOpt[Long].getOrElse(None)
     val requestType = parseRequestType(json, field)
     if (id.isDefined && requestType.isDefined) Some(CustomFields(requestType, field, id.get)) else None
   }

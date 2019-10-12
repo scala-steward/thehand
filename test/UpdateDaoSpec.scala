@@ -9,7 +9,7 @@
  *
  */
 
-import models.{Author, CommitEntry, CommitEntryFile, CommitTasks, EntryFile, DatabaseSuffix, Task}
+import models._
 import org.specs2.concurrent.ExecutionEnv
 
 class UpdateDaoSpec(implicit ee: ExecutionEnv) extends ApiSpecification {
@@ -18,7 +18,7 @@ class UpdateDaoSpec(implicit ee: ExecutionEnv) extends ApiSpecification {
   private val fixture = ApplicationFixture.fixture
 
   "After populate suffix db with fixture data" should {
-    "list task tablle must have five tasks" in {
+    "list task table must have five tasks" in {
       val tasks = fixture.daoTasks.list(suffix)
       tasks must haveSize[Seq[Task]](5).await
     }
@@ -38,7 +38,7 @@ class UpdateDaoSpec(implicit ee: ExecutionEnv) extends ApiSpecification {
       val counter = fixture.daoCommits.infoRevision(suffix, 9)
       counter must haveSize[Seq[CommitEntry]](0).await
     }
-    "list commit entry table qith an id return one" in {
+    "list commit entry table with an id return one" in {
       val counter = fixture.daoCommits.info(suffix, 1)
       counter must haveSize[Seq[CommitEntry]](1).await
     }
