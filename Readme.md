@@ -3,9 +3,9 @@
 [![Build Status](https://travis-ci.org/0um/thehand.svg?branch=master)](https://travis-ci.org/0um/thehand)
 
 ## Requirements
-- Postgresql [download](https://www.postgresql.org/download/)
-- Java SDK 8 or Superior [download](https://www.oracle.com/technetwork/java/javase/downloads/index.html)
-- Sbt [download](https://www.scala-sbt.org/download.html)
+-   PostgresSQL [download](https://www.postgresql.org/download/)
+-   Java SDK 11 or Superior [download](https://www.oracle.com/technetwork/java/javase/downloads/index.html)
+-   Sbt [download](https://www.scala-sbt.org/download.html)
 
 ### Setup DB
 Create a user and database
@@ -44,8 +44,7 @@ dbconfig = {
 Each project has a distinct configuration with the repository connection data and connection to the database.
 
 It is important to switch to each project ```database_suffix =" demo_ "```, to keep each project separate using suffixes.
-
-```
+```conf
 projectDemo = {
   user = "YOUR USER"
   pass = "YOUR PASS"
@@ -62,9 +61,8 @@ projectDemo = {
 }
 ```
 
-
 Defines how the information about the tasks is extracted
-```
+```conf
 patternParser = "(#\\d)\\d+" //task or fix #NUMBER
 patternSplit = "#" //task or fix #NUMBER
 separator = ""
@@ -89,8 +87,8 @@ end_revision = 1000
 ```
 
 ##### Target Configuration
-For agile flow data aggregation using [TargetProcess] (targetprocess.com)
-Currently thehand does not have support for other means of authentication.
+For agile flow data aggregation using [TargetProcess] (www.targetprocess.com)
+Currently TheHand does not have support for other means of authentication.
 ```conf
 target = {
   user = "YOUR USER"

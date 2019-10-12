@@ -32,23 +32,27 @@ class ProcessTargetConnector(t: TaskConnector) extends TaskProcessConnector {
     if (id.isDefined) Some(Task(typeTask, typeTaskId, userStoryId, timeSpend, parentId, id.get)) else None
   }
 
-  private def filterRequestType(json: JsValue, field: String) : Boolean = {
-    val name = (json \ "Name").validateOpt[String].getOrElse(None)
-    name.isDefined && name.get == field
-  }
+  private def filterRequestType(json: JsValue, field: String) : Boolean =
+    (json \ "Name").validateOpt[String].getOrElse(None) match {
+      case Some(name) => name == field
+      case _ => false
+    }
 
-  private def getRequestType(request: Option[Seq[JsValue]], field: String) = request match {
-    case Some(r) =>
-      val requestType = r.filter(filterRequestType(_, field))
-      .map(js => (js \ "Value").validateOpt[String].getOrElse(None))
-      if (requestType.nonEmpty) requestType.head else None
-    case None => None
-  }
+  private def getRequestType(request: collection.Seq[JsValue], field: String): Option[String] =
+    request
+      .filter(filterRequestType(_, field))
+      .map(js => (js \ "Value")
+        .validateOpt[String]
+        .getOrElse(None)) match {
+        case Seq(rType) => rType
+        case _ => None
+      }
 
-  private def parseRequestType(json: JsValue, field: String) : Option[String] = {
-    val request = (json \ "CustomFields").validateOpt[Seq[JsValue]].getOrElse(None)
-    if (request.isDefined) getRequestType(request, field) else None
-  }
+  private def parseRequestType(json: JsValue, field: String) : Option[String] =
+    (json \ "CustomFields").validateOpt[collection.Seq[JsValue]].getOrElse(None) match {
+      case Some(request) => getRequestType(request, field)
+      case _ => None
+    }
 
   private def parseCustomFieldJson(json: JsValue, field: String): Option[CustomFields] =  {
     val id = (json \ "Id").validateOpt[Long].getOrElse(None)
