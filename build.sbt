@@ -4,8 +4,8 @@ enablePlugins(PlayScala)
 lazy val root = (project in file(".")).settings(
     inThisBuild(List(
       organization := "io.github.0um",
-      scalaVersion := "2.13.1",
-      version      := "0.1.5"
+      scalaVersion := "2.13.0",
+      version      := "0.1.6"
     )),
     name := "thehand",
     libraryDependencies ++= Seq(
