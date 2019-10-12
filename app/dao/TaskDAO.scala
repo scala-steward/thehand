@@ -14,12 +14,13 @@ trait TaskComponent { self: HasDatabaseConfigProvider[JdbcProfile] =>
   class TaskTable(tag: Tag, suffix: DatabaseSuffix) extends Table[Task](tag, suffix.suffix + "TASK") {
     def typeTask: Rep[Option[String]] = column[Option[String]]("type_task")
     def typeTaskId: Rep[Option[Long]] = column[Option[Long]]("type_task_id")
+    def userStoryId: Rep[Option[Long]] = column[Option[Long]]("user_story")
     def timeSpend: Rep[Option[Double]] = column[Option[Double]]("time_spend")
     def parentId: Rep[Option[Long]] = column[Option[Long]]("parent_id")
     def taskId: Rep[Long] = column[Long]("task_id", O.Unique)
     def id: Rep[Long] = column[Long]("id", O.PrimaryKey, O.AutoInc)
 
-    def * = (typeTask, typeTaskId, timeSpend, parentId, taskId, id) <> ((Task.apply _).tupled, Task.unapply)
+    def * = (typeTask, typeTaskId, userStoryId, timeSpend, parentId, taskId, id) <> ((Task.apply _).tupled, Task.unapply)
   }
 }
 
@@ -38,7 +39,7 @@ class TaskDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)
     def taskQuery(task: Task) = {
       for {
         taskId <- tasks.filter(_.taskId === task.taskId).map(_.id).result.headOption
-        u <- updateInsert(task, taskId)//.asTry
+        u <- updateInsert(task, taskId)
       } yield u
     }
 

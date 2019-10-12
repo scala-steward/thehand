@@ -29,11 +29,11 @@ object ExtractorFixture {
   }
 
   val extractTasks = Seq(
-    Task(Some("Task"), Some(5L), Some(20), None, 1),
-    Task(Some("Task"), Some(5L), Some(20), None, 2),
-    Task(Some("Bug"), Some(8L), Some(20), Some(1), 3),
-    Task(Some("Bug"), Some(8L), Some(20), Some(2), 4),
-    Task(Some("Bug"), Some(8L), Some(20), Some(2), 5))
+    Task(Some("Task"), Some(5L), None, Some(20), None, 1),
+    Task(Some("Task"), Some(5L), None, Some(20), None, 2),
+    Task(Some("Bug"), Some(8L), None, Some(20), Some(1), 3),
+    Task(Some("Bug"), Some(8L), None, Some(20), Some(2), 4),
+    Task(Some("Bug"), Some(8L), None, Some(20), Some(2), 5))
 
   val extractAuthors =
     Seq(Author("john"), Author("philips"), Author("thomas"))

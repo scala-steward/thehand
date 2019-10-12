@@ -22,13 +22,14 @@ object ProcessTargetConnector {
 }
 
 class ProcessTargetConnector(t: TaskConnector) extends TaskProcessConnector {
-  private def parseAssignableJson(json: JsValue): Option[Task] = {
+  private def parseTaskJson(json: JsValue): Option[Task] = {
     val typeTask = (json \ "EntityType" \ "Name").validateOpt[String].get
     val typeTaskId = (json \ "EntityType" \ "Id").validateOpt[Long].get
     val timeSpend = (json \ "TimeSpent").validateOpt[Double].get
     val parentId = (json \ "Project" \ "Id").validateOpt[Long].get
+    val userStoryId = (json \ "UserStory" \ "Id").validateOpt[Long].get
     val id = (json \ "Id").validateOpt[Long].get
-    if (id.isDefined) Some(Task(typeTask, typeTaskId, timeSpend, parentId, id.get)) else None
+    if (id.isDefined) Some(Task(typeTask, typeTaskId, userStoryId, timeSpend, parentId, id.get)) else None
   }
 
   private def filterRequestType(json: JsValue, field: String) : Boolean = {
@@ -54,10 +55,18 @@ class ProcessTargetConnector(t: TaskConnector) extends TaskProcessConnector {
   }
 
   def process(id: Long): Option[Task] = {
+    val task = callAndProcess(id, t.assignable, parseTaskJson)
+    if (task.isDefined && task.get.typeTask.contains("Bug"))
+      callAndProcess(id, t.bugs, parseTaskJson)
+    else
+      task
+  }
+
+  private def callAndProcess(id: Long, f: Long => String, g: JsValue => Option[Task]): Option[Task] = {
     Try {
-      Json.parse(t.assignable(id))
+      Json.parse(f(id))
     } match {
-      case Success(s) => parseAssignableJson(s)
+      case Success(s) => g(s)
       case Failure(e) =>
         HandLogger.error("error in parse the json task data " + e)
         None

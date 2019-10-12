@@ -72,16 +72,16 @@ class TargetConnector(url: String, user: String, password: String) extends TaskC
     jsonData(url + "/EntityStates/" + id, "")
   }
 
-  def assignable(id: Long, options: String = "[Id,Project,EntityType,Effort,TimeSpent]"): String = {
-    jsonData(url + "/Assignables/" + id.toString, "&include=" + options)
+  def assignable(id: Long): String = {
+    jsonData(url + "/Assignables/" + id.toString, "&include=[Id,Project,EntityType,TimeSpent,Effort]")
   }
 
   def userId(options: String = "&include=[Id]"): String = {
     jsonData(url + "/Context/", options)
   }
 
-  def bugs(id: Long, options: String): String = {
-    jsonData(url + "/Bugs/" + id.toString, "&include=" + options)
+  def bugs(id: Long): String = {
+    jsonData(url + "/Bugs/" + id.toString, "&include=[Id,Project,EntityType,Effort,TimeSpent,UserStory]")
   }
 
   def tasks(id: Long, options: String): String = {
@@ -109,8 +109,8 @@ class TargetConnector(url: String, user: String, password: String) extends TaskC
     jsonData(url + "/Users/" + id.toString + "/Assignables", "&include=" + options + takeOption)
   }
 
-  def customFields(id: Long, options: String = "[CustomFields]"): String = {
-    jsonData(url + "/Assignables/" + id.toString, "&include" + options)
+  def customFields(id: Long): String = {
+    jsonData(url + "/Assignables/" + id.toString, "&include[CustomFields]")
   }
 }
 
