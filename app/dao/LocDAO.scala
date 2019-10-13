@@ -43,15 +43,12 @@ class LocDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(
     lazy val files = TableQuery[EntryFilesTable]((tag: Tag) => new EntryFilesTable(tag, suffix))
     lazy val filesLocs = TableQuery[LocFilesTable]((tag: Tag) => new LocFilesTable(tag, suffix))
 
-    def updateInsert(fileRef: Option[Long], id: Option[Long], count: Long) = {
-      if (fileRef.isEmpty) {
-        filesLocs.size.result
+    def updateInsert(fileRef: Option[Long], locId: Option[Long], count: Long) =
+      (fileRef, locId) match {
+        case (None, _) => filesLocs.size.result //HIRO dummy query
+        case (Some(_), None) => filesLocs += LocFile(fileRef.get, count)
+        case (Some(_), Some(id)) => filesLocs.insertOrUpdate(LocFile(fileRef.get, count, id))
       }
-      else {
-        if (id.isEmpty) filesLocs += LocFile(fileRef.get, count)
-        else filesLocs.insertOrUpdate(LocFile(fileRef.get, count, id.get))
-      }
-    }
 
     def fileQuery(file: FileCount) = {
       for {

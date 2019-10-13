@@ -44,12 +44,12 @@ class CommitEntryFileDAO @Inject() (protected val dbConfigProvider: DatabaseConf
         case None => DBIOAction.successful(Some(-1))
       }
 
-      def updateInsert(c: CommitEntryWriter, id: Option[Long], commitId: Long, copyFileId: Option[Long], fileId: Option[Long]) = {
-        if (id.isEmpty)
-          commitsFiles += c.commit.copy(copyPath = copyFileId, pathId = fileId.get, revisionId = commitId)
-        else
-          commitsFiles.insertOrUpdate(c.commit.copy(copyPath = copyFileId, pathId = fileId.get, revisionId = commitId, id = id.head))
-      }
+      def updateInsert(c: CommitEntryWriter, entryId: Option[Long], commitId: Long, copyFileId: Option[Long], fileId: Option[Long]) =
+        (entryId,fileId)  match {
+          case (Some(id), Some(file)) => commitsFiles.insertOrUpdate(c.commit.copy(copyPath = copyFileId, pathId = file, revisionId = commitId, id = id))
+          case (None, Some(file)) => commitsFiles += c.commit.copy(copyPath = copyFileId, pathId = file, revisionId = commitId)
+          case _ => commitsFiles += c.commit.copy(copyPath = copyFileId, pathId = -1L, revisionId = commitId) //HIRO
+        }
 
       def insertFilePath(c: CommitEntryWriter, commitId: Long) = for {
         fileId <- tryFindFileId(Some(c.path))

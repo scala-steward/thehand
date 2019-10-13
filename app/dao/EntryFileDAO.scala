@@ -27,8 +27,10 @@ class EntryFileDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProv
 
   def insert(fs: Seq[EntryFile], suffix: DatabaseSuffix): Future[Seq[Int]] = db.run {
     val files = TableQuery[EntryFilesTable]((tag: Tag) => new EntryFilesTable(tag, suffix))
-    def updateInsert(file: EntryFile, id: Option[Long]) = {
-      if (id.isEmpty) files += file else files.insertOrUpdate(file.copy(id = id.head))
+    def updateInsert(file: EntryFile, entryId: Option[Long]) =
+      entryId match {
+      case Some(id) => files.insertOrUpdate(file.copy(id = id))
+      case None => files += file
     }
 
     def fileQuery(file: EntryFile) = {

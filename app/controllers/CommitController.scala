@@ -40,8 +40,8 @@ class CommitController @Inject()
   }
 
   def infoDate(suffix: DatabaseSuffix, from: QueryLocalDate, to: QueryLocalDate): Action[Unit] = ApiAction { implicit request =>
-    val fromTime = Timestamp.valueOf(from.date.atTime(LocalTime.MIDNIGHT))
-    val toTime = Timestamp.valueOf(to.date.atTime(LocalTime.MIDNIGHT))
+    val fromTime = Timestamp.valueOf(from.queryDate.atTime(LocalTime.MIDNIGHT))
+    val toTime = Timestamp.valueOf(to.queryDate.atTime(LocalTime.MIDNIGHT))
     maybeSeq(dao.infoDate(suffix, fromTime, toTime))
   }
 }

@@ -28,9 +28,11 @@ class CustomFieldsDAO @Inject() (protected val dbConfigProvider: DatabaseConfigP
 
   def insert(ts: Seq[CustomFields], suffix: DatabaseSuffix): Future[Seq[Int]] = db.run {
     val customs = TableQuery[CustomFieldsTable]((tag: Tag) => new CustomFieldsTable(tag, suffix))
-    def updateInsert(cf: CustomFields, customId: Option[Long]) = {
-      if (customId.isEmpty) customs += cf else customs.insertOrUpdate(cf.copy(id = customId.head))
-    }
+    def updateInsert(cf: CustomFields, customId: Option[Long]) =
+      customId match {
+        case Some(id) => customs.insertOrUpdate(cf.copy(id = id))
+        case None => customs += cf
+      }
 
     def customQuery(cf: CustomFields) = {
       for {

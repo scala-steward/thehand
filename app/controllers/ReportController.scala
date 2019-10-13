@@ -10,8 +10,6 @@
 package controllers
 
 import java.io.File
-import java.sql.Timestamp
-import java.time.LocalTime
 
 import api.ApiController
 import javax.inject._
@@ -38,52 +36,39 @@ class ReportController @Inject()
   }
 
   def listCommitCustomField(suffix: DatabaseSuffix, customField: String, from: QueryLocalDate, to: QueryLocalDate): Action[Unit] = ApiAction { implicit request =>
-    val fromTime = Timestamp.valueOf(from.date.atTime(LocalTime.MIN))
-    val toTime = Timestamp.valueOf(to.date.atTime(LocalTime.MAX).minusMinutes(1))
-    maybeSeq(dao.countCommitByCustomField(suffix, customField, fromTime, toTime))
+    maybeSeq(dao.countCommitByCustomField(suffix, customField, from.fromTime, to.toTime))
   }
 
   def listCommitLocCustomField(suffix: DatabaseSuffix, customField: String, from: QueryLocalDate, to: QueryLocalDate): Action[Unit] = ApiAction { implicit request =>
-    val fromTime = Timestamp.valueOf(from.date.atTime(LocalTime.MIN))
-    val toTime = Timestamp.valueOf(to.date.atTime(LocalTime.MAX).minusMinutes(1))
-    maybeSeq(dao.countCommitLocByCustomField(suffix, customField, fromTime, toTime))
+    maybeSeq(dao.countCommitLocByCustomField(suffix, customField, from.fromTime, to.toTime))
+  }
+
+  private def getCompleteFilename(suffixName: String, filename: String) = {
+    val localDirectory = new java.io.File(".").getCanonicalPath
+    val reportDirectory = s"$localDirectory/report/"
+    s"${reportDirectory}${suffixName.toLowerCase}${filename}"
   }
 
   // UNSAFE SECTION
   def listCommitsCustomFieldCsv(suffix: DatabaseSuffix, fieldValue: String, from: QueryLocalDate, to: QueryLocalDate): Action[AnyContent] = Action.async {
-    // hiro fix path and correct parametrize in other function
-    lazy val fromTime = Timestamp.valueOf(from.date.atTime(LocalTime.MIN))
-    lazy val toTime = Timestamp.valueOf(to.date.atTime(LocalTime.MAX))
-
-    lazy val localDirectory = new java.io.File(".").getCanonicalPath
-    lazy val reportDirectory = s"$localDirectory/report/"
-    lazy val file = s"${suffix.suffix.toLowerCase}_commits_bugs_counter"
-    lazy val filename = s"$reportDirectory$file"
-
+    lazy val file = "_commits_bugs_counter";
     val writer: CvsIO.type = CvsIO
-    dao.countCommitByCustomField(suffix, fieldValue, fromTime, toTime)
+    lazy val filename = getCompleteFilename(suffix.suffix, file)
+    dao.countCommitByCustomField(suffix, fieldValue, from.fromTime, to.toTime)
       .map {
-      a =>
-      writer.write(filename, a.sortBy(i => i._2))
+      lines => writer.write(filename, lines)
       Ok.sendFile(new File(filename+".csv"), inline=true)
         .withHeaders(CACHE_CONTROL->"max-age=3600",CONTENT_DISPOSITION->s"attachment; filename=$file.csv", CONTENT_TYPE->"application/x-download");
     }
   }
 
   def listCommitsLocCustomFieldCsv(suffix: DatabaseSuffix, fieldValue: String, from: QueryLocalDate, to: QueryLocalDate): Action[AnyContent] = Action.async {
-    // hiro fix path and correct parametrize in other function
-    lazy val fromTime = Timestamp.valueOf(from.date.atTime(LocalTime.MIN))
-    lazy val toTime = Timestamp.valueOf(to.date.atTime(LocalTime.MAX))
-
-    lazy val localDirectory = new java.io.File(".").getCanonicalPath
-    lazy val reportDirectory = s"$localDirectory/report/"
-    lazy val file = s"${suffix.suffix.toLowerCase}_commits_bugs_counter"
-    lazy val filename = s"$reportDirectory$file"
-
+    lazy val file = "_commits_bugs_loc_counter";
     lazy val writer: CvsIO.type = CvsIO
-    dao.countCommitLocByCustomField(suffix, fieldValue, fromTime, toTime)
-      .map(_.map { case ((a, b), c) => (a, b, c) }).map { a =>
-      writer.writeSLI(filename, a.sortBy(i => i._3))
+    lazy val filename = getCompleteFilename(suffix.suffix, file)
+    dao.countCommitLocByCustomField(suffix, fieldValue, from.fromTime, to.toTime)
+      .map {
+      lines => writer.writeSLI(filename, lines)
       Ok.sendFile(new File(filename+".csv"), inline=true)
         .withHeaders(CACHE_CONTROL->"max-age=3600",CONTENT_DISPOSITION->s"attachment; filename=$file.csv", CONTENT_TYPE->"application/x-download");
     }

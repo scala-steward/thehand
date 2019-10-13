@@ -32,9 +32,12 @@ class AuthorDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
 
   def insert(as: Seq[Author], suffix: DatabaseSuffix): Future[Seq[Int]] = db.run {
     val authors = TableQuery[AuthorsTable]((tag: Tag) => new AuthorsTable(tag, suffix))
-    def updateInsert(author: Author, authorIds: Option[Long]) = {
-      if (authorIds.isEmpty) authors += author else authors.insertOrUpdate(author.copy(author.author, authorIds.head))
-    }
+
+    def updateInsert(author: Author, authorId: Option[Long]) =
+      authorId match {
+        case Some(id) => authors.insertOrUpdate(author.copy(author.author,id))
+        case None => authors += author
+      }
 
     def authorQuery(author: Author) = {
       for {

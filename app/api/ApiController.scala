@@ -192,7 +192,7 @@ class ApiController @Inject() (val dbc: DatabaseConfigProvider, l: Langs, mcc: M
       case signedFieldPattern(_, field) => (field, ASC)
     }
     // Checks if every field is within the available allowed ones
-    if ((fieldsWithOrder.map(field => field._1) diff allowedFields).isEmpty)
+    if (fieldsWithOrder.map{ case(field, _) => field }.diff(allowedFields).isEmpty)
       Right(fieldsWithOrder)
     else
       Left(errorParamMalformed(name))

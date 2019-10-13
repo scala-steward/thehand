@@ -53,12 +53,12 @@ class CommitDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
   def insert(cs: Seq[(CommitEntry, String)], suffix: DatabaseSuffix): Future[Seq[Int]] = db.run {
     val authors = TableQuery[AuthorsTable]((tag: Tag) => new AuthorsTable(tag, suffix))
     val commits = TableQuery[CommitTable]((tag: Tag) => new CommitTable(tag, suffix))
-    def updateInsert(commit: CommitEntry, commitId: Option[Long], authorId: Option[Long]) = {
-      if (commitId.isEmpty)
-        commits += commit.copy(authorId = authorId.head)
-      else
-        commits.insertOrUpdate(commit.copy(authorId = authorId.head, id = commitId.head))
-    }
+    def updateInsert(commit: CommitEntry, commitId: Option[Long], authorId: Option[Long]) =
+      (commitId, authorId) match {
+        case (Some(id), Some(authorId)) => commits.insertOrUpdate(commit.copy(authorId = authorId, id = id))
+        case (None, Some(authorId)) => commits += commit.copy(authorId = authorId)
+        case _ => commits += commit.copy(authorId = 1L)
+      }
 
     def commitQuery(entry: (CommitEntry, String)) = {
       val (commit, authorName) = entry

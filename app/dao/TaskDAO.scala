@@ -32,9 +32,12 @@ class TaskDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)
 
   def insert(ts: Seq[Task], suffix: DatabaseSuffix): Future[Seq[Int]] = db.run {
     val tasks = TableQuery[TaskTable]((tag: Tag) => new TaskTable(tag, suffix))
-    def updateInsert(task: Task, taskId: Option[Long]) = {
-      if (taskId.isEmpty) tasks += task else tasks.insertOrUpdate(task.copy(id = taskId.head))
-    }
+
+    def updateInsert(task: Task, taskId: Option[Long]) =
+      taskId match {
+        case None => tasks += task
+        case Some(id) => tasks.insertOrUpdate(task.copy(id = id))
+      }
 
     def taskQuery(task: Task) = {
       for {

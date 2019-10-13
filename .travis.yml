@@ -1,7 +1,7 @@
 language: scala
 
 script:
-  "sbt ++$TRAVIS_SCALA_VERSION clean coverage test coverageReport"
+  "sbt -Dconfig.file=./conf/application_test.conf ++$TRAVIS_SCALA_VERSION clean coverage test coverageReport"
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)

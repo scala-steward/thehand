@@ -73,7 +73,7 @@ class ReportDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
     val commits = TableQuery[CommitTable]((tag: Tag) => new CommitTable(tag, suffix))
     val commitsFiles = TableQuery[CommitEntryFileTable]((tag: Tag) => new CommitEntryFileTable(tag, suffix))
 
-    val cmts = for {
+    val commitsBugs = for {
       ai <- authors if ai.author === author
       co <- commits if co.authorId === ai.id
       cf <- commitsFiles if cf.revisionId === co.id
@@ -81,7 +81,7 @@ class ReportDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
       tk <- tasks if tk.taskId === ct.taskId && tk.typeTask === "Bug"
       fi <- files if fi.id === cf.pathId
     } yield fi
-    val countCommits = cmts
+    val countCommits = commitsBugs
       .groupBy(result => result.path)
       .map {
         case (path, group) =>
@@ -142,38 +142,37 @@ class ReportDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
     } yield fi
   }
 
-  def countCommitByCustomField(suffix: DatabaseSuffix, fieldValue: String, initialTime: Timestamp, finalTime: Timestamp) : Future[Seq[(String, Int)]] = db.run {
+  private def filesByCustomFiled(suffix: DatabaseSuffix, fieldValue: String, initialTime: Timestamp, finalTime: Timestamp) = {
     val commitTasks = TableQuery[CommitTasksTable]((tag: Tag) => new CommitTasksTable(tag, suffix))
-    def countCommitTask()= for {
+    for {
       taskId <- if (fieldValue.contains("Issue")) bugTasks(suffix, fieldValue).distinct else tasksByField(suffix, fieldValue)
       commitId <- commitDateRange(suffix, initialTime, finalTime)
       ct <- commitTasks if ct.commitId === commitId && ct.taskId === taskId
       fi <- commitFiles(suffix, ct.commitId)
     } yield fi
-    val countCommits = countCommitTask
-      .groupBy(result => result.path)
-      .map { case (path, group) => (path, group.length) }
-      .sortBy(groupedResult => groupedResult._2)
-    countCommits.result.transactionally
   }
 
-  def countCommitLocByCustomField(suffix: DatabaseSuffix, fieldValue: String, initialTime: Timestamp, finalTime: Timestamp): Future[Seq[((String, Long), Int)]] = db.run {
-    val commitTasks = TableQuery[CommitTasksTable]((tag: Tag) => new CommitTasksTable(tag, suffix))
-    val fileLocs = TableQuery[LocFilesTable]((tag: Tag) => new LocFilesTable(tag, suffix))
+  def countCommitByCustomField(suffix: DatabaseSuffix, fieldValue: String, initialTime: Timestamp, finalTime: Timestamp) : Future[Seq[(String, Int)]] = db.run {
+    val countFiles = filesByCustomFiled(suffix, fieldValue, initialTime, finalTime)
+      .groupBy(result => result.path)
+      .map { case (path, group) => (path, group.length) }
+      .sortBy{ case (_, length) => length }
+    countFiles.result.transactionally
+  }
+
+  def countCommitLocByCustomField(suffix: DatabaseSuffix, fieldValue: String, initialTime: Timestamp, finalTime: Timestamp): Future[Seq[(String, Long, Int)]] = db.run {
+    val fileLineCounter = TableQuery[LocFilesTable]((tag: Tag) => new LocFilesTable(tag, suffix))
 
     def countCommitTask() = for {
-      taskId <- if (fieldValue.contains("Issue")) bugTasks(suffix, fieldValue).distinct else tasksByField(suffix, fieldValue)
-      commitId <- commitDateRange(suffix, initialTime, finalTime)
-      ct <- commitTasks if ct.commitId === commitId && ct.taskId === taskId
-      fi <- commitFiles(suffix, ct.commitId)
-      lc <- fileLocs if lc.fileRef === fi.id
+      fi <- filesByCustomFiled(suffix, fieldValue, initialTime, finalTime)
+      lc <- fileLineCounter if lc.fileRef === fi.id
     } yield (fi.path, lc.count)
 
-    val countCommits = countCommitTask
+    val countCommits = countCommitTask()
       .groupBy(result => result)
       .map{ case (path, group) => (path, group.length) }
-      .sortBy(groupedResult => groupedResult._2)
-
+      .sortBy{ case (_, length) => length }
+      .map{ case ((a, b), c) => (a, b, c) }
     countCommits.result.transactionally
   }
 

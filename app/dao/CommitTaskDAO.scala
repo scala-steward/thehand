@@ -1,12 +1,11 @@
 package dao
 
 import javax.inject.Inject
-
 import models._
-import play.api.db.slick.{ DatabaseConfigProvider, HasDatabaseConfigProvider }
+import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.jdbc.JdbcProfile
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
 trait CommitTaskComponent extends CommitComponent { self: HasDatabaseConfigProvider[JdbcProfile] =>
   import profile.api._
@@ -30,12 +29,13 @@ class CommitTaskDAO @Inject() (protected val dbConfigProvider: DatabaseConfigPro
   def insert(entries: Seq[CommitTasks], suffix: DatabaseSuffix): Future[Seq[Int]] = db.run {
     val commits = TableQuery[CommitTable]((tag: Tag) => new CommitTable(tag, suffix))
     val commitTasks = TableQuery[CommitTasksTable]((tag: Tag) => new CommitTasksTable(tag, suffix))
-    def updateInsert(ct: CommitTasks, id: Option[Long], commitId: Option[Long]) = {
-      if (id.isEmpty)
-        commitTasks += ct.copy(commitId = commitId.head)
-      else
-        commitTasks.insertOrUpdate(ct.copy(commitId = commitId.head, id = commitId.head))
-    }
+
+    def updateInsert(ct: CommitTasks, entryId: Option[Long], commitId: Option[Long]) =
+      (entryId, commitId) match {
+        case (Some(id), Some(coId)) => commitTasks.insertOrUpdate(ct.copy(commitId = coId, id = id))
+        case (_, Some(coId)) => commitTasks += ct.copy(commitId = coId)
+        case _ => commitTasks += ct.copy(commitId = -1L) //HIRO
+      }
 
     def swapRevisionByTableId(revision: Long) = {
       commits.filter(_.revision === revision).map(_.id).result.headOption

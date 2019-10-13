@@ -35,7 +35,7 @@ trait ApiResult {
   def envelopedJson(implicit lang: Lang): JsValue = Json.obj(
     "data" -> json,
     "status" -> status,
-    "headers" -> JsObject((headers ++ Api.basicHeaders).map(h => h._1 -> JsString(h._2))))
+    "headers" -> JsObject((headers ++ Api.basicHeaders).map{ case(h, js) => h -> JsString(js)}))
 
   /*
 	* Returns a Result with the ApiResult information.

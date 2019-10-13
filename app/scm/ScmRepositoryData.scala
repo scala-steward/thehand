@@ -13,7 +13,7 @@ package scm
 
 import dao._
 import javax.inject.Inject
-import models.DatabaseSuffix
+import models.{DatabaseSuffix, FixedRange}
 import tasks.TaskProcessConnector
 
 import scala.concurrent.{ExecutionContextExecutor, Future}
@@ -26,7 +26,8 @@ class ScmRepositoryData[T] @Inject()
  taskProcessor: TaskProcessConnector,
  suffix: DatabaseSuffix)
 {
-  implicit val context: ExecutionContextExecutor = scala.concurrent.ExecutionContext.fromExecutor(null)
+  implicit val context: ExecutionContextExecutor = scala.concurrent.ExecutionContext.fromExecutor(
+    new java.util.concurrent.ForkJoinPool(100))
   lazy val daoTasks = new TaskDAO(dbConfigProvider)
   lazy val daoCustomFields = new CustomFieldsDAO(dbConfigProvider)
   lazy val daoCommits = new CommitDAO(dbConfigProvider)
@@ -35,25 +36,25 @@ class ScmRepositoryData[T] @Inject()
   lazy val daoCommitFiles = new CommitEntryFileDAO(dbConfigProvider)
   lazy val daoCommitTasks = new CommitTaskDAO(dbConfigProvider)
 
-  private def calculateRangeLimit(lastId: Long, latestId: Long): (Long, Long) = {
-    val lastIdDB: Long = if (lastId < 1) 1 else lastId
-    val lastIdScm: Long = if (latestId < 1) 1 else latestId
-    if (lastIdDB != lastIdScm) (lastIdDB, lastIdScm) else (1, 1)
+  private def calculateRangeLimit(lastId: Long, latestId: Long): FixedRange = {
+    val lastIdDB: Long = if (lastId < 1L) 1L else lastId
+    val lastIdScm: Long = if (latestId < 1L) 1L else latestId
+    if (lastIdDB != lastIdScm) FixedRange(lastIdDB, lastIdScm) else FixedRange(1, 1)
   }
 
-  def fixRange(range: (Long, Long)): (Long, Long) = {
-    lazy val last = repository.latestId.getOrElse(-1.toLong)
+  def fixRange(range: FixedRange): FixedRange = {
+    val last = repository.latestId.getOrElse(-1L)
     range match {
-      case (from, to) if from < 1 && ((to < 1) || (to > last)) => (1, last)
-      case (from, to) if from < 1 => (1, to)
-      case (from, to) if to > last => (from, last)
-      case (from, to) => (from, to)
+      case r if r.begin < 1L && ((r.end < 1L) || (r.end > last)) => FixedRange(1, last)
+      case r if r.begin < 1L => FixedRange(1L, r.end)
+      case r if r.end > last => FixedRange(r.begin, last)
+      case r => FixedRange(r.begin, r.end)
     }
   }
 
-  def updateRange(range: (Long, Long), steps: Long = 1000): Future[Seq[Int]] = {
-    val r = fixRange(range)
-    doStep(r._1, r._2, steps)
+  def updateRange(range: FixedRange, steps: Long = 1000): Future[Seq[Int]] = {
+    val fixedRange = fixRange(range)
+    doStep(fixedRange.begin, fixedRange.end, steps)
   }
 
   def doStep(from: Long, to: Long, step: Long): Future[Seq[Int]] = {

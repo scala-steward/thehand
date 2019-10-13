@@ -81,8 +81,9 @@ object ApiError {
   def errorHeaderMalformed(header: String)(implicit m: Messages) = apply(ERROR_HEADER_MALFORMED, Messages("api.error.header.malformed", header))
   def errorBodyMissed(implicit m: Messages) = apply(ERROR_BODY_MISSED, Messages("api.error.body.missed"))
   def errorBodyMalformed(errors: collection.Seq[(JsPath, collection.Seq[JsonValidationError])])(implicit m: Messages) =
-    apply(ERROR_BODY_MALFORMED, Messages("api.error.body.malformed"), JsObject(errors.map { e =>
-      e._1.toJsonString -> JsArray(e._2.map { ve =>
+    apply(ERROR_BODY_MALFORMED, Messages("api.error.body.malformed"), JsObject(errors.map {
+      case (path, validationError) =>
+        path.toJsonString -> JsArray(validationError.map { ve =>
         JsString(Messages(ve.message, ve.args: _*))
       })
     }))

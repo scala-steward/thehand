@@ -61,11 +61,10 @@ class ProcessTargetConnector(t: TaskConnector) extends TaskProcessConnector {
   }
 
   def process(id: Long): Option[Task] = {
-    val task = callAndProcess(id, t.assignable, parseTaskJson)
-    if (task.isDefined && task.get.typeTask.contains("Bug"))
-      callAndProcess(id, t.bugs, parseTaskJson)
-    else
-      task
+    callAndProcess(id, t.assignable, parseTaskJson) match {
+      case Some(task) if (task.typeTask.contains("Bug")) => callAndProcess(id, t.bugs, parseTaskJson)
+      case task => task
+    }
   }
 
   private def callAndProcess(id: Long, f: Long => String, g: JsValue => Option[Task]): Option[Task] = {

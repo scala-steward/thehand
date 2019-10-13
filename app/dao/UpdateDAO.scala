@@ -38,7 +38,7 @@ class UpdateDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
 
   private def updateRepositoryRange(confName: String, from: Long, to: Long) = {
     val repository = loadSvnRepository(confName)
-    repository.flatMap(rep => rep.updateRange((from, to)))
+    repository.flatMap(rep => rep.updateRange(FixedRange(from, to)))
   }
 
   def update(suffix: DatabaseSuffix, from: Option[Long], to: Option[Long]): Future[Seq[Int]] = {
