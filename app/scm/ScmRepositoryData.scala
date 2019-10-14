@@ -26,8 +26,7 @@ class ScmRepositoryData[T] @Inject()
  taskProcessor: TaskProcessConnector,
  suffix: DatabaseSuffix)
 {
-  implicit val context: ExecutionContextExecutor = scala.concurrent.ExecutionContext.fromExecutor(
-    new java.util.concurrent.ForkJoinPool(100))
+  implicit val context: ExecutionContextExecutor = scala.concurrent.ExecutionContext.fromExecutor(null)
   lazy val daoTasks = new TaskDAO(dbConfigProvider)
   lazy val daoCustomFields = new CustomFieldsDAO(dbConfigProvider)
   lazy val daoCommits = new CommitDAO(dbConfigProvider)
@@ -58,7 +57,7 @@ class ScmRepositoryData[T] @Inject()
   }
 
   def doStep(from: Long, to: Long, step: Long): Future[Seq[Int]] = {
-    if (((to - from) / step) <= 0) {
+    if (((to - from) / step) <= 0L) {
       updateInRange(repository.log(from, to))
     } else {
       updateInRange(repository.log(from, from + step))

@@ -176,4 +176,22 @@ class ReportDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
     countCommits.result.transactionally
   }
 
+  def dump(suffix: DatabaseSuffix, initialTime: Timestamp, finalTime: Timestamp) = db.run {
+    val commitTasks = TableQuery[CommitTasksTable]((tag: Tag) => new CommitTasksTable(tag, suffix))
+    val tasks = TableQuery[TaskTable]((tag: Tag) => new TaskTable(tag, suffix))
+    val files = TableQuery[EntryFilesTable]((tag: Tag) => new EntryFilesTable(tag, suffix))
+    val authors = TableQuery[AuthorsTable]((tag: Tag) => new AuthorsTable(tag, suffix))
+    val commits = TableQuery[CommitTable]((tag: Tag) => new CommitTable(tag, suffix))
+    val commitsFiles = TableQuery[CommitEntryFileTable]((tag: Tag) => new CommitEntryFileTable(tag, suffix))
+
+    val dumpData = for {
+      ai <- authors
+      co <- commits if co.authorId === ai.id && co.timestamp >= initialTime && co.timestamp <= finalTime
+      cf <- commitsFiles if cf.revisionId === co.id
+      ct <- commitTasks if ct.commitId === co.id
+      tk <- tasks if tk.taskId === ct.taskId
+      fi <- files if fi.id === cf.pathId
+    } yield (ai.author, co.revision, co.message, co.timestamp, fi.path, cf.typeModification, tk.taskId, tk.typeTask, tk.userStoryId, tk.timeSpend)
+    dumpData.result.transactionally
+  }
 }
