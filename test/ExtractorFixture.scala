@@ -35,6 +35,10 @@ object ExtractorFixture {
     Task(Some("Bug"), Some(8L), None, Some(20), Some(2), 4),
     Task(Some("Bug"), Some(8L), None, Some(20), Some(2), 5))
 
+  val customFields = Seq(
+    CustomFields(Some("internal"), "Bug", 1L, 1L)
+  )
+
   val extractAuthors =
     Seq(Author("john"), Author("philips"), Author("thomas"))
 

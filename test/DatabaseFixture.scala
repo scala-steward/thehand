@@ -41,12 +41,14 @@ class DatabaseFixture @Inject() (protected val dbConfigProvider: DatabaseConfigP
   val daoFiles: EntryFileDAO = Application.instanceCache[EntryFileDAO].apply(app)
   val daoCommitFiles: CommitEntryFileDAO = Application.instanceCache[CommitEntryFileDAO].apply(app)
   val daoCommitTasks: CommitTaskDAO = Application.instanceCache[CommitTaskDAO].apply(app)
+  val daoCustomFields: CustomFieldsDAO = Application.instanceCache[CustomFieldsDAO].apply(app)
 
   def populate(suffix: DatabaseSuffix) = {
     val daoBootstrap: BootDAO = Application.instanceCache[BootDAO].apply(app)
     daoBootstrap.createSchemas(suffix)
     val insertAll = for {
       _ <- daoTasks.insert(ExtractorFixture.extractTasks, suffix)
+      _ <- daoCustomFields.insert(ExtractorFixture.customFields, suffix)
       _ <- daoAuthors.insert(ExtractorFixture.extractAuthors, suffix)
       _ <- daoCommits.insert(ExtractorFixture.extractCommits, suffix)
       _ <- daoFiles.insert(ExtractorFixture.extractFiles, suffix)
