@@ -14,11 +14,11 @@ import java.io.File
 import api.ApiController
 import javax.inject._
 import dao._
-import models.{DatabaseSuffix, Dump, QueryLocalDate}
+import models._
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.i18n.Langs
 import play.api.mvc._
-import reportio.CvsIO
+import reportio.{CvsIO, Writable}
 
 import scala.concurrent.ExecutionContext
 
@@ -43,47 +43,39 @@ class ReportController @Inject()
     maybeSeq(dao.countCommitLocByCustomField(suffix, customField, from.fromTime, to.toTime))
   }
 
-  private def getCompleteFilename(suffixName: String, filename: String) = {
-    val localDirectory = new java.io.File(".").getCanonicalPath
-    val reportDirectory = s"$localDirectory/report/"
-    s"${reportDirectory}\\${suffixName.toLowerCase}${filename}"
+  def dump(suffix: DatabaseSuffix, from: QueryLocalDate, to: QueryLocalDate): Action[Unit] = ApiAction { implicit request =>
+    maybeSeq(dao.dump(suffix, from.toTime, to.toTime))
   }
 
   // UNSAFE SECTION
+  private def generateCsvFile(suffixName: String, filename: String, x: Seq[Writable]) = {
+      val localDirectory = new java.io.File(".").getCanonicalPath
+      val reportDirectory = s"$localDirectory/report/"
+      val filenameComplete = s"${reportDirectory}\\${suffixName.toLowerCase}${filename}"
+      val writer: CvsIO.type = CvsIO
+      writer.write(filenameComplete, x)
+        Ok.sendFile(new File(filenameComplete+".csv"), inline=true)
+          .withHeaders(CACHE_CONTROL->"max-age=3600",CONTENT_DISPOSITION->s"attachment; filename=$filename.csv", CONTENT_TYPE->"application/x-download");
+  }
+
   def listCommitsCustomFieldCsv(suffix: DatabaseSuffix, fieldValue: String, from: QueryLocalDate, to: QueryLocalDate): Action[AnyContent] = Action.async {
     lazy val file = "_commits_bugs_counter";
-    val writer: CvsIO.type = CvsIO
-    lazy val filename = getCompleteFilename(suffix.suffix, file)
     dao.countCommitByCustomField(suffix, fieldValue, from.fromTime, to.toTime)
-      .map {
-      lines => writer.write(filename, lines)
-      Ok.sendFile(new File(filename+".csv"), inline=true)
-        .withHeaders(CACHE_CONTROL->"max-age=3600",CONTENT_DISPOSITION->s"attachment; filename=$file.csv", CONTENT_TYPE->"application/x-download");
-    }
+      .map(_.map{r => DumpCounter(r._1, r._2)}.sorted.reverse)
+      .map(generateCsvFile(suffix.suffix, file, _))
   }
 
   def listCommitsLocCustomFieldCsv(suffix: DatabaseSuffix, fieldValue: String, from: QueryLocalDate, to: QueryLocalDate): Action[AnyContent] = Action.async {
     lazy val file = "_commits_bugs_loc_counter";
-    lazy val writer: CvsIO.type = CvsIO
-    lazy val filename = getCompleteFilename(suffix.suffix, file)
     dao.countCommitLocByCustomField(suffix, fieldValue, from.fromTime, to.toTime)
-      .map {
-      lines => writer.writeSLI(filename, lines)
-      Ok.sendFile(new File(filename+".csv"), inline=true)
-        .withHeaders(CACHE_CONTROL->"max-age=3600",CONTENT_DISPOSITION->s"attachment; filename=$file.csv", CONTENT_TYPE->"application/x-download");
-    }
+      .map(_.map{r => DumpLocCounter(r._1, r._2, r._3)}.sorted.reverse)
+      .map(generateCsvFile(suffix.suffix, file, _))
   }
 
-  def dump(suffix: DatabaseSuffix, from: QueryLocalDate, to: QueryLocalDate): Action[AnyContent] = Action.async {
+  def dumpCsv(suffix: DatabaseSuffix, from: QueryLocalDate, to: QueryLocalDate): Action[AnyContent] = Action.async {
     lazy val file = "_dump";
-    lazy val writer: CvsIO.type = CvsIO
-    lazy val filename = getCompleteFilename(suffix.suffix, file)
     dao.dump(suffix, from.fromTime, to.toTime)
-      .map(_.map{r => Dump(r._1, r._2, r._3, r._4, r._5, r._6, r._7, r._8, r._9, r._10, r._11, r._12)})
-      .map {
-        lines => writer.writeDump(filename, lines)
-          Ok.sendFile(new File(filename+".csv"), inline=true)
-            .withHeaders(CACHE_CONTROL->"max-age=3600",CONTENT_DISPOSITION->s"attachment; filename=$file.csv", CONTENT_TYPE->"application/x-download");
-      }
+      .map(_.map{r => DumpJoinDatabase(r._1, r._2, r._3, r._4, r._5, r._6, r._7, r._8, r._9, r._10, r._11, r._12)})
+      .map(generateCsvFile(suffix.suffix, file, _))
   }
 }

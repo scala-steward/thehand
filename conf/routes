@@ -47,7 +47,8 @@ GET     /api/v1/:suffix/customfields/:id    controllers.CustomFieldsController.i
 GET     /api/v1/:suffix/customfields/field/:field    controllers.CustomFieldsController.listField(suffix: DatabaseSuffix, field: String)
 
 # DUMP
-GET     /api/v1/:suffix/dump/:from/to/:to/csv        controllers.ReportController.dump(suffix: DatabaseSuffix, from: QueryLocalDate, to: QueryLocalDate)
+GET     /api/v1/:suffix/dump/:from/to/:to  controllers.ReportController.dump(suffix: DatabaseSuffix, from: QueryLocalDate, to: QueryLocalDate)
+GET     /api/v1/:suffix/dump/:from/to/:to/csv        controllers.ReportController.dumpCsv(suffix: DatabaseSuffix, from: QueryLocalDate, to: QueryLocalDate)
 
 # USERNAMES
 GET		/api/v1/usernames					controllers.UsersController.usernames
