@@ -191,7 +191,7 @@ class ReportDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
       ct <- commitTasks if ct.commitId === co.id
       tk <- tasks if tk.taskId === ct.taskId
       fi <- files if fi.id === cf.pathId
-    } yield (ai.author, co.revision, co.message, co.timestamp, fi.path, cf.typeModification, tk.taskId, tk.typeTask, tk.userStoryId, tk.timeSpend)
+    } yield (ai.id, ai.author, co.revision, co.message, co.timestamp, fi.id, fi.path, cf.typeModification, tk.taskId, tk.typeTask, tk.userStoryId, tk.timeSpend)
     dumpData.result.transactionally
   }
 }

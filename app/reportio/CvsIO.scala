@@ -31,10 +31,13 @@ object CvsIO extends ReportIO {
     lazy val f = new File(filename + ".csv")
     val writer = CSVWriter.open(f)
     lines.foreach(row => writer.writeRow(
-      List(row.author,
+      List(row.authorId,
+        row.author,
         row.rev,
         row.message.getOrElse(""),
+        row.fileId,
         row.path,
+        row.time.getOrElse(""),
         row.typeModification.getOrElse(""),
         row.taskId,
         row.taskType.getOrElse(""),

@@ -79,7 +79,7 @@ class ReportController @Inject()
     lazy val writer: CvsIO.type = CvsIO
     lazy val filename = getCompleteFilename(suffix.suffix, file)
     dao.dump(suffix, from.fromTime, to.toTime)
-      .map(_.map{r => Dump(r._1, r._2, r._3, r._4, r._5, r._6, r._7, r._8, r._9, r._10)})
+      .map(_.map{r => Dump(r._1, r._2, r._3, r._4, r._5, r._6, r._7, r._8, r._9, r._10, r._11, r._12)})
       .map {
         lines => writer.writeDump(filename, lines)
           Ok.sendFile(new File(filename+".csv"), inline=true)
