@@ -34,6 +34,11 @@ class CustomFieldsApiV1Spec extends ApiSpecification {
       s must beEqualTo(
         s"""[{"fieldValue":"internal","field":"Bug","taskId":1,"id":1}]""").ignoreSpace
     }
+    s"return a customfields by field Issue must return a bad request" in new Scope {
+      val result: Future[Result] = routeGET(
+        "/api/v1/CUSTOM_FIELDS_/customfields/field/Issue")
+      status(result) must equalTo(BAD_REQUEST)
+    }
   }
 
 }

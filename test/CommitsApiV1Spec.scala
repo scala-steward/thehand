@@ -54,5 +54,28 @@ class CommitsApiV1Spec extends ApiSpecification {
         s"""[{"message":"Task#1","timestamp":"2015-09-06T10:11:00.00Z","revision":1,"authorId":1,"id":1},
            |{"message":"Bug#4","timestamp":"2015-12-05T10:11:00.00Z","revision":2,"authorId":2,"id":2}]""".stripMargin).ignoreSpace
     }
+    s"return a commit files counter custom field by date" in new Scope {
+      val result: Future[Result] = routeGET(
+        "/api/v1/COMMITS_/commits/custom/internal/2014-01-06/to/2017-01-06")
+      status(result) must equalTo(OK)
+      contentType(result) must beSome.which(_ == "application/json")
+      val s = contentAsString(result)
+      s must beEqualTo(
+        s"""[["/zop",1],["/zap",2],["/zip",2]]""".stripMargin).ignoreSpace
+    }
+    s"return a commit files loc counter custom field by date" in new Scope {
+      val result: Future[Result] = routeGET(
+        "/api/v1/COMMITS_/commits/custom/loc/internal/2014-01-06/to/2017-01-06")
+      status(result) must equalTo(OK)
+      contentType(result) must beSome.which(_ == "application/json")
+      val s = contentAsString(result)
+      s must beEqualTo(
+        s"""[["/zop",20,1],["/zap",20,2],["/zip",10,2]]""".stripMargin).ignoreSpace
+    }
+    s"return a error with a invalid date" in new Scope {
+      val result: Future[Result] = routeGET(
+        "/api/v1/COMMITS_/commits/custom/internal/2014/to/2017")
+      status(result) must equalTo(BAD_REQUEST)
+    }
   }
 }

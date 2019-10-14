@@ -55,6 +55,12 @@ object ExtractorFixture {
   val extractFiles: Seq[EntryFile] =
     Seq(EntryFile("/zip"), EntryFile("/zap"), EntryFile("/zop"), EntryFile("/zip"))
 
+  val lineCounterFiles = Seq(
+    FileCount("/zip", 10),
+    FileCount("/zap", 20),
+    FileCount("/zop", 20)
+  )
+
   private val commitFilesOne = Seq(
     CommitEntryWriter(CommitEntryFile(Some('A'), None, Some(1), 0, 0), "/zip", ""),
     CommitEntryWriter(CommitEntryFile(Some('A'), None, Some(1), 0, 0), "/zap", ""),
