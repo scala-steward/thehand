@@ -70,7 +70,7 @@ class CommitsApiV1Spec extends ApiSpecification {
       contentType(result) must beSome.which(_ == "text/plain")
       val s = contentAsString(result)
       s must beEqualTo(
-        s"""2,/zip2,/zap1,/zop""".stripMargin).ignoreSpace
+        s"""2,"/zip"2,"/zap"1,"/zop"""".stripMargin).ignoreSpace
     }
     s"return a commit files loc counter custom field by date" in new Scope {
       val result: Future[Result] = routeGET(
@@ -88,7 +88,7 @@ class CommitsApiV1Spec extends ApiSpecification {
       contentType(result) must beSome.which(_ == "text/plain")
       val s = contentAsString(result)
       s must beEqualTo(
-        s"""2,10,/zip2,20,/zap1,20,/zop""".stripMargin).ignoreSpace
+        s"""2,10,"/zip"2,20,"/zap"1,20,"/zop"""".stripMargin).ignoreSpace
     }
     s"return a error with a invalid date" in new Scope {
       val result: Future[Result] = routeGET(

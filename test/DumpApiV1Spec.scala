@@ -22,7 +22,7 @@ class DumpApiV1Spec extends ApiSpecification {
       status(result) must equalTo(OK)
       contentType(result) must beSome.which(_ == "text/plain")
       val s = contentAsString(result)
-      s.size must beEqualTo(436)
+      s.size must beEqualTo(520)
     }
   }
 }
