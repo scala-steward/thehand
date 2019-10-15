@@ -52,32 +52,36 @@ object ExtractorFixture {
     Seq((commitOne, "john"), (commitTwo, "philips"), (commitThree, "philips"),
       (commitFour, "philips"), (commitFive, "thomas"), (commitOne, "john"))
 
+  val file1 = "/trunk/zip"
+  val file2 = "/trunk/zap"
+  val file3 = "/trunk/zop"
+
   val extractFiles: Seq[EntryFile] =
-    Seq(EntryFile("/zip"), EntryFile("/zap"), EntryFile("/zop"), EntryFile("/zip"))
+    Seq(EntryFile(file2), EntryFile(file2), EntryFile(file3), EntryFile(file1))
 
   val lineCounterFiles = Seq(
-    FileCount("/zip", 10),
-    FileCount("/zap", 20),
-    FileCount("/zop", 20)
+    FileCount(file1, 10),
+    FileCount(file2, 20),
+    FileCount(file3, 20)
   )
 
   private val commitFilesOne = Seq(
-    CommitEntryWriter(CommitEntryFile(Some('A'), None, Some(1), 0, 0), "/zip", ""),
-    CommitEntryWriter(CommitEntryFile(Some('A'), None, Some(1), 0, 0), "/zap", ""),
-    CommitEntryWriter(CommitEntryFile(Some('A'), None, Some(1), 0, 0), "/zop", ""))
+    CommitEntryWriter(CommitEntryFile(Some('A'), None, Some(1), 0, 0), file1, ""),
+    CommitEntryWriter(CommitEntryFile(Some('A'), None, Some(1), 0, 0), file2, ""),
+    CommitEntryWriter(CommitEntryFile(Some('A'), None, Some(1), 0, 0), file3, ""))
 
   private val commitFilesTwo = Seq(
-    CommitEntryWriter(CommitEntryFile(Some('M'), None, Some(2), 0, 0), "/zip", ""),
-    CommitEntryWriter(CommitEntryFile(Some('M'), None, Some(2), 0, 0), "/zap", ""))
+    CommitEntryWriter(CommitEntryFile(Some('M'), None, Some(2), 0, 0), file1, ""),
+    CommitEntryWriter(CommitEntryFile(Some('M'), None, Some(2), 0, 0), file2, ""))
 
   private val commitFilesThree =
-    Seq(CommitEntryWriter(CommitEntryFile(Some('M'), None, Some(3), 0, 0), "/zip", ""))
+    Seq(CommitEntryWriter(CommitEntryFile(Some('M'), None, Some(3), 0, 0), file1, ""))
 
   private val commitFilesFour =
-    Seq(CommitEntryWriter(CommitEntryFile(Some('M'), None, Some(4), 0, 0), "/zip", ""))
+    Seq(CommitEntryWriter(CommitEntryFile(Some('M'), None, Some(4), 0, 0), file1, ""))
 
   private val commitFilesFive =
-    Seq(CommitEntryWriter(CommitEntryFile(Some('D'), None, Some(5), 0, 0), "/zip", ""))
+    Seq(CommitEntryWriter(CommitEntryFile(Some('D'), None, Some(5), 0, 0), file1, ""))
 
   val extractCommitsFiles: Seq[(Seq[CommitEntryWriter], Long)] =
     Seq((commitFilesOne, 1L), (commitFilesTwo, 2L), (commitFilesThree, 2L),

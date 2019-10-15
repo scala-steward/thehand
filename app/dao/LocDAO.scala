@@ -28,8 +28,6 @@ class LocDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(
 
   import profile.api._
 
-  private def fileCount(file: NodeSeq): Long = (file \\ "metrics" \\ "metric").head.text.toLong
-
   private def fileQuery(suffix: DatabaseSuffix, file: FileCount) = {
     lazy val files = TableQuery[EntryFilesTable]((tag: Tag) => new EntryFilesTable(tag, suffix))
     lazy val filesLocs = TableQuery[LocFilesTable]((tag: Tag) => new LocFilesTable(tag, suffix))
@@ -49,9 +47,11 @@ class LocDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(
     }
   }
 
+  private def fileCount(file: NodeSeq): Long = (file \\ "metrics" \\ "metric").head.text.toLong
+
   private def parser(xml: NodeSeq) : Seq[FileCount] =
     (xml \\ "sourcemonitor_metrics" \\ "project" \\ "checkpoints" \\ "files" \\ "file")
-      .map(file => FileCount("/trunk/" + file.attribute("file_name"), fileCount(file)))
+      .map(file => FileCount(file.attribute("file_name").toString(), fileCount(file)))
 
   def update(suffix: DatabaseSuffix, xml: NodeSeq): Future[immutable.Seq[Int]] = {
     insert(parser(xml), suffix)
@@ -59,5 +59,10 @@ class LocDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(
 
   def insert(cs: Seq[FileCount], suffix: DatabaseSuffix): Future[Seq[Int]] = db.run {
     DBIO.sequence(cs.map(fileQuery(suffix, _))).transactionally
+  }
+
+  def list(suffix: DatabaseSuffix): Future[Seq[LocFile]] = db.run {
+    lazy val filesLocs = TableQuery[LocFilesTable]((tag: Tag) => new LocFilesTable(tag, suffix))
+    filesLocs.result
   }
 }

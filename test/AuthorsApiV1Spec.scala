@@ -49,12 +49,7 @@ class AuthorsApiV1Spec extends ApiSpecification {
       contentType(result) must beSome.which(_ == "application/json")
       val s = contentAsString(result)
       s must beEqualTo(
-        s"""[
-             [
-               "/zip",
-               1
-             ]
-           ]""").ignoreSpace
+        s"""[["${ExtractorFixture.file1}",1]]""").ignoreSpace
     }
     s"return a files paths for the author" in new Scope {
       val result: Future[Result] = routeGET(
@@ -63,12 +58,7 @@ class AuthorsApiV1Spec extends ApiSpecification {
       contentType(result) must beSome.which(_ == "application/json")
       val s = contentAsString(result)
       s must beEqualTo(
-        s"""[
-             [
-               "/zip",
-               1
-             ]
-           ]""").ignoreSpace
+        s"""[["${ExtractorFixture.file1}",1]]""").ignoreSpace
     }
   }
 }

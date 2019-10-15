@@ -61,7 +61,7 @@ class CommitsApiV1Spec extends ApiSpecification {
       contentType(result) must beSome.which(_ == "application/json")
       val s = contentAsString(result)
       s must beEqualTo(
-        s"""[["/zop",1],["/zap",2],["/zip",2]]""".stripMargin).ignoreSpace
+        s"""[["${ExtractorFixture.file3}",1],["${ExtractorFixture.file2}",2],["${ExtractorFixture.file1}",2]]""".stripMargin).ignoreSpace
     }
     s"return a commit files csv counter custom field by date" in new Scope {
       val result: Future[Result] = routeGET(
@@ -70,7 +70,7 @@ class CommitsApiV1Spec extends ApiSpecification {
       contentType(result) must beSome.which(_ == "text/plain")
       val s = contentAsString(result)
       s must beEqualTo(
-        s"""2,"/zip"2,"/zap"1,"/zop"""".stripMargin).ignoreSpace
+        s"""2,"${ExtractorFixture.file1}"2,"${ExtractorFixture.file2}"1,"${ExtractorFixture.file3}"""".stripMargin).ignoreSpace
     }
     s"return a commit files loc counter custom field by date" in new Scope {
       val result: Future[Result] = routeGET(
@@ -79,7 +79,7 @@ class CommitsApiV1Spec extends ApiSpecification {
       contentType(result) must beSome.which(_ == "application/json")
       val s = contentAsString(result)
       s must beEqualTo(
-        s"""[["/zop",20,1],["/zap",20,2],["/zip",10,2]]""".stripMargin).ignoreSpace
+        s"""[["${ExtractorFixture.file3}",20,1],["${ExtractorFixture.file2}",20,2],["${ExtractorFixture.file1}",10,2]]""".stripMargin).ignoreSpace
     }
     s"return a commit files csv loc counter custom field by date" in new Scope {
       val result: Future[Result] = routeGET(
@@ -88,7 +88,7 @@ class CommitsApiV1Spec extends ApiSpecification {
       contentType(result) must beSome.which(_ == "text/plain")
       val s = contentAsString(result)
       s must beEqualTo(
-        s"""2,10,"/zip"2,20,"/zap"1,20,"/zop"""".stripMargin).ignoreSpace
+        s"""2,10,"${ExtractorFixture.file1}"2,20,"${ExtractorFixture.file2}"1,20,"${ExtractorFixture.file3}"""".stripMargin).ignoreSpace
     }
     s"return a error with a invalid date" in new Scope {
       val result: Future[Result] = routeGET(

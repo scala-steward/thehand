@@ -14,7 +14,7 @@ class FilesApiV1Spec extends ApiSpecification {
       status(result) must equalTo(OK)
       val s = contentAsString(result)
       s must beEqualTo(
-        s"""[{"path":"/zip","id":1},{"path":"/zap","id":2},{"path":"/zop","id":3}]""").ignoreSpace
+        s"""[{"path":"${ExtractorFixture.file2}","id":1},{"path":"${ExtractorFixture.file3}","id":2},{"path":"${ExtractorFixture.file1}","id":3}]""").ignoreSpace
     }
     s"return a files by id" in new Scope {
       val result: Future[Result] = routeGET(
@@ -23,12 +23,7 @@ class FilesApiV1Spec extends ApiSpecification {
       contentType(result) must beSome.which(_ == "application/json")
       val s = contentAsString(result)
       s must beEqualTo(
-        s"""[
-             {
-               "path": "/zap",
-               "id": 2
-             }
-           ]""").ignoreSpace
+        s"""[{"path":"${ExtractorFixture.file3}","id":2}]""").ignoreSpace
     }
     // HIRO check this below !!!
     s"return a file path and a counter for all tasks of type bug" in new Scope {
@@ -38,16 +33,7 @@ class FilesApiV1Spec extends ApiSpecification {
       contentType(result) must beSome.which(_ == "application/json")
       val s = contentAsString(result)
       s must beEqualTo(
-        s"""[
-             [
-               "/zap",
-               1
-             ],
-             [
-               "/zip",
-               2
-             ]
-           ]""").ignoreSpace
+        s"""[["${ExtractorFixture.file2}",1],["${ExtractorFixture.file1}",2]]""").ignoreSpace
     }
   }
 }

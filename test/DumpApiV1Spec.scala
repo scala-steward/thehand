@@ -14,7 +14,7 @@ class DumpApiV1Spec extends ApiSpecification {
       status(result) must equalTo(OK)
       contentType(result) must beSome.which(_ == "application/json")
       val s = contentAsString(result)
-      s.size must beEqualTo(466)
+      s.size must beEqualTo(508)
     }
     s"return a list of files" in new Scope {
       val result: Future[Result] = routeGET(
@@ -22,7 +22,7 @@ class DumpApiV1Spec extends ApiSpecification {
       status(result) must equalTo(OK)
       contentType(result) must beSome.which(_ == "text/plain")
       val s = contentAsString(result)
-      s.size must beEqualTo(520)
+      s.size must beEqualTo(562)
     }
   }
 }
