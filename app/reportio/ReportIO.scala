@@ -5,5 +5,5 @@ trait Writable {
 }
 
 trait ReportIO {
-  def write(filename: String, w: Seq[Writable]): Unit
+  def write(w: Seq[Writable]): String
 }

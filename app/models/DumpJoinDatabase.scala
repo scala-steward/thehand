@@ -15,9 +15,9 @@ class DumpJoinDatabase(authorId: Long,
                        taskId: Long,
                        taskType: Option[String],
                        userStory: Option[Long],
-                       timeSpend: Option[Double]) extends Writable
-{
-  override def toWritableSeq: Seq[Any] = {
+                       timeSpend: Option[Double]) extends Writable {
+
+  override def toWritableSeq: Seq[Any] =
     List(this.authorId,
       this.author,
       this.rev,
@@ -29,9 +29,7 @@ class DumpJoinDatabase(authorId: Long,
       this.taskId,
       this.taskType.getOrElse(""),
       this.userStory.getOrElse(""),
-      this.timeSpend.getOrElse(0.0)
-    )
-  }
+      this.timeSpend.getOrElse(0.0))
 }
 
 object DumpJoinDatabase {

@@ -9,8 +9,6 @@
 
 package controllers
 
-import java.io.File
-
 import api.ApiController
 import javax.inject._
 import dao._
@@ -47,35 +45,25 @@ class ReportController @Inject()
     maybeSeq(dao.dump(suffix, from.toTime, to.toTime))
   }
 
-  // UNSAFE SECTION
-  private def generateCsvFile(suffixName: String, filename: String, x: Seq[Writable]) = {
-      val localDirectory = new java.io.File(".").getCanonicalPath
-      val reportDirectory = s"$localDirectory/report/"
-      val filenameComplete = s"${reportDirectory}\\${suffixName.toLowerCase}${filename}"
-      val writer: CvsIO.type = CvsIO
-      writer.write(filenameComplete, x)
-        Ok.sendFile(new File(filenameComplete+".csv"), inline=true)
-          .withHeaders(CACHE_CONTROL->"max-age=3600",CONTENT_DISPOSITION->s"attachment; filename=$filename.csv", CONTENT_TYPE->"application/x-download");
-  }
+  private def generateCsvFile(rows: Seq[Writable]) =
+      Ok(CvsIO.write(rows)).withHeaders("Content-Type" -> "text/csv",
+        "Content-Disposition" -> "attachment; filename=report.csv")
 
   def listCommitsCustomFieldCsv(suffix: DatabaseSuffix, fieldValue: String, from: QueryLocalDate, to: QueryLocalDate): Action[AnyContent] = Action.async {
-    lazy val file = "_commits_bugs_counter";
     dao.countCommitByCustomField(suffix, fieldValue, from.fromTime, to.toTime)
       .map(_.map{r => DumpCounter(r._1, r._2)}.sorted.reverse)
-      .map(generateCsvFile(suffix.suffix, file, _))
+      .map(generateCsvFile)
   }
 
   def listCommitsLocCustomFieldCsv(suffix: DatabaseSuffix, fieldValue: String, from: QueryLocalDate, to: QueryLocalDate): Action[AnyContent] = Action.async {
-    lazy val file = "_commits_bugs_loc_counter";
     dao.countCommitLocByCustomField(suffix, fieldValue, from.fromTime, to.toTime)
       .map(_.map{r => DumpLocCounter(r._1, r._2, r._3)}.sorted.reverse)
-      .map(generateCsvFile(suffix.suffix, file, _))
+      .map(generateCsvFile)
   }
 
   def dumpCsv(suffix: DatabaseSuffix, from: QueryLocalDate, to: QueryLocalDate): Action[AnyContent] = Action.async {
-    lazy val file = "_dump";
     dao.dump(suffix, from.fromTime, to.toTime)
       .map(_.map{r => DumpJoinDatabase(r._1, r._2, r._3, r._4, r._5, r._6, r._7, r._8, r._9, r._10, r._11, r._12)})
-      .map(generateCsvFile(suffix.suffix, file, _))
+      .map(generateCsvFile)
   }
 }
