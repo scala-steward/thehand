@@ -63,6 +63,15 @@ class CommitsApiV1Spec extends ApiSpecification {
       s must beEqualTo(
         s"""[["/zop",1],["/zap",2],["/zip",2]]""".stripMargin).ignoreSpace
     }
+    s"return a commit files csv counter custom field by date" in new Scope {
+      val result: Future[Result] = routeGET(
+        "/api/v1/COMMITS_/commits/custom/internal/2014-01-06/to/2017-01-06/csv")
+      status(result) must equalTo(OK)
+      contentType(result) must beSome.which(_ == "text/plain")
+      val s = contentAsString(result)
+      s must beEqualTo(
+        s"""2,/zip2,/zap1,/zop""".stripMargin).ignoreSpace
+    }
     s"return a commit files loc counter custom field by date" in new Scope {
       val result: Future[Result] = routeGET(
         "/api/v1/COMMITS_/commits/custom/loc/internal/2014-01-06/to/2017-01-06")
@@ -71,6 +80,15 @@ class CommitsApiV1Spec extends ApiSpecification {
       val s = contentAsString(result)
       s must beEqualTo(
         s"""[["/zop",20,1],["/zap",20,2],["/zip",10,2]]""".stripMargin).ignoreSpace
+    }
+    s"return a commit files csv loc counter custom field by date" in new Scope {
+      val result: Future[Result] = routeGET(
+        "/api/v1/COMMITS_/commits/custom/loc/internal/2014-01-06/to/2017-01-06/csv")
+      status(result) must equalTo(OK)
+      contentType(result) must beSome.which(_ == "text/plain")
+      val s = contentAsString(result)
+      s must beEqualTo(
+        s"""2,10,/zip2,20,/zap1,20,/zop""".stripMargin).ignoreSpace
     }
     s"return a error with a invalid date" in new Scope {
       val result: Future[Result] = routeGET(
