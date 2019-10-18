@@ -17,19 +17,28 @@ import telemetrics.HandLogger
 
 import scala.util.{Failure, Success, Try}
 
+case class TaskWithCustom(task: Task, custom: Option[CustomFields])
+
 object ProcessTargetConnector {
   def apply(t: TaskConnector): ProcessTargetConnector = new ProcessTargetConnector(t)
 }
 
 class ProcessTargetConnector(t: TaskConnector) extends TaskProcessConnector {
-  private def parseTaskJson(json: JsValue): Option[Task] = {
+
+  private def parseTaskJson(json: JsValue, field: String): Option[TaskWithCustom] = {
     val typeTask = (json \ "EntityType" \ "Name").validateOpt[String].getOrElse(None)
     val typeTaskId = (json \ "EntityType" \ "Id").validateOpt[Long].getOrElse(None)
     val timeSpend = (json \ "TimeSpent").validateOpt[Double].getOrElse(None)
     val parentId = (json \ "Project" \ "Id").validateOpt[Long].getOrElse(None)
     val userStoryId = (json \ "UserStory" \ "Id").validateOpt[Long].getOrElse(None)
     val id = (json \ "Id").validateOpt[Long].getOrElse(None)
-    if (id.isDefined) Some(Task(typeTask, typeTaskId, userStoryId, timeSpend, parentId, id.get)) else None
+    val requestType = parseRequestType(json, field)
+
+    (id, requestType) match {
+      case (Some(id), Some(_)) => Some(TaskWithCustom(Task(typeTask, typeTaskId, userStoryId, timeSpend, parentId, id), Some(CustomFields(requestType, field, id))))
+      case (Some(id), None) => Some(TaskWithCustom(Task(typeTask, typeTaskId, userStoryId, timeSpend, parentId, id), None))
+      case _ => None
+    }
   }
 
   private def filterRequestType(json: JsValue, field: String) : Boolean =
@@ -57,21 +66,37 @@ class ProcessTargetConnector(t: TaskConnector) extends TaskProcessConnector {
   private def parseCustomFieldJson(json: JsValue, field: String): Option[CustomFields] =  {
     val id = (json \ "Id").validateOpt[Long].getOrElse(None)
     val requestType = parseRequestType(json, field)
-    if (id.isDefined && requestType.isDefined) Some(CustomFields(requestType, field, id.get)) else None
+
+    (id, requestType)  match {
+      case (Some(id), Some(_)) => Some(CustomFields(requestType, field, id))
+      case _ => None
+    }
   }
 
-  def process(id: Long): Option[Task] = {
-    callAndProcess(id, t.assignable, parseTaskJson) match {
-      case Some(task) if (task.typeTask.contains("Bug")) => callAndProcess(id, t.bugs, parseTaskJson)
+  def processRange(ids: Seq[Long], field: String): Seq[TaskWithCustom] = {
+    treeTaskCollect(ids, field, Seq(), Seq())
+  }
+
+  private def treeTaskCollect(ids: Seq[Long], field: String, idAcc: Seq[Long], res: Seq[TaskWithCustom]): Seq[TaskWithCustom] =
+    if (ids.isEmpty) res
+    else {
+      lazy val localRes = ids.flatMap(id => process(id, field))
+      treeTaskCollect(localRes.flatMap(_.task.parentId), field, (idAcc ++ ids).distinct, res ++ localRes)
+    }
+
+  def process(id: Long, field: String): Option[TaskWithCustom] = {
+    val twc = callAndProcess(id, field, t.assignable, parseTaskJson)
+    twc match {
+      case Some(task) if (task.task.typeTask.contains("Bug")) => callAndProcess(id, field, t.bugs, parseTaskJson)
       case task => task
     }
   }
 
-  private def callAndProcess(id: Long, f: Long => String, g: JsValue => Option[Task]): Option[Task] = {
+  private def callAndProcess(id: Long, field: String, f: Long => String, g: (JsValue, String) => Option[TaskWithCustom]): Option[TaskWithCustom] = {
     Try {
       Json.parse(f(id))
     } match {
-      case Success(s) => g(s)
+      case Success(s) => g(s, field)
       case Failure(e) =>
         HandLogger.error("error in parse the json task data " + e)
         None

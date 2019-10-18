@@ -68,45 +68,12 @@ class TargetConnector(url: String, user: String, password: String) extends TaskC
     }
   }
 
-  def entityStates(id: String): String = {
-    jsonData(url + "/EntityStates/" + id, "")
-  }
-
   def assignable(id: Long): String = {
-    jsonData(url + "/Assignables/" + id.toString, "&include=[Id,Project,EntityType,TimeSpent,Effort]")
-  }
-
-  def userId(options: String = "&include=[Id]"): String = {
-    jsonData(url + "/Context/", options)
+    jsonData(url + "/Assignables/" + id.toString, "&include=[Id,Project,EntityType,TimeSpent,Effort,CustomFields]")
   }
 
   def bugs(id: Long): String = {
-    jsonData(url + "/Bugs/" + id.toString, "&include=[Id,Project,EntityType,Effort,TimeSpent,UserStory]")
-  }
-
-  def tasks(id: Long, options: String): String = {
-    jsonData(url + "/Tasks/" + id.toString, "&include=" + options)
-  }
-
-  def generals(id: Long, options: String): String = {
-    jsonData(url + "/Generals/" + id.toString, "&include=" + options)
-  }
-
-  def projects(id: Long, options: String): String = {
-    jsonData(url + "/Projects/" + id.toString, "&include=" + options)
-  }
-
-  def features(id: Long, options: String): String = {
-    jsonData(url + "/Features/" + id.toString, "&include=" + options)
-  }
-
-  def userStories(id: Long, options: String): String = {
-    jsonData(url + "/UserStories/" + id.toString, "&include=" + options)
-  }
-
-  def userTasks(id: Long, take: Option[String], options: String = "[Name,Project,Description,EntityType,Effort,Priority,TimeSpent,EntityState]"): String = {
-    val takeOption = if (take.isEmpty) "" else "&take=" + take
-    jsonData(url + "/Users/" + id.toString + "/Assignables", "&include=" + options + takeOption)
+    jsonData(url + "/Bugs/" + id.toString, "&include=[Id,Project,EntityType,Effort,TimeSpent,UserStory,CustomFields]")
   }
 
   def customFields(id: Long): String = {

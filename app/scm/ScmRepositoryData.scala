@@ -18,6 +18,7 @@ import tasks.TaskProcessConnector
 
 import scala.concurrent.{ExecutionContextExecutor, Future}
 import play.api.db.slick.DatabaseConfigProvider
+import telemetrics.HandLogger
 
 class ScmRepositoryData[T] @Inject()
 (protected val dbConfigProvider: DatabaseConfigProvider,
@@ -38,30 +39,33 @@ class ScmRepositoryData[T] @Inject()
   private def calculateRangeLimit(lastId: Long, latestId: Long): FixedRange = {
     val lastIdDB: Long = if (lastId < 1L) 1L else lastId
     val lastIdScm: Long = if (latestId < 1L) 1L else latestId
-    if (lastIdDB != lastIdScm) FixedRange(lastIdDB, lastIdScm) else FixedRange(1, 1)
+    if (lastIdDB != lastIdScm) FixedRange(lastIdDB, lastIdScm) else FixedRange(1L, 1L)
   }
 
   def fixRange(range: FixedRange): FixedRange = {
     val last = repository.latestId.getOrElse(-1L)
     range match {
-      case r if r.begin < 1L && ((r.end < 1L) || (r.end > last)) => FixedRange(1, last)
+      case r if r.begin < 1L && ((r.end < 1L) || (r.end > last)) => FixedRange(1L, last)
       case r if r.begin < 1L => FixedRange(1L, r.end)
       case r if r.end > last => FixedRange(r.begin, last)
       case r => FixedRange(r.begin, r.end)
     }
   }
 
-  def updateRange(range: FixedRange, steps: Long = 1000): Future[Seq[Int]] = {
+  def updateRange(range: FixedRange, steps: Long = 2000L): Future[Seq[Int]] = {
     val fixedRange = fixRange(range)
+    //updateTasks(repository.log(range.begin, range.end))
+    val log = repository.log(range.begin, range.end)
+    Future.sequence(repository.log(range.begin, range.end).sliding(log.size/20).toSeq.map(updateTasks))
     doStep(fixedRange.begin, fixedRange.end, steps)
   }
 
   def doStep(from: Long, to: Long, step: Long): Future[Seq[Int]] = {
+    HandLogger.debug(s"step ${from}-${to}")
     if (((to - from) / step) <= 0L) {
-      updateInRange(repository.log(from, to))
+      updateInSvm(repository.log(from, to)).flatMap( _ => Future(Seq()))
     } else {
-      updateInRange(repository.log(from, from + step))
-      doStep(from + step, to, step)
+      updateInSvm(repository.log(from, from + step)).flatMap( _ => doStep(from + step, to, step))
     }
   }
 
@@ -73,19 +77,22 @@ class ScmRepositoryData[T] @Inject()
       case None => Future(Seq())
     }
 
-  def updateInRange(data: Seq[T]): Future[Seq[Int]] = {
-    val insertAll: Future[Seq[Int]] =
-      for {
-        _ <- daoTasks.insert(extractor.extractTasks(data).flatMap(taskProcessor.process), suffix)
-        _ <- daoCustomFields.insert(extractor.extractTasks(data).flatMap(taskProcessor.processCustomFields(_, "Request Type")), suffix)
-        _ <- daoAuthors.insert(extractor.extractAuthors(data), suffix)
-        _ <- daoCommits.insert(extractor.extractCommits(data), suffix)
-        _ <- daoFiles.insert(extractor.extractFiles(data), suffix)
-        _ <- daoCommitTasks.insert(extractor.extractCommitsTasks(data), suffix)
-        c <- daoCommitFiles.insert(extractor.extractCommitsFiles(data), suffix)
-      } yield c
-    insertAll
+  def updateTasks(data: Seq[T]): Future[Seq[Int]] = {
+   val twc = taskProcessor.processRange(extractor.extractTasks(data), "Request Type")
+   for {
+      _ <- daoTasks.insert(twc.map(_.task), suffix)
+      c <- daoCustomFields.insert(twc.flatMap(_.custom), suffix)
+   } yield c
   }
+
+  def updateInSvm(data: Seq[T]): Future[Seq[Int]] =
+    for {
+      _ <- daoAuthors.insert(extractor.extractAuthors(data), suffix)
+      _ <- daoCommits.insert(extractor.extractCommits(data), suffix)
+      _ <- daoFiles.insert(extractor.extractFiles(data), suffix)
+      _ <- daoCommitTasks.insert(extractor.extractCommitsTasks(data), suffix)
+      c <- daoCommitFiles.insert(extractor.extractCommitsFiles(data), suffix)
+    } yield c
 
   def updateCustomFields(field: String, startId: Long, endId: Long): Future[Seq[Int]] = {
     lazy val data = repository.log(startId, endId)

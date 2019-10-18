@@ -1,6 +1,5 @@
 package dao
 
-import slick.dbio.DBIOAction
 import javax.inject.Inject
 import models._
 import play.api.db.slick.{ DatabaseConfigProvider, HasDatabaseConfigProvider }
@@ -39,29 +38,29 @@ class CommitEntryFileDAO @Inject() (protected val dbConfigProvider: DatabaseConf
     def fileQuery(fileEntries: (Seq[CommitEntryWriter], Long)) = {
       val (entryFiles, revisionNumber) = fileEntries
 
-      def tryFindFileId(path: Option[String]): DBIO[Option[Long]] = path match {
-        case Some(p) => if (p == null) DBIOAction.successful(Some(-1)) else files.filter(_.path === p).map(_.id).result.headOption
-        case None => DBIOAction.successful(Some(-1))
-      }
-
-      def updateInsert(c: CommitEntryWriter, entryId: Option[Long], commitId: Long, copyFileId: Option[Long], fileId: Option[Long]) =
-        (entryId,fileId)  match {
-          case (Some(id), Some(file)) => commitsFiles.insertOrUpdate(c.commit.copy(copyPath = copyFileId, pathId = file, revisionId = commitId, id = id))
-          case (None, Some(file)) => commitsFiles += c.commit.copy(copyPath = copyFileId, pathId = file, revisionId = commitId)
-          case _ => commitsFiles += c.commit.copy(copyPath = copyFileId, pathId = -1L, revisionId = commitId) //HIRO
+      def updateInsert(c: CommitEntryWriter, entryId: Option[Long], commitId: Option[Long], copyFileId: Option[Long], pathId: Option[Long]) =
+        (commitId, pathId) match {
+          case (Some(commitRev),Some(file)) =>
+            entryId match {
+              case Some(id) => commitsFiles.insertOrUpdate(c.commit.copy(copyPath = copyFileId, pathId = file, revisionId = commitRev, id = id))
+              case None => commitsFiles += c.commit.copy(copyPath = copyFileId, pathId = file, revisionId = commitRev)
+            }
+          case _ => DBIO.successful(0)
         }
 
-      def insertFilePath(c: CommitEntryWriter, commitId: Long) = for {
-        fileId <- tryFindFileId(Some(c.path))
-        copyFileId <- tryFindFileId(Some(c.pathCopy))
-        id <- commitsFiles.filter(_.revisionId === commitId).filter(_.pathId === fileId).map(_.id).result.headOption
-        u <- updateInsert(c, id, commitId, copyFileId, fileId).asTry
-      } yield u
+      def insertFilePath(c: CommitEntryWriter, commitId: Option[Long]) =
+        for {
+          fileId <- files.filter(_.path === c.path).map(_.id).result.headOption
+          copyFileId <- files.filter(_.path === c.pathCopy).map(_.id).result.headOption
+          id <- commitsFiles.filter(_.revisionId === commitId).filter(_.pathId === fileId).map(_.id).result.headOption
+          u <- updateInsert(c, id, commitId, copyFileId, fileId).asTry
+        } yield u
 
-      def insert(files: Seq[CommitEntryWriter]) = for {
-        commitId <- commits.filter(_.revision === revisionNumber).map(_.id).result.headOption
-        _ <- DBIO.sequence(files.map(insertFilePath(_, commitId.getOrElse(-1))))
-      } yield files.size
+      def insert(files: Seq[CommitEntryWriter]) =
+        for {
+          commitId <- commits.filter(_.revision === revisionNumber).map(_.id).result.headOption
+          _ <- DBIO.sequence(files.map(insertFilePath(_, commitId))).asTry
+        } yield files.size
 
       insert(entryFiles)
     }
