@@ -54,10 +54,11 @@ class ScmRepositoryData[T] @Inject()
 
   def updateRange(range: FixedRange, steps: Long = 2000L): Future[Seq[Int]] = {
     val fixedRange = fixRange(range)
-    //updateTasks(repository.log(range.begin, range.end))
-    val log = repository.log(range.begin, range.end)
-    Future.sequence(repository.log(range.begin, range.end).sliding(log.size/20).toSeq.map(updateTasks))
-    doStep(fixedRange.begin, fixedRange.end, steps)
+    Future.sequence(Seq(
+      doStep(fixedRange.begin, fixedRange.end, steps),
+      updateTasks(repository.log(range.begin, range.end)))
+    )
+    Future(Seq())
   }
 
   def doStep(from: Long, to: Long, step: Long): Future[Seq[Int]] = {
