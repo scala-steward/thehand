@@ -52,7 +52,7 @@ class ScmRepositoryData[T] @Inject()
     }
   }
 
-  def updateRange(range: FixedRange, steps: Long = 2000L): Future[Seq[Int]] = {
+  def updateRange(range: FixedRange, steps: Long = 1000L): Future[Seq[Int]] = {
     val fixedRange = fixRange(range)
     Future.sequence(Seq(
       doStep(fixedRange.begin, fixedRange.end, steps),
