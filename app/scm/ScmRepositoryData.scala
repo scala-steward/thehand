@@ -52,7 +52,7 @@ class ScmRepositoryData[T] @Inject()
     }
   }
 
-  def updateRange(range: FixedRange, steps: Long = 1000L): Future[Seq[Int]] = {
+  def updateRange(range: FixedRange, steps: Long = 1L): Future[Seq[Int]] = {  //low speed
     val fixedRange = fixRange(range)
     Future.sequence(Seq(
       doStep(fixedRange.begin, fixedRange.end, steps),
@@ -74,7 +74,7 @@ class ScmRepositoryData[T] @Inject()
     repository.latestId match {
       case Some(last) => daoCommits
         .actionLatestRevision(suffix)
-        .flatMap(lastId => updateRange(calculateRangeLimit(lastId.getOrElse(1), last)))
+        .flatMap(lastId => updateRange(calculateRangeLimit(lastId.getOrElse(-1), last)))
       case None => Future(Seq())
     }
 
