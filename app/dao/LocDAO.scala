@@ -2,7 +2,7 @@ package dao
 
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import javax.inject.Inject
-import models.{DatabaseSuffix, LocFile, FileCount}
+import models.{DatabaseSuffix, FileCount, LocFile}
 import slick.jdbc.JdbcProfile
 
 import scala.collection.immutable
@@ -51,7 +51,7 @@ class LocDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(
 
   private def parser(xml: NodeSeq) : Seq[FileCount] =
     (xml \\ "sourcemonitor_metrics" \\ "project" \\ "checkpoints" \\ "files" \\ "file")
-      .map(file => FileCount(file.attribute("file_name").toString(), fileCount(file)))
+      .map(file => FileCount(file.attribute("file_name").getOrElse("").toString(), fileCount(file)))
 
   def update(suffix: DatabaseSuffix, xml: NodeSeq): Future[immutable.Seq[Int]] = {
     insert(parser(xml), suffix)

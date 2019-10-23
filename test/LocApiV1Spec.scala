@@ -48,7 +48,7 @@ class LocApiV1Spec(implicit ee: ExecutionEnv) extends ApiSpecification {
         counterXml, xmlHeaders)
       status(result) must equalTo(OK)
 
-      lazy val vec = Vector(LocFile(3,10,1), LocFile(1,20,2), LocFile(2,20,3))
+      lazy val vec = Vector(LocFile(3,459,1), LocFile(1,459,2), LocFile(2,20,3))
       lazy val lineCounter = fixture.daoLineCounter.list(localSuffix)
       lineCounter must equalTo[Seq[LocFile]](vec).await(retries = 2, timeout = 1.seconds)
     }
