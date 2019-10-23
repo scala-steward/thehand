@@ -41,9 +41,9 @@ class LocDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(
   private def updateInsert(suffix: DatabaseSuffix, fileRef: Option[Long], locId: Option[Long], count: Long) = {
     lazy val filesLocs = TableQuery[LocFilesTable]((tag: Tag) => new LocFilesTable(tag, suffix))
     (fileRef, locId) match {
-      case (None, _) => filesLocs.size.result //HIRO dummy query
-      case (Some(_), None) => filesLocs += LocFile(fileRef.get, count)
-      case (Some(_), Some(id)) => filesLocs.insertOrUpdate(LocFile(fileRef.get, count, id))
+      case (Some(fileId), Some(id)) => filesLocs.insertOrUpdate(LocFile(fileId, count, id))
+      case (Some(fileId), None) => filesLocs += LocFile(fileId, count)
+      case (None, _) => DBIO.successful(0)
     }
   }
 
