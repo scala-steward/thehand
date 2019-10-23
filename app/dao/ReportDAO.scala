@@ -106,24 +106,26 @@ class ReportDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
   private def bugTasks(suffix: DatabaseSuffix, fieldValue: String) = {
     val customFields = TableQuery[CustomFieldsTable]((tag: Tag) => new CustomFieldsTable(tag, suffix))
     val tasks = TableQuery[TaskTable]((tag: Tag) => new TaskTable(tag, suffix))
-    for {
+    val query = for {
       cs <- customFields if cs.field_value === fieldValue
       taskParents <- tasks if cs.taskId === taskParents.taskId
       tsk <- tasks if tsk.taskId === taskParents.taskId ||
         tsk.parentId === taskParents.taskId ||
         (tsk.userStoryId.isEmpty && tsk.typeTask === "Bug")
     } yield tsk.taskId
+    query.distinct
   }
 
   private def tasksByField(suffix: DatabaseSuffix, fieldValue: String) = {
     val customFields = TableQuery[CustomFieldsTable]((tag: Tag) => new CustomFieldsTable(tag, suffix))
     val tasks = TableQuery[TaskTable]((tag: Tag) => new TaskTable(tag, suffix))
-    for {
+    val query = for {
       cs <- customFields if cs.field_value === fieldValue
       taskParents <- tasks if cs.taskId === taskParents.taskId
       tsk <- tasks if tsk.taskId === taskParents.taskId ||
         tsk.parentId === taskParents.taskId
     } yield tsk.taskId
+    query.distinct
   }
 
   private def commitDateRange(suffix: DatabaseSuffix, initialTime: Timestamp, finalTime: Timestamp) = {
@@ -142,13 +144,20 @@ class ReportDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
     } yield fi
   }
 
-  private def filesByCustomFiled(suffix: DatabaseSuffix, fieldValue: String, initialTime: Timestamp, finalTime: Timestamp) = {
+  private def commitsByCustomFiled(suffix: DatabaseSuffix, fieldValue: String, initialTime: Timestamp, finalTime: Timestamp) = {
     val commitTasks = TableQuery[CommitTasksTable]((tag: Tag) => new CommitTasksTable(tag, suffix))
-    for {
-      taskId <- if (fieldValue.contains("Issue")) bugTasks(suffix, fieldValue).distinct else tasksByField(suffix, fieldValue)
+    val query = for {
+      taskId <- if (fieldValue.contains("Issue")) bugTasks(suffix, fieldValue) else tasksByField(suffix, fieldValue)
       commitId <- commitDateRange(suffix, initialTime, finalTime)
       ct <- commitTasks if ct.commitId === commitId && ct.taskId === taskId
-      fi <- commitFiles(suffix, ct.commitId)
+    } yield ct.commitId
+    query.distinct
+  }
+
+  private def filesByCustomFiled(suffix: DatabaseSuffix, fieldValue: String, initialTime: Timestamp, finalTime: Timestamp) = {
+    for {
+      ct <- commitsByCustomFiled(suffix, fieldValue, initialTime, finalTime)
+      fi <- commitFiles(suffix, ct)
     } yield fi
   }
 
