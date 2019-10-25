@@ -33,7 +33,7 @@ class LocDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(
     lazy val files = TableQuery[EntryFilesTable]((tag: Tag) => new EntryFilesTable(tag, suffix))
     lazy val filesLocs = TableQuery[LocFilesTable]((tag: Tag) => new LocFilesTable(tag, suffix))
     for {
-      f <- files.filter(_.path.toLowerCase === file.path.toLowerCase()).map(_.id).result.headOption
+      f <- files.filter(_.path === file.path).map(_.id).result.headOption
       l <- filesLocs.filter(_.fileRef === f).map(_.id).result.headOption
       u <- updateInsert(suffix, f, l, file.lines)
     } yield u
