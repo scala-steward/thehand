@@ -8,6 +8,7 @@ import dao.LocDAO
 import javax.inject.Inject
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.i18n.Langs
+import play.api.libs.json.JsValue
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.xml.NodeSeq
@@ -18,7 +19,12 @@ class LocController @Inject()
 
   val locDao = new LocDAO(dbc)
 
-  def update(suffix: DatabaseSuffix): Action[NodeSeq] = ApiActionWithXmlBody { implicit request =>
+  def updateXml(suffix: DatabaseSuffix): Action[NodeSeq] = ApiActionWithXmlBody { implicit request =>
+    val body = request.request.body
+    maybeSeq(locDao.updateXml(suffix, body))
+  }
+
+  def update(suffix: DatabaseSuffix): Action[JsValue] = ApiActionWithBody { implicit request =>
     val body = request.request.body
     maybeSeq(locDao.update(suffix, body))
   }

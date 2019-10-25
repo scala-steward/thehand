@@ -72,6 +72,7 @@ POST    /boot/:suffix/:magic                controllers.BootController.createSuf
 
 # LOC
 POST     /api/v1/:suffix/loc                controllers.LocController.update(suffix: DatabaseSuffix)
+POST     /api/v1/:suffix/locxml             controllers.LocController.updateXml(suffix: DatabaseSuffix)
 
 # Map static resources from the /public folder to the /assets URL path
 ### NoDocs ###
