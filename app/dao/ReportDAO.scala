@@ -179,9 +179,8 @@ class ReportDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvide
 
     val countCommits = countCommitTask()
       .groupBy(result => result)
-      .map{ case (path, group) => (path, group.length) }
-      .sortBy{ case (_, length) => length }
-      .map{ case ((a, b), c) => (a, b, c) }
+      .map{ case ((path, count), group) => (path, count, group.length) }
+      .sortBy{ case (_, _, length) => length }
     countCommits.result.transactionally
   }
 
