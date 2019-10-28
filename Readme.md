@@ -83,7 +83,7 @@ target = {
 ```
 
 Examples to check the config
-```
+```bash
 > curl -v -X POST http://ip:9000/suffix_table_/YOUR_MAGIC_SECRET/
 > curl -v -X POST http://ip:9000/boot/suffix_table_/YOUR_MAGIC_SECRET/
 > curl -v -X POST -H 'X-API-Key:AbCdEfGhIjK1' http://ip:9000/api/v1/update/suffix_table
@@ -117,6 +117,5 @@ Also you can run the python scripts:
  python LOC/count_lines_json.py
  python generate_reports
 ```
-
 > __Note:__ Remember to change the configuration.py to your needs.
 

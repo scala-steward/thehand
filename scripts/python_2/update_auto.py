@@ -1,7 +1,6 @@
 import requests
 
 from configuration import ConfServer
-from configuration import ConfRepos
 
 url = "http://"+ConfServer.ip+":"+ConfServer.port+"/api/v1/updateall"
 

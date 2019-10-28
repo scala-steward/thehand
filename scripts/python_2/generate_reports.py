@@ -1,6 +1,5 @@
 import os
 import requests
-from datetime import date
 from datetime import datetime
 from datetime import timedelta
 
@@ -24,7 +23,7 @@ if not os.path.exists('reports'):
     os.makedirs('reports')
 
 for i in ConfRepos.res:
-    url = "http://"+ConfServer.ip+":"+ConfServer.port+"/api/v1/"+i+"/commits/custom/Issue/"+twoYearsAgo.strftime("%Y-%m-%d")+"/to/"+today.strftime("%Y-%m-%d")+"/csv"    
+    url = "http://"+ConfServer.ip+":"+ConfServer.port+"/api/v1/"+i+"/commits/custom/Issue/"+twoYearsAgo.strftime("%Y-%m-%d")+"/to/"+today.strftime("%Y-%m-%d")+"/csv"
     #url = "http://"+ConfServer.ip+":"+ConfServer.port+"/api/v1/"+i+"/commits/custom/Issue/2019-10-07/to/2019-10-07/csv"
     response = requests.request("GET", url, headers=headers)
     file = open('reports/'+ i+'issues.csv', 'w')

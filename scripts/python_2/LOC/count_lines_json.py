@@ -1,8 +1,5 @@
-import glob, os
+import os
 import requests
-from datetime import date
-from datetime import datetime
-from datetime import timedelta
 
 from configuration import ConfServer
 from configuration import ConfRepos
@@ -10,7 +7,7 @@ from configuration import ConfRepos
 def file_len(fname):
     i = 0
     with open(fname) as f:
-        for i, l in enumerate(f):
+        for i, _ in enumerate(f):
             pass
     return i + 1
 
@@ -20,8 +17,8 @@ def generate_file_lines(top_dir):
     f = open('lines.txt', 'w')
     top_dir_remove = top_dir+"/"
     f.write('[\n')
-    for dirpath, dirnames, files in os.walk(top_dir):
-        for file in files:        
+    for dirpath, _, files in os.walk(top_dir):
+        for file in files:
             if file.endswith(".cpp") or \
             file.endswith(".CPP") or \
             file.endswith(".h") or  \
