@@ -35,8 +35,8 @@ dbconfig = {
   keepAliveConnection = true
   users = "USERDBNAME"
   password = "PASSDB"
-  maxActive = 2
-  maxConnections = 20
+  maxActive = 4
+  maxConnections = 40
   numThreads = 10
 }
 ```
@@ -51,9 +51,6 @@ projectDemo = {
   pass = "YOUR PASS"
   url = "YOUR SVN URL"
   database_suffix = "demo_"
-  mode = "auto"
-  start_revision = 1  //use only if mode is no auto
-  end_revision = 1000 //use only if mode is no auto
   task_model = {
     patternParser = "(#\\d)\\d+" //task or fix #NUMBER
     patternSplit = "#" //task or fix #NUMBER
@@ -69,24 +66,6 @@ patternSplit = "#" //task or fix #NUMBER
 separator = ""
 ```
 
-##### Scan scm mode
-There are two operating modes for scm scanning
-
-###### Auto Mode
-Search in the records what the last version already saved, and in scm which the last version sent. Using this data to load the records.
-```conf
-mode = "auto"
-```
-
-###### Manual Mode
-Use the user-defined revision number to set the log load.
-Currently does not update existing records. Not having an "insertOrUpdate" behavior.
-```conf
-mode = "off"
-start_revision = 1
-end_revision = 1000
-```
-
 ##### Target Configuration
 For agile flow data aggregation using [TargetProcess] (www.targetprocess.com)
 Currently TheHand does not have support for other means of authentication.
@@ -98,9 +77,13 @@ target = {
 }
 ```
  
-### Run
+### Devel
 ```bash
 > sbt run -Dconfig.file=/... path .../application.conf
+```
+
+Examples to check the config
+```
 > curl -v -X POST http://ip:9000/suffix_table_/YOUR_MAGIC_SECRET/
 > curl -v -X POST http://ip:9000/boot/suffix_table_/YOUR_MAGIC_SECRET/
 > curl -v -X POST -H 'X-API-Key:AbCdEfGhIjK1' http://ip:9000/api/v1/update/suffix_table
@@ -110,3 +93,30 @@ target = {
 ```bash
 > sbt test
 ```
+
+#### Run
+Run this on __production__:
+```bash
+> sbt universal:packageBin
+```
+
+And copy the generate 'package' from target.
+```bash
+> ./path_generated/bin/thehand
+```
+
+> __Note:__ Remember to open port 9000 on server
+
+Also you can run the python scripts:
+
+##### Python 2
+```bash
+ pip install requests
+ python boot.py
+ python update_auto.py
+ python LOC/count_lines_json.py
+ python generate_reports
+```
+
+> __Note:__ Remember to change the configuration.py to your needs.
+

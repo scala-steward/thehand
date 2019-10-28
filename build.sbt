@@ -1,5 +1,7 @@
 enablePlugins(SwaggerPlugin)
 enablePlugins(PlayScala)
+enablePlugins(JavaServerAppPackaging)
+// enablePlugins(WindowsPlugin) uncomment to generate with windows:packegeBin
 
 lazy val root = (project in file(".")).settings(
     inThisBuild(List(
@@ -29,6 +31,15 @@ lazy val root = (project in file(".")).settings(
       "org.webjars" % "swagger-ui" % "2.2.10"
     )
   )
+
+// general package information (can be scoped to Windows)
+maintainer := "Jeison Cardoso <cardoso.jeison@gmail.com>"
+packageSummary := "the-hand-windows"
+packageDescription := """The Hand Windows MSI."""
+
+// wix build information
+wixProductId := "ce07be71-510d-414a-92d4-dff47631848a"
+wixProductUpgradeId := "4552fb0e-e257-4dbd-9ecb-dba9dbacf424"
 
 routesImport += "models.DatabaseSuffix"
 routesImport += "models.QueryMagic"
@@ -67,10 +78,13 @@ scalacOptions ++= Seq(                 // for scala 2.13
   "-Xlint:type-parameter-shadow",      // A local type parameter shadows a type already in scope.
   "-Ywarn-dead-code",                  // Warn when dead code is identified.
   "-Ywarn-extra-implicit",             // Warn when more than one implicit parameter section is defined.
-  "-Ywarn-numeric-widen",              // Warn when numerics are widened// ]
+  "-Ywarn-numeric-widen",              // Warn when numerics are widened
   "-Ywarn-unused:patvars",             // Warn if a variable bound in a pattern is unused.
   "-Ywarn-unused:privates",            // Warn if a private member is unused.
   "-Ywarn-value-discard",              // Warn when non-Unit expression results are unused.
   "-Ywarn-unused:locals",              // Warn if a local definition is unused.
   "-Ywarn-unused:imports",             // Warn if an import selector is not referenced.
 )
+
+sources in (Compile, doc) := Seq.empty
+publishArtifact in (Compile, packageDoc) := false
