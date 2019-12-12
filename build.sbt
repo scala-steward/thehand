@@ -23,9 +23,9 @@ lazy val root = (project in file(".")).settings(
       "com.typesafe" % "config" % "1.4.0",
       "com.typesafe.scala-logging" % "scala-logging_2.13" % "3.9.2",
       "com.typesafe.slick" %% "slick" % "3.3.2",
-      "com.typesafe.play" % "play-json_2.13" % "2.8.0",
+      "com.typesafe.play" % "play-json_2.13" % "2.8.1",
       "com.typesafe.play" %% "play-slick" % "4.0.2",
-      "com.typesafe.play" %% "play-json-joda" % "2.8.0",
+      "com.typesafe.play" %% "play-json-joda" % "2.8.1",
       specs2 % Test,
       "org.specs2" %% "specs2-matcher-extra" % "4.8.1" % Test,
       "org.webjars" % "swagger-ui" % "2.2.10"
