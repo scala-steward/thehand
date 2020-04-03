@@ -8,6 +8,7 @@ after_success:
 
 scala:
 - 2.13.0
+- 2.13.1
 
 jdk:
 - openjdk11
