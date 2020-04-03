@@ -6,8 +6,8 @@ enablePlugins(JavaServerAppPackaging)
 lazy val root = (project in file(".")).settings(
     inThisBuild(List(
       organization := "io.github.0um",
-      scalaVersion := "2.13.0",
-      version      := "0.1.6"
+      scalaVersion := "2.13.1",
+      version      := "0.1.7"
     )),
     name := "thehand",
     libraryDependencies ++= Seq(
@@ -28,7 +28,7 @@ lazy val root = (project in file(".")).settings(
       "com.typesafe.play" %% "play-json-joda" % "2.8.1",
       specs2 % Test,
       "org.specs2" %% "specs2-matcher-extra" % "4.9.2" % Test,
-      "org.webjars" % "swagger-ui" % "2.2.10"
+      "org.webjars" % "swagger-ui" % "3.25.0"
     )
   )
 
