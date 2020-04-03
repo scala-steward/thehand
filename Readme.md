@@ -1,7 +1,6 @@
 # TheHand
-[![Build Status](https://travis-ci.org/0um/thehand.svg?branch=master)](https://travis-ci.org/0um/thehand)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/c2972ff17bbd4acdab3e5188eb0de474)](https://www.codacy.com/manual/0um/thehand?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=0um/thehand&amp;utm_campaign=Badge_Grade)
-[![codecov](https://codecov.io/gh/0um/thehand/branch/doc/graph/badge.svg)](https://codecov.io/gh/0um/thehand)
+[![Build Status](https://travis-ci.org/amorvincitomnia/thehand.svg?branch=master)](https://travis-ci.org/amorvincitomnia/thehand)
+[![codecov](https://codecov.io/gh/0um/thehand/branch/doc/graph/badge.svg)](https://codecov.io/gh/amorvincitomnia/thehand)
 
 ## Requirements
 -   PostgresSQL [download](https://www.postgresql.org/download/)
