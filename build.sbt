@@ -13,7 +13,7 @@ lazy val root = (project in file(".")).settings(
     libraryDependencies ++= Seq(
       guice,
       "org.tmatesoft.svnkit" % "svnkit" % "1.10.1",
-      "commons-codec" % "commons-codec" % "1.14",
+      "commons-codec" % "commons-codec" % "1.15",
       "org.postgresql" % "postgresql" % "42.2.16",
       "com.h2database" % "h2" % "1.4.200",
       "ch.qos.logback" % "logback-classic" % "1.2.3",
