@@ -22,7 +22,7 @@ lazy val root = (project in file(".")).settings(
       "org.joda" % "joda-convert" % "2.2.1",
       "com.typesafe" % "config" % "1.4.0",
       "com.typesafe.scala-logging" % "scala-logging_2.13" % "3.9.2",
-      "com.typesafe.slick" %% "slick" % "3.3.2",
+      "com.typesafe.slick" %% "slick" % "3.3.3",
       "com.typesafe.play" % "play-json_2.13" % "2.9.0",
       "com.typesafe.play" %% "play-slick" % "5.0.0",
       "com.typesafe.play" %% "play-json-joda" % "2.9.0",
