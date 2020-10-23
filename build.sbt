@@ -20,7 +20,7 @@ lazy val root = (project in file(".")).settings(
       "com.github.tototoshi" %% "slick-joda-mapper" % "2.4.2",
       "joda-time" % "joda-time" % "2.10.7",
       "org.joda" % "joda-convert" % "2.2.1",
-      "com.typesafe" % "config" % "1.4.0",
+      "com.typesafe" % "config" % "1.4.1",
       "com.typesafe.scala-logging" % "scala-logging_2.13" % "3.9.2",
       "com.typesafe.play" % "play-json_2.13" % "2.9.1",
       "com.typesafe.slick" %% "slick" % "3.3.3",
