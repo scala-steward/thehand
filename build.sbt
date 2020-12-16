@@ -17,7 +17,7 @@ lazy val root = (project in file(".")).settings(
       "org.postgresql" % "postgresql" % "42.2.18",
       "com.h2database" % "h2" % "1.4.200",
       "ch.qos.logback" % "logback-classic" % "1.2.3",
-      "com.github.tototoshi" %% "slick-joda-mapper" % "2.4.2",
+      "com.github.tototoshi" %% "slick-joda-mapper" % "2.5.0",
       "joda-time" % "joda-time" % "2.10.8",
       "org.joda" % "joda-convert" % "2.2.1",
       "com.typesafe" % "config" % "1.4.1",
