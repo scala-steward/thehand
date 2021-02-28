@@ -6,7 +6,7 @@ enablePlugins(JavaServerAppPackaging)
 lazy val root = (project in file(".")).settings(
     inThisBuild(List(
       organization := "io.github.0um",
-      scalaVersion := "2.13.1",
+      scalaVersion := "2.13.5",
       version      := "0.1.7"
     )),
     name := "thehand",
